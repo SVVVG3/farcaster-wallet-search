@@ -82,7 +82,8 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
             <div className="absolute -bottom-1 -right-1 w-5 h-5 flex items-center justify-center border-2 border-white dark:border-gray-800"
                  style={{ 
                    backgroundColor: '#8A63D2',
-                   borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%'
+                   clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)',
+                   borderRadius: '2px'
                  }}>
               <span className="text-white text-xs font-bold">✓</span>
             </div>
@@ -94,26 +95,6 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
             <h3 className="text-xl font-bold text-gray-900 dark:text-white truncate">
               {user.display_name || user.username}
             </h3>
-            {user.pro?.status === 'subscribed' && (
-              <span className="px-3 py-0.5 text-white text-xs font-bold rounded-full flex items-center space-x-1.5"
-                    style={{ backgroundColor: '#8A63D2' }}>
-                <span className="text-sm">✓</span>
-                <span>Farcaster Pro</span>
-              </span>
-            )}
-            {(user.bankrData?.farcaster?.bankrClub || user.bankrData?.twitter?.bankrClub) && (
-              <span className="px-2 py-0.5 bg-gradient-to-r from-yellow-400 to-orange-500 text-white 
-                             text-xs font-bold rounded-full shadow-lg flex items-center space-x-1">
-                <Image
-                  src="/BankrLogo.png"
-                  alt="Bankr"
-                  width={16}
-                  height={13}
-                  className="w-4 h-3"
-                />
-                <span>BANKR CLUB</span>
-              </span>
-            )}
           </div>
           
           <p className="text-gray-600 dark:text-gray-400 font-mono text-sm">
@@ -151,9 +132,33 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
       {user.profile?.bio?.text && (
         <div className="space-y-2 border-t border-gray-200 dark:border-gray-600 pt-4">
           <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Bio</h4>
-          <p className="text-gray-900 dark:text-white text-sm leading-relaxed">
-            {user.profile.bio.text}
-          </p>
+          <div className="flex flex-wrap items-start gap-2">
+            <p className="text-gray-900 dark:text-white text-sm leading-relaxed flex-1 min-w-0">
+              {user.profile.bio.text}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {user.pro?.status === 'subscribed' && (
+                <span className="px-3 py-0.5 text-white text-xs font-bold rounded-full flex items-center space-x-1.5"
+                      style={{ backgroundColor: '#8A63D2' }}>
+                  <span className="text-sm">✓</span>
+                  <span>Farcaster Pro</span>
+                </span>
+              )}
+              {(user.bankrData?.farcaster?.bankrClub || user.bankrData?.twitter?.bankrClub) && (
+                <span className="px-2 py-0.5 bg-gradient-to-r from-yellow-400 to-orange-500 text-white 
+                               text-xs font-bold rounded-full shadow-lg flex items-center space-x-1">
+                  <Image
+                    src="/BankrLogo.png"
+                    alt="Bankr"
+                    width={16}
+                    height={13}
+                    className="w-4 h-3"
+                  />
+                  <span>BANKR CLUB</span>
+                </span>
+              )}
+            </div>
+          </div>
         </div>
       )}
 

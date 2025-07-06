@@ -27,9 +27,9 @@ function truncateAddress(address: string): string {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 
-function UserProfile({ user, copiedAddresses, copyToClipboard }: { 
+function UserProfile({ user, copiedAddress, copyToClipboard }: { 
   user: FarcasterUser; 
-  copiedAddresses: Set<string>;
+  copiedAddress: string | null;
   copyToClipboard: (text: string) => void;
 }) {
   const handleExternalLink = async (url: string) => {
@@ -191,7 +191,7 @@ function UserProfile({ user, copiedAddresses, copyToClipboard }: {
                   title="Copy address"
                 >
                   <span className="text-lg">
-                    {copiedAddresses.has(address) ? '✅' : '📋'}
+                    {copiedAddress === address ? '✅' : '📋'}
                   </span>
                 </button>
               </div>
@@ -223,7 +223,7 @@ function UserProfile({ user, copiedAddresses, copyToClipboard }: {
                   title="Copy address"
                 >
                   <span className="text-lg">
-                    {copiedAddresses.has(address) ? '✅' : '📋'}
+                    {copiedAddress === address ? '✅' : '📋'}
                   </span>
                 </button>
               </div>
@@ -254,7 +254,7 @@ function UserProfile({ user, copiedAddresses, copyToClipboard }: {
               title="Copy address"
             >
               <span className="text-lg">
-                {copiedAddresses.has(user.custody_address) ? '✅' : '📋'}
+                {copiedAddress === user.custody_address ? '✅' : '📋'}
               </span>
             </button>
           </div>
@@ -299,7 +299,7 @@ function UserProfile({ user, copiedAddresses, copyToClipboard }: {
                     title="Copy address"
                   >
                     <span className="text-lg">
-                      {copiedAddresses.has(user.bankrData?.farcaster?.evmAddress || '') ? '✅' : '📋'}
+                      {copiedAddress === (user.bankrData?.farcaster?.evmAddress || '') ? '✅' : '📋'}
                     </span>
                   </button>
                 </div>
@@ -325,7 +325,7 @@ function UserProfile({ user, copiedAddresses, copyToClipboard }: {
                     title="Copy address"
                   >
                     <span className="text-lg">
-                      {copiedAddresses.has(user.bankrData?.farcaster?.solanaAddress || '') ? '✅' : '📋'}
+                      {copiedAddress === (user.bankrData?.farcaster?.solanaAddress || '') ? '✅' : '📋'}
                     </span>
                   </button>
                 </div>
@@ -366,7 +366,7 @@ function UserProfile({ user, copiedAddresses, copyToClipboard }: {
                     title="Copy address"
                   >
                     <span className="text-lg">
-                      {copiedAddresses.has(user.bankrData?.twitter?.evmAddress || '') ? '✅' : '📋'}
+                      {copiedAddress === (user.bankrData?.twitter?.evmAddress || '') ? '✅' : '📋'}
                     </span>
                   </button>
                 </div>
@@ -392,7 +392,7 @@ function UserProfile({ user, copiedAddresses, copyToClipboard }: {
                     title="Copy address"
                   >
                     <span className="text-lg">
-                      {copiedAddresses.has(user.bankrData?.twitter?.solanaAddress || '') ? '✅' : '📋'}
+                      {copiedAddress === (user.bankrData?.twitter?.solanaAddress || '') ? '✅' : '📋'}
                     </span>
                   </button>
                 </div>
@@ -406,7 +406,7 @@ function UserProfile({ user, copiedAddresses, copyToClipboard }: {
 }
 
 export default function ProfileDisplay({ users, notFoundAddresses }: ProfileDisplayProps) {
-  const [copiedAddresses, setCopiedAddresses] = useState<Set<string>>(new Set());
+  const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -423,16 +423,12 @@ export default function ProfileDisplay({ users, notFoundAddresses }: ProfileDisp
         }
       }
       
-      // Show checkmark for this specific address
-      setCopiedAddresses(prev => new Set(prev).add(text));
+      // Show checkmark for this specific address (replaces any previous checkmark)
+      setCopiedAddress(text);
       
       // Reset checkmark after 2 seconds
       setTimeout(() => {
-        setCopiedAddresses(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(text);
-          return newSet;
-        });
+        setCopiedAddress(prev => prev === text ? null : prev);
       }, 2000);
       
     } catch (error) {
@@ -457,7 +453,7 @@ export default function ProfileDisplay({ users, notFoundAddresses }: ProfileDisp
               <UserProfile 
                 key={`${user.fid}-${index}`} 
                 user={user} 
-                copiedAddresses={copiedAddresses}
+                copiedAddress={copiedAddress}
                 copyToClipboard={copyToClipboard}
               />
             ))}
@@ -487,7 +483,7 @@ export default function ProfileDisplay({ users, notFoundAddresses }: ProfileDisp
                     className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                     title="Copy address"
                   >
-                    {copiedAddresses.has(notFoundItem) ? '✅' : '📋'}
+                    {copiedAddress === notFoundItem ? '✅' : '📋'}
                   </button>
                 </div>
               ))}

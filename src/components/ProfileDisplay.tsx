@@ -102,9 +102,9 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
                 <Image
                   src="/BankrLogo.png"
                   alt="Bankr"
-                  width={12}
-                  height={12}
-                  className="w-3 h-3"
+                  width={16}
+                  height={13}
+                  className="w-4 h-3"
                 />
                 <span>BANKR CLUB</span>
               </span>
@@ -307,7 +307,16 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
       {/* Bankr Wallet Information */}
       {(user.bankrData?.farcaster || user.bankrData?.twitter) && (
         <div className="space-y-2 border-t border-gray-200 dark:border-gray-600 pt-4">
-          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Bankr Wallets</h4>
+          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center space-x-2">
+            <Image
+              src="/BankrLogo.png"
+              alt="Bankr"
+              width={20}
+              height={16}
+              className="w-5 h-4"
+            />
+            <span>Bankr Wallets</span>
+          </h4>
           
           {/* Farcaster Bankr Wallet */}
           {user.bankrData?.farcaster && (

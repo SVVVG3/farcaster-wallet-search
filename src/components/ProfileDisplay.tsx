@@ -79,8 +79,9 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
             }}
           />
           {user.pro?.status === 'subscribed' && (
-            <div className="absolute -top-1 -right-1 w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
-              <span className="text-white text-xs">✓</span>
+            <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center"
+                 style={{ backgroundColor: '#8A63D2' }}>
+              <span className="text-white text-xs font-bold">✓</span>
             </div>
           )}
         </div>
@@ -91,9 +92,9 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
               {user.display_name || user.username}
             </h3>
             {user.pro?.status === 'subscribed' && (
-              <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 
-                             text-xs font-medium rounded-full flex items-center space-x-1">
-                <span>✓</span>
+              <span className="px-3 py-1 text-white text-xs font-bold rounded-full flex items-center space-x-1.5"
+                    style={{ backgroundColor: '#8A63D2' }}>
+                <span className="text-sm">✓</span>
                 <span>Farcaster Pro</span>
               </span>
             )}

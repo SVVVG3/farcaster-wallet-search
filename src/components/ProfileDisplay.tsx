@@ -47,22 +47,15 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
   const handleExternalLink = async (url: string) => {
     triggerHaptic();
     
-    // Check if we're in a Farcaster mini app environment
-    const isInMiniApp = typeof window !== 'undefined' && 
-                       window.location.hostname.includes('warpcast') ||
-                       window.location.search.includes('utm_source=farcaster') ||
-                       (typeof navigator !== 'undefined' && navigator.userAgent.includes('Farcaster'));
-    
-    if (isInMiniApp) {
-      try {
-        if (sdk && sdk.actions && sdk.actions.openUrl) {
-          await sdk.actions.openUrl(url);
-          return;
-        }
-      } catch (error) {
-        console.error('Failed to open external URL with SDK:', error);
-        // Fall through to window.open fallback
+    try {
+      // Use SDK to open external URLs when available
+      if (sdk && sdk.actions && sdk.actions.openUrl) {
+        await sdk.actions.openUrl(url);
+        return;
       }
+    } catch (error) {
+      console.error('Failed to open external URL with SDK:', error);
+      // Fall through to window.open fallback
     }
     
     // Default behavior for desktop/web browsers
@@ -158,8 +151,7 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Bio</h4>
             <div className="flex flex-wrap gap-2">
               {user.pro?.status === 'subscribed' && (
-                <span className="px-3 py-0.5 text-white text-xs font-bold rounded-full flex items-center space-x-1.5"
-                      style={{ backgroundColor: '#8A63D2' }}>
+                <span className="px-3 py-0.5 text-gray-900 dark:text-white text-xs font-bold rounded-full flex items-center space-x-1.5 bg-gray-100 dark:bg-gray-700">
                   <Image
                     src="/FarcasterProBadge.png"
                     alt="Farcaster Pro"

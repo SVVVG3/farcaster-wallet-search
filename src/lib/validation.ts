@@ -3,6 +3,8 @@
  * This file doesn't import any Node.js-specific libraries
  */
 
+
+
 /**
  * Validate if a string is a valid Ethereum address
  * @param address - The address to validate
@@ -125,4 +127,41 @@ export function validateAddressOrUsername(input: string): {
     type: null, 
     error: 'Invalid format. Must be a valid wallet address (Ethereum/Solana) or Farcaster username.' 
   };
+}
+
+/**
+ * Get the appropriate blockchain explorer URL for an address
+ * @param address - The wallet address
+ * @returns Object with explorer URL and address type
+ */
+export function getExplorerUrl(address: string): { url: string; type: 'ethereum' | 'solana' | 'unknown' } {
+  if (isValidEthereumAddress(address)) {
+    return {
+      url: `https://basescan.org/address/${address}`,
+      type: 'ethereum'
+    };
+  }
+  
+  if (isValidSolanaAddress(address)) {
+    return {
+      url: `https://solscan.io/account/${address}`,
+      type: 'solana'
+    };
+  }
+  
+  return {
+    url: '',
+    type: 'unknown'
+  };
+}
+
+/**
+ * Open blockchain explorer for the given address
+ * @param address - The wallet address to view
+ */
+export function openExplorer(address: string): void {
+  const { url } = getExplorerUrl(address);
+  if (url) {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
 } 

@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { sdk } from '@farcaster/miniapp-sdk';
 import { FarcasterUser } from '@/lib/neynar';
+import { openExplorer, getExplorerUrl } from '@/lib/validation';
 
 interface ProfileDisplayProps {
   users: FarcasterUser[];
@@ -173,9 +174,14 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
                                  text-xs font-medium rounded">
                     ETH
                   </span>
-                  <span className="font-mono text-sm text-gray-700 dark:text-gray-300 truncate">
+                  <button
+                    onClick={() => openExplorer(address)}
+                    className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
+                             transition-colors cursor-pointer hover:underline truncate"
+                    title="View on BaseScan"
+                  >
                     {truncateAddress(address)}
-                  </span>
+                  </button>
                   {user.verified_addresses.primary?.eth_address === address && (
                     <span className="px-1.5 py-0.5 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 
                                    text-xs font-medium rounded">
@@ -205,9 +211,14 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
                                  text-xs font-medium rounded">
                     SOL
                   </span>
-                  <span className="font-mono text-sm text-gray-700 dark:text-gray-300 truncate">
+                  <button
+                    onClick={() => openExplorer(address)}
+                    className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
+                             transition-colors cursor-pointer hover:underline truncate"
+                    title="View on Solscan"
+                  >
                     {truncateAddress(address)}
-                  </span>
+                  </button>
                   {user.verified_addresses.primary?.sol_address === address && (
                     <span className="px-1.5 py-0.5 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 
                                    text-xs font-medium rounded">
@@ -242,9 +253,14 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
                              text-xs font-medium rounded">
                 Custody
               </span>
-              <span className="font-mono text-sm text-gray-700 dark:text-gray-300 truncate">
+              <button
+                onClick={() => openExplorer(user.custody_address)}
+                className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
+                         transition-colors cursor-pointer hover:underline truncate"
+                title="View on BaseScan"
+              >
                 {truncateAddress(user.custody_address)}
-              </span>
+              </button>
             </div>
             <button
               onClick={() => copyToClipboard(user.custody_address)}
@@ -287,9 +303,14 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
                                    text-xs font-medium rounded">
                       FC ETH
                     </span>
-                    <span className="font-mono text-sm text-gray-700 dark:text-gray-300 truncate">
-                      {truncateAddress(user.bankrData.farcaster.evmAddress)}
-                    </span>
+                    <button
+                      onClick={() => openExplorer(user.bankrData?.farcaster?.evmAddress || '')}
+                      className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
+                               transition-colors cursor-pointer hover:underline truncate"
+                      title="View on BaseScan"
+                    >
+                      {truncateAddress(user.bankrData?.farcaster?.evmAddress || '')}
+                    </button>
                   </div>
                   <button
                     onClick={() => copyToClipboard(user.bankrData?.farcaster?.evmAddress || '')}
@@ -313,9 +334,14 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
                                    text-xs font-medium rounded">
                       FC SOL
                     </span>
-                    <span className="font-mono text-sm text-gray-700 dark:text-gray-300 truncate">
-                      {truncateAddress(user.bankrData.farcaster.solanaAddress)}
-                    </span>
+                    <button
+                      onClick={() => openExplorer(user.bankrData?.farcaster?.solanaAddress || '')}
+                      className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
+                               transition-colors cursor-pointer hover:underline truncate"
+                      title="View on Solscan"
+                    >
+                      {truncateAddress(user.bankrData?.farcaster?.solanaAddress || '')}
+                    </button>
                   </div>
                   <button
                     onClick={() => copyToClipboard(user.bankrData?.farcaster?.solanaAddress || '')}
@@ -354,9 +380,14 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
                                    text-xs font-medium rounded">
                       𝕏 ETH
                     </span>
-                    <span className="font-mono text-sm text-gray-700 dark:text-gray-300 truncate">
-                      {truncateAddress(user.bankrData.twitter.evmAddress)}
-                    </span>
+                    <button
+                      onClick={() => openExplorer(user.bankrData?.twitter?.evmAddress || '')}
+                      className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
+                               transition-colors cursor-pointer hover:underline truncate"
+                      title="View on BaseScan"
+                    >
+                      {truncateAddress(user.bankrData?.twitter?.evmAddress || '')}
+                    </button>
                   </div>
                   <button
                     onClick={() => copyToClipboard(user.bankrData?.twitter?.evmAddress || '')}
@@ -380,9 +411,14 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
                                    text-xs font-medium rounded">
                       𝕏 SOL
                     </span>
-                    <span className="font-mono text-sm text-gray-700 dark:text-gray-300 truncate">
-                      {truncateAddress(user.bankrData.twitter.solanaAddress)}
-                    </span>
+                    <button
+                      onClick={() => openExplorer(user.bankrData?.twitter?.solanaAddress || '')}
+                      className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
+                               transition-colors cursor-pointer hover:underline truncate"
+                      title="View on Solscan"
+                    >
+                      {truncateAddress(user.bankrData?.twitter?.solanaAddress || '')}
+                    </button>
                   </div>
                   <button
                     onClick={() => copyToClipboard(user.bankrData?.twitter?.solanaAddress || '')}

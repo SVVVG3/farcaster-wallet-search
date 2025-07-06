@@ -60,6 +60,27 @@ export default function Home() {
     setError(null);
   };
 
+  const handleExternalLink = async (url: string) => {
+    try {
+      await sdk.actions.openUrl(url);
+    } catch (error) {
+      console.error('Failed to open external URL:', error);
+      // Fallback to window.open if SDK fails
+      window.open(url, '_blank');
+    }
+  };
+
+  const handleFarcasterProfile = async () => {
+    try {
+      // Try to open in Farcaster app first
+      await sdk.actions.openUrl('https://farcaster.xyz/svvvg3.eth');
+    } catch (error) {
+      console.error('Failed to open Farcaster profile:', error);
+      // Fallback to external link
+      window.open('https://farcaster.xyz/svvvg3.eth', '_blank');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
@@ -197,32 +218,26 @@ export default function Home() {
           <div className="text-center text-sm text-gray-600 dark:text-gray-400">
             <p>
               Powered by{' '}
-              <a
-                href="https://neynar.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 dark:text-blue-400 hover:underline"
+              <button
+                onClick={() => handleExternalLink('https://neynar.com/')}
+                className="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer border-none bg-transparent p-0 font-inherit"
               >
                 Neynar
-              </a>
+              </button>
               {' '}&{' '}
-              <a
-                href="https://bankr.bot/api"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 dark:text-blue-400 hover:underline"
+              <button
+                onClick={() => handleExternalLink('https://bankr.bot/api')}
+                className="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer border-none bg-transparent p-0 font-inherit"
               >
                 Bankr API
-              </a>
+              </button>
               {' '}• Vibe Coded w/ love by{' '}
-              <a
-                href="https://farcaster.xyz/svvvg3.eth"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 dark:text-blue-400 hover:underline"
+              <button
+                onClick={handleFarcasterProfile}
+                className="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer border-none bg-transparent p-0 font-inherit"
               >
                 SVVVG3
-              </a>
+              </button>
               {' '}for the Farcaster community 💜
             </p>
           </div>

@@ -79,11 +79,10 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
             }}
           />
           {user.pro?.status === 'subscribed' && (
-            <div className="absolute -bottom-1 -right-1 w-5 h-5 flex items-center justify-center border-2 border-white dark:border-gray-800"
+            <div className="absolute -bottom-1 -right-1 w-5 h-5 flex items-center justify-center"
                  style={{ 
                    backgroundColor: '#8A63D2',
-                   clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)',
-                   borderRadius: '2px'
+                   clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)'
                  }}>
               <span className="text-white text-xs font-bold">✓</span>
             </div>
@@ -131,11 +130,8 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
       {/* Bio */}
       {user.profile?.bio?.text && (
         <div className="space-y-2 border-t border-gray-200 dark:border-gray-600 pt-4">
-          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Bio</h4>
-          <div className="flex flex-wrap items-start gap-2">
-            <p className="text-gray-900 dark:text-white text-sm leading-relaxed flex-1 min-w-0">
-              {user.profile.bio.text}
-            </p>
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Bio</h4>
             <div className="flex flex-wrap gap-2">
               {user.pro?.status === 'subscribed' && (
                 <span className="px-3 py-0.5 text-white text-xs font-bold rounded-full flex items-center space-x-1.5"
@@ -159,6 +155,9 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
               )}
             </div>
           </div>
+          <p className="text-gray-900 dark:text-white text-sm leading-relaxed">
+            {user.profile.bio.text}
+          </p>
         </div>
       )}
 

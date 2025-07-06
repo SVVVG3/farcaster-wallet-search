@@ -33,14 +33,24 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
   copiedAddress: string | null;
   copyToClipboard: (text: string) => void;
 }) {
-  const triggerHaptic = () => {
+  // Check if we're in a mini app environment using SDK context
+  const isInMiniApp = async () => {
     try {
-      // Always try haptics - let the browser decide if it's available
-      if (typeof window !== 'undefined' && 'navigator' in window && 'vibrate' in navigator) {
-        console.log('📳 Triggering haptic feedback');
-        navigator.vibrate(50);
+      if (!sdk || !sdk.context) return false;
+      const context = await sdk.context;
+      return context && context.client && typeof context.client.clientFid === 'number';
+    } catch {
+      return false;
+    }
+  };
+
+  const triggerHaptic = async () => {
+    try {
+      if ((await isInMiniApp()) && sdk && sdk.haptics) {
+        console.log('📳 Triggering Farcaster haptic feedback');
+        await sdk.haptics.impactOccurred('medium');
       } else {
-        console.log('❌ Haptic feedback not available');
+        console.log('❌ Not in mini app or haptics not available');
       }
     } catch (error) {
       console.error('❌ Haptic feedback failed:', error);
@@ -49,22 +59,22 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
 
   const handleExternalLink = async (url: string) => {
     console.log('🔗 Opening external link:', url);
-    triggerHaptic();
+    await triggerHaptic();
     
-    // Always try SDK first, then fallback to window.open
-    try {
-      if (sdk && sdk.actions && sdk.actions.openUrl) {
-        console.log('✅ Using SDK to open URL');
-        await sdk.actions.openUrl(url);
-        return;
-      } else {
-        console.log('❌ SDK not available, falling back to window.open');
+    // Only use SDK if we're in mini app environment
+    if (await isInMiniApp()) {
+      try {
+        if (sdk && sdk.actions && sdk.actions.openUrl) {
+          console.log('✅ Using SDK to open URL');
+          await sdk.actions.openUrl(url);
+          return;
+        }
+      } catch (error) {
+        console.error('❌ Failed to open external URL with SDK:', error);
       }
-    } catch (error) {
-      console.error('❌ Failed to open external URL with SDK:', error);
     }
     
-    // Fallback to window.open
+    // Fallback to window.open for desktop browsers
     console.log('🌐 Using window.open fallback');
     window.open(url, '_blank', 'noopener,noreferrer');
   };
@@ -523,18 +533,29 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
 export default function ProfileDisplay({ users, notFoundAddresses }: ProfileDisplayProps) {
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
 
+  // Check if we're in a mini app environment using SDK context
+  const isInMiniApp = async () => {
+    try {
+      if (!sdk || !sdk.context) return false;
+      const context = await sdk.context;
+      return context && context.client && typeof context.client.clientFid === 'number';
+    } catch {
+      return false;
+    }
+  };
+
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
       console.log('📋 Copied to clipboard:', text);
       
-      // Add haptic feedback - always try it
+      // Add haptic feedback using proper Farcaster SDK
       try {
-        if (typeof window !== 'undefined' && 'navigator' in window && 'vibrate' in navigator) {
-          console.log('📳 Triggering haptic feedback for copy');
-          navigator.vibrate(50);
+        if ((await isInMiniApp()) && sdk && sdk.haptics) {
+          console.log('📳 Triggering Farcaster haptic feedback for copy');
+          await sdk.haptics.impactOccurred('light');
         } else {
-          console.log('❌ Haptic feedback not available for copy');
+          console.log('❌ Not in mini app or haptics not available for copy');
         }
       } catch (error) {
         console.error('❌ Haptic feedback failed for copy:', error);

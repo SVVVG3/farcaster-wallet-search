@@ -82,7 +82,7 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
             <div className="absolute -bottom-1 -right-1 w-5 h-5 flex items-center justify-center"
                  style={{ 
                    backgroundColor: '#8A63D2',
-                   clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)'
+                   borderRadius: '25% 10% 25% 10% / 10% 25% 10% 25%'
                  }}>
               <span className="text-white text-xs font-bold">✓</span>
             </div>
@@ -118,7 +118,7 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
             </span>
             {user.score && (
               <span className="text-sm text-gray-600 dark:text-gray-400">
-                Score: <span className="font-semibold text-gray-900 dark:text-white">
+                Neynar Score: <span className="font-semibold text-gray-900 dark:text-white">
                   {user.score.toFixed(2)}
                 </span>
               </span>

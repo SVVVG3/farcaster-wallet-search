@@ -1,0 +1,473 @@
+'use client';
+
+import Image from 'next/image';
+import { useState, useEffect } from 'react';
+import { FarcasterUser } from '@/lib/neynar';
+
+interface ProfileDisplayProps {
+  users: FarcasterUser[];
+  searchedAddresses: string[];
+  notFoundAddresses: string[];
+}
+
+interface ToastProps {
+  message: string;
+  isVisible: boolean;
+  onClose: () => void;
+}
+
+function Toast({ message, isVisible, onClose }: ToastProps) {
+  useEffect(() => {
+    if (isVisible) {
+      const timer = setTimeout(() => {
+        onClose();
+      }, 2000); // Hide after 2 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible, onClose]);
+
+  if (!isVisible) return null;
+
+  return (
+    <div className="fixed top-4 left-4 right-4 md:left-auto md:right-4 md:max-w-sm z-50 animate-in slide-in-from-top-2 duration-300">
+      <div className="bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center space-x-2">
+        <span className="text-base">✅</span>
+        <span className="text-sm font-medium">{message}</span>
+      </div>
+    </div>
+  );
+}
+
+function formatNumber(num: number): string {
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1) + 'M';
+  }
+  if (num >= 1000) {
+    return (num / 1000).toFixed(1) + 'K';
+  }
+  return num.toString();
+}
+
+function truncateAddress(address: string): string {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+}
+
+function UserProfile({ user, onCopy }: { user: FarcasterUser; onCopy: () => void }) {
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    onCopy();
+  };
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 md:p-6 space-y-4">
+      {/* Header with avatar and basic info */}
+      <div className="flex items-start space-x-4">
+        <div className="relative">
+          <Image
+            src={user.pfp_url || '/default-avatar.png'}
+            alt={`${user.display_name || user.username}'s avatar`}
+            width={80}
+            height={80}
+            className="rounded-full ring-2 ring-gray-200 dark:ring-gray-600"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = '/default-avatar.png';
+            }}
+          />
+          {user.power_badge && (
+            <div className="absolute -top-1 -right-1 w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
+              <span className="text-white text-xs">⚡</span>
+            </div>
+          )}
+        </div>
+        
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center space-x-2 flex-wrap">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white truncate">
+              {user.display_name || user.username}
+            </h3>
+            {user.power_badge && (
+              <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 
+                             text-xs font-medium rounded-full">
+                Power User
+              </span>
+            )}
+            {(user.bankrData?.farcaster?.bankrClub || user.bankrData?.twitter?.bankrClub) && (
+              <span className="px-2 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white 
+                             text-xs font-bold rounded-full shadow-lg">
+                🏆 BANKR CLUB
+              </span>
+            )}
+          </div>
+          
+          <p className="text-gray-600 dark:text-gray-400 font-mono text-sm">
+            @{user.username}
+          </p>
+          
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            FID: {user.fid}
+          </p>
+          
+          {/* Follower stats */}
+          <div className="flex items-center space-x-4 mt-2">
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              <span className="font-semibold text-gray-900 dark:text-white">
+                {formatNumber(user.follower_count)}
+              </span> followers
+            </span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              <span className="font-semibold text-gray-900 dark:text-white">
+                {formatNumber(user.following_count)}
+              </span> following
+            </span>
+            {user.score && (
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Score: <span className="font-semibold text-gray-900 dark:text-white">
+                  {user.score.toFixed(2)}
+                </span>
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Bio */}
+      {user.profile?.bio?.text && (
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Bio</h4>
+          <p className="text-gray-900 dark:text-white text-sm leading-relaxed">
+            {user.profile.bio.text}
+          </p>
+        </div>
+      )}
+
+      {/* Connected Accounts */}
+      {user.verified_accounts && user.verified_accounts.length > 0 && (
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Connected Accounts</h4>
+          <div className="space-y-1">
+            {user.verified_accounts.map((account, index) => (
+              <div key={index} className="flex items-center space-x-2 bg-gray-50 dark:bg-gray-700 
+                                         rounded-lg px-3 py-2">
+                <span className="px-2 py-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 
+                               text-xs font-medium rounded capitalize">
+                  {account.platform}
+                </span>
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  @{account.username}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Verified Addresses */}
+      {(user.verified_addresses?.eth_addresses?.length > 0 || user.verified_addresses?.sol_addresses?.length > 0) && (
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Verified Addresses</h4>
+          <div className="space-y-1">
+            {user.verified_addresses.eth_addresses?.map((address, index) => (
+              <div key={`eth-${index}`} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 
+                                                   rounded-lg px-3 py-3 md:py-2">
+                <div className="flex items-center space-x-2 flex-1 min-w-0">
+                  <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 
+                                 text-xs font-medium rounded">
+                    ETH
+                  </span>
+                  <span className="font-mono text-sm text-gray-700 dark:text-gray-300 truncate">
+                    {truncateAddress(address)}
+                  </span>
+                  {user.verified_addresses.primary?.eth_address === address && (
+                    <span className="px-1.5 py-0.5 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 
+                                   text-xs font-medium rounded">
+                      Primary
+                    </span>
+                  )}
+                </div>
+                <button
+                  onClick={() => copyToClipboard(address)}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors 
+                           min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md ml-2
+                           hover:bg-gray-100 dark:hover:bg-gray-600 active:bg-gray-200 dark:active:bg-gray-500"
+                  title="Copy address"
+                >
+                  <span className="text-lg">📋</span>
+                </button>
+              </div>
+            ))}
+            
+            {user.verified_addresses.sol_addresses?.map((address, index) => (
+              <div key={`sol-${index}`} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 
+                                                   rounded-lg px-3 py-3 md:py-2">
+                <div className="flex items-center space-x-2 flex-1 min-w-0">
+                  <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 
+                                 text-xs font-medium rounded">
+                    SOL
+                  </span>
+                  <span className="font-mono text-sm text-gray-700 dark:text-gray-300 truncate">
+                    {truncateAddress(address)}
+                  </span>
+                  {user.verified_addresses.primary?.sol_address === address && (
+                    <span className="px-1.5 py-0.5 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 
+                                   text-xs font-medium rounded">
+                      Primary
+                    </span>
+                  )}
+                </div>
+                <button
+                  onClick={() => copyToClipboard(address)}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors 
+                           min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md ml-2
+                           hover:bg-gray-100 dark:hover:bg-gray-600 active:bg-gray-200 dark:active:bg-gray-500"
+                  title="Copy address"
+                >
+                  <span className="text-lg">📋</span>
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Custody Address */}
+      {user.custody_address && (
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Custody Address</h4>
+          <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-3 md:py-2">
+            <div className="flex items-center space-x-2 flex-1 min-w-0">
+              <span className="px-2 py-1 bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 
+                             text-xs font-medium rounded">
+                Custody
+              </span>
+              <span className="font-mono text-sm text-gray-700 dark:text-gray-300 truncate">
+                {truncateAddress(user.custody_address)}
+              </span>
+            </div>
+            <button
+              onClick={() => copyToClipboard(user.custody_address)}
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors 
+                       min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md ml-2
+                       hover:bg-gray-100 dark:hover:bg-gray-600 active:bg-gray-200 dark:active:bg-gray-500"
+              title="Copy address"
+            >
+              <span className="text-lg">📋</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Bankr Wallet Information */}
+      {(user.bankrData?.farcaster || user.bankrData?.twitter) && (
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Bankr Wallets</h4>
+          
+          {/* Farcaster Bankr Wallet */}
+          {user.bankrData?.farcaster && (
+            <div className="space-y-1">
+              <div className="flex items-center space-x-2">
+                <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Farcaster Bankr</span>
+                {user.bankrData.farcaster.bankrClub && (
+                  <span className="px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 
+                                 text-xs font-medium rounded">
+                    Club Member
+                  </span>
+                )}
+              </div>
+              
+              {user.bankrData.farcaster.evmAddress && (
+                <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 
+                               rounded-lg px-3 py-3 md:py-2">
+                  <div className="flex items-center space-x-2 flex-1 min-w-0">
+                    <span className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 
+                                   text-xs font-medium rounded">
+                      FC ETH
+                    </span>
+                    <span className="font-mono text-sm text-gray-700 dark:text-gray-300 truncate">
+                      {truncateAddress(user.bankrData.farcaster.evmAddress)}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => copyToClipboard(user.bankrData?.farcaster?.evmAddress || '')}
+                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors 
+                             min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md ml-2
+                             hover:bg-gray-100 dark:hover:bg-gray-600 active:bg-gray-200 dark:active:bg-gray-500"
+                    title="Copy address"
+                  >
+                    <span className="text-lg">📋</span>
+                  </button>
+                </div>
+              )}
+              
+              {user.bankrData.farcaster.solanaAddress && (
+                <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 
+                               rounded-lg px-3 py-3 md:py-2">
+                  <div className="flex items-center space-x-2 flex-1 min-w-0">
+                    <span className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 
+                                   text-xs font-medium rounded">
+                      FC SOL
+                    </span>
+                    <span className="font-mono text-sm text-gray-700 dark:text-gray-300 truncate">
+                      {truncateAddress(user.bankrData.farcaster.solanaAddress)}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => copyToClipboard(user.bankrData?.farcaster?.solanaAddress || '')}
+                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors 
+                             min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md ml-2
+                             hover:bg-gray-100 dark:hover:bg-gray-600 active:bg-gray-200 dark:active:bg-gray-500"
+                    title="Copy address"
+                  >
+                    <span className="text-lg">📋</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* X Bankr Wallet */}
+          {user.bankrData?.twitter && (
+            <div className="space-y-1">
+              <div className="flex items-center space-x-2">
+                <span className="text-xs font-medium text-gray-600 dark:text-gray-400">X Bankr</span>
+                {user.bankrData.twitter.bankrClub && (
+                  <span className="px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 
+                                 text-xs font-medium rounded">
+                    Club Member
+                  </span>
+                )}
+              </div>
+              
+              {user.bankrData.twitter.evmAddress && (
+                <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 
+                               rounded-lg px-3 py-3 md:py-2">
+                  <div className="flex items-center space-x-2 flex-1 min-w-0">
+                    <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 
+                                   text-xs font-medium rounded">
+                      𝕏 ETH
+                    </span>
+                    <span className="font-mono text-sm text-gray-700 dark:text-gray-300 truncate">
+                      {truncateAddress(user.bankrData.twitter.evmAddress)}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => copyToClipboard(user.bankrData?.twitter?.evmAddress || '')}
+                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors 
+                             min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md ml-2
+                             hover:bg-gray-100 dark:hover:bg-gray-600 active:bg-gray-200 dark:active:bg-gray-500"
+                    title="Copy address"
+                  >
+                    <span className="text-lg">📋</span>
+                  </button>
+                </div>
+              )}
+              
+              {user.bankrData.twitter.solanaAddress && (
+                <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 
+                               rounded-lg px-3 py-3 md:py-2">
+                  <div className="flex items-center space-x-2 flex-1 min-w-0">
+                    <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 
+                                   text-xs font-medium rounded">
+                      𝕏 SOL
+                    </span>
+                    <span className="font-mono text-sm text-gray-700 dark:text-gray-300 truncate">
+                      {truncateAddress(user.bankrData.twitter.solanaAddress)}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => copyToClipboard(user.bankrData?.twitter?.solanaAddress || '')}
+                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors 
+                             min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md ml-2
+                             hover:bg-gray-100 dark:hover:bg-gray-600 active:bg-gray-200 dark:active:bg-gray-500"
+                    title="Copy address"
+                  >
+                    <span className="text-lg">📋</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function ProfileDisplay({ users, notFoundAddresses }: ProfileDisplayProps) {
+  const [toast, setToast] = useState({ isVisible: false, message: '' });
+
+  const handleCopy = () => {
+    setToast({ 
+      isVisible: true, 
+      message: `Address copied to clipboard!` 
+    });
+  };
+
+  const hideToast = () => {
+    setToast({ isVisible: false, message: '' });
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    handleCopy();
+  };
+
+  if (users.length === 0 && notFoundAddresses.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="w-full max-w-4xl mx-auto space-y-6">
+      <Toast 
+        message={toast.message} 
+        isVisible={toast.isVisible} 
+        onClose={hideToast} 
+      />
+
+
+      {/* Found profiles */}
+      {users.length > 0 && (
+        <div className="space-y-4">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+            Found Profiles ({users.length})
+          </h3>
+          <div className="grid gap-6">
+            {users.map((user, index) => (
+              <UserProfile key={`${user.fid}-${index}`} user={user} onCopy={handleCopy} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Not found addresses */}
+      {notFoundAddresses.length > 0 && (
+        <div className="space-y-3">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            No Profiles Found
+          </h3>
+          <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+              The following addresses don&apos;t have linked Farcaster profiles:
+            </p>
+            <div className="space-y-2">
+              {notFoundAddresses.map((notFoundItem, index) => (
+                <div key={index} className="flex items-center justify-between bg-white dark:bg-gray-700 
+                                           rounded-lg px-3 py-2 border border-gray-200 dark:border-gray-600">
+                  <span className="font-mono text-sm text-gray-700 dark:text-gray-300">
+                    {notFoundItem}
+                  </span>
+                  <button
+                    onClick={() => copyToClipboard(notFoundItem)}
+                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                    title="Copy address"
+                  >
+                    📋
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+} 

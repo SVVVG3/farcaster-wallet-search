@@ -34,13 +34,19 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
   copyToClipboard: (text: string) => void;
 }) {
   const handleExternalLink = async (url: string) => {
+    // Try Farcaster SDK first if available
     try {
-      await sdk.actions.openUrl(url);
+      if (sdk && sdk.actions && sdk.actions.openUrl) {
+        await sdk.actions.openUrl(url);
+        return;
+      }
     } catch (error) {
-      console.error('Failed to open external URL:', error);
-      // Fallback to window.open if SDK fails
-      window.open(url, '_blank');
+      console.error('Failed to open external URL with SDK:', error);
+      // Fall through to window.open fallback
     }
+    
+    // Default behavior for desktop/web browsers
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const openExplorerExternal = (address: string) => {

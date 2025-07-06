@@ -149,7 +149,7 @@ function UserProfile({ user, onCopy }: { user: FarcasterUser; onCopy: () => void
 
       {/* Bio */}
       {user.profile?.bio?.text && (
-        <div className="space-y-2">
+        <div className="space-y-2 border-t border-gray-200 dark:border-gray-600 pt-4">
           <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Bio</h4>
           <p className="text-gray-900 dark:text-white text-sm leading-relaxed">
             {user.profile.bio.text}
@@ -159,7 +159,7 @@ function UserProfile({ user, onCopy }: { user: FarcasterUser; onCopy: () => void
 
       {/* Connected Accounts */}
       {user.verified_accounts && user.verified_accounts.length > 0 && (
-        <div className="space-y-2">
+        <div className="space-y-2 border-t border-gray-200 dark:border-gray-600 pt-4">
           <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Connected Accounts</h4>
           <div className="space-y-1">
             {user.verified_accounts.map((account, index) => (
@@ -180,7 +180,7 @@ function UserProfile({ user, onCopy }: { user: FarcasterUser; onCopy: () => void
 
       {/* Verified Addresses */}
       {(user.verified_addresses?.eth_addresses?.length > 0 || user.verified_addresses?.sol_addresses?.length > 0) && (
-        <div className="space-y-2">
+        <div className="space-y-2 border-t border-gray-200 dark:border-gray-600 pt-4">
           <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Verified Addresses</h4>
           <div className="space-y-1">
             {user.verified_addresses.eth_addresses?.map((address, index) => (
@@ -248,7 +248,7 @@ function UserProfile({ user, onCopy }: { user: FarcasterUser; onCopy: () => void
 
       {/* Custody Address */}
       {user.custody_address && (
-        <div className="space-y-2">
+        <div className="space-y-2 border-t border-gray-200 dark:border-gray-600 pt-4">
           <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Custody Address</h4>
           <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-3 md:py-2">
             <div className="flex items-center space-x-2 flex-1 min-w-0">
@@ -275,7 +275,7 @@ function UserProfile({ user, onCopy }: { user: FarcasterUser; onCopy: () => void
 
       {/* Bankr Wallet Information */}
       {(user.bankrData?.farcaster || user.bankrData?.twitter) && (
-        <div className="space-y-2">
+        <div className="space-y-2 border-t border-gray-200 dark:border-gray-600 pt-4">
           <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Bankr Wallets</h4>
           
           {/* Farcaster Bankr Wallet */}

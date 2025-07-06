@@ -65,16 +65,15 @@ body,
   color: #ededed !important;
 }
 
-/* Override any white backgrounds */
-* {
-  background-color: inherit;
-  touch-action: manipulation !important;
-  -webkit-tap-highlight-color: transparent !important;
+/* Override only problematic backgrounds while preserving component styling */
+body, html {
+  background-color: #0a0a0a !important;
 }
 
-/* Specific overrides for common elements */
-div, section, main, header, footer, nav {
-  background-color: inherit !important;
+/* Preserve component backgrounds but add touch improvements */
+* {
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent !important;
 }
 
 /* Prevent zoom gestures completely */

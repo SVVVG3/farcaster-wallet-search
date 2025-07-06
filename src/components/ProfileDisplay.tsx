@@ -98,8 +98,15 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
             )}
             {(user.bankrData?.farcaster?.bankrClub || user.bankrData?.twitter?.bankrClub) && (
               <span className="px-2 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white 
-                             text-xs font-bold rounded-full shadow-lg">
-                🏆 BANKR CLUB
+                             text-xs font-bold rounded-full shadow-lg flex items-center space-x-1">
+                <Image
+                  src="/BankrLogo.png"
+                  alt="Bankr"
+                  width={12}
+                  height={12}
+                  className="w-3 h-3"
+                />
+                <span>BANKR CLUB</span>
               </span>
             )}
           </div>

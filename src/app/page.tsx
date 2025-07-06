@@ -95,6 +95,9 @@ export default function Home() {
 
       const data = await response.json();
       setSearchResults(data.results);
+      
+      // Scroll to top after search results are loaded
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {

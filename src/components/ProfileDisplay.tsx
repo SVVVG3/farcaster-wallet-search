@@ -79,13 +79,29 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
             }}
           />
           {user.pro?.status === 'subscribed' && (
-            <div className="absolute -bottom-1 -right-1 w-5 h-5 flex items-center justify-center"
-                 style={{ 
-                   backgroundColor: '#8A63D2',
-                   clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)',
-                   borderRadius: '3px'
-                 }}>
-              <span className="text-white text-xs font-bold">✓</span>
+            <div className="absolute -bottom-1 -right-1 w-5 h-5 flex items-center justify-center">
+              <svg width="20" height="20" viewBox="0 0 100 100" className="absolute inset-0">
+                <path d="
+                  M30 5
+                  Q35 0 40 0
+                  H60
+                  Q65 0 70 5
+                  L95 30
+                  Q100 35 100 40
+                  V60
+                  Q100 65 95 70
+                  L70 95
+                  Q65 100 60 100
+                  H40
+                  Q35 100 30 95
+                  L5 70
+                  Q0 65 0 60
+                  V40
+                  Q0 35 5 30
+                  Z
+                " fill="#8A63D2"/>
+              </svg>
+              <span className="text-white text-xs font-bold relative z-10">✓</span>
             </div>
           )}
         </div>

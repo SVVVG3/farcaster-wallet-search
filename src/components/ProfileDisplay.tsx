@@ -33,12 +33,25 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
   copiedAddress: string | null;
   copyToClipboard: (text: string) => void;
 }) {
+  const triggerHaptic = () => {
+    try {
+      // Try different haptic methods that might be available
+      if (typeof window !== 'undefined' && 'navigator' in window && 'vibrate' in navigator) {
+        navigator.vibrate(50);
+      }
+    } catch (error) {
+      // Silently fail if haptics not available
+    }
+  };
+
   const handleExternalLink = async (url: string) => {
+    triggerHaptic();
+    
     // Check if we're in a Farcaster mini app environment
     const isInMiniApp = typeof window !== 'undefined' && 
-                       (window.parent !== window || 
-                        window.location.href.includes('farcaster') ||
-                        window.navigator.userAgent.includes('Farcaster'));
+                       window.location.hostname.includes('warpcast') ||
+                       window.location.search.includes('utm_source=farcaster') ||
+                       (typeof navigator !== 'undefined' && navigator.userAgent.includes('Farcaster'));
     
     if (isInMiniApp) {
       try {
@@ -64,6 +77,7 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
   };
 
   const scrollToBankrAddresses = () => {
+    triggerHaptic();
     // Scroll to the very bottom of the page
     window.scrollTo({ 
       top: document.documentElement.scrollHeight, 
@@ -87,30 +101,14 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
             }}
           />
           {user.pro?.status === 'subscribed' && (
-            <div className="absolute -bottom-1 -right-1 w-5 h-5 flex items-center justify-center">
-              <svg width="20" height="20" viewBox="0 0 100 100" className="absolute inset-0">
-                <path d="
-                  M50 5
-                  Q58 8 65 15
-                  Q72 8 80 15
-                  Q92 22 85 35
-                  Q92 42 85 50
-                  Q92 58 85 65
-                  Q92 78 80 85
-                  Q72 92 65 85
-                  Q58 92 50 95
-                  Q42 92 35 85
-                  Q28 92 20 85
-                  Q8 78 15 65
-                  Q8 58 15 50
-                  Q8 42 15 35
-                  Q8 22 20 15
-                  Q28 8 35 15
-                  Q42 8 50 5
-                  Z
-                " fill="#8A63D2"/>
-              </svg>
-              <span className="text-white text-xs font-bold relative z-10">✓</span>
+            <div className="absolute -bottom-1 -right-1 w-5 h-5">
+              <Image
+                src="/FarcasterProBadge.png"
+                alt="Farcaster Pro"
+                width={20}
+                height={20}
+                className="w-5 h-5"
+              />
             </div>
           )}
         </div>
@@ -162,7 +160,13 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
               {user.pro?.status === 'subscribed' && (
                 <span className="px-3 py-0.5 text-white text-xs font-bold rounded-full flex items-center space-x-1.5"
                       style={{ backgroundColor: '#8A63D2' }}>
-                  <span className="text-sm">✓</span>
+                  <Image
+                    src="/FarcasterProBadge.png"
+                    alt="Farcaster Pro"
+                    width={16}
+                    height={16}
+                    className="w-4 h-4"
+                  />
                   <span>Farcaster Pro</span>
                 </span>
               )}
@@ -524,15 +528,13 @@ export default function ProfileDisplay({ users, notFoundAddresses }: ProfileDisp
     try {
       await navigator.clipboard.writeText(text);
       
-      // Add haptic feedback using Farcaster SDK
+      // Add haptic feedback
       try {
-        await sdk.haptics.notificationOccurred('success');
-      } catch (error) {
-        console.log('Haptics not available:', error);
-        // Fallback to browser vibration for non-Farcaster environments
-        if ('vibrate' in navigator) {
+        if (typeof window !== 'undefined' && 'navigator' in window && 'vibrate' in navigator) {
           navigator.vibrate(50);
         }
+      } catch (error) {
+        // Silently fail if haptics not available
       }
       
       // Show checkmark for this specific address (replaces any previous checkmark)

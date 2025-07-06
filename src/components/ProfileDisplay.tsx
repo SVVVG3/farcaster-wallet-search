@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { sdk } from '@farcaster/miniapp-sdk';
 import { FarcasterUser } from '@/lib/neynar';
-import { openExplorer } from '@/lib/validation';
+import { getExplorerUrl } from '@/lib/validation';
 
 interface ProfileDisplayProps {
   users: FarcasterUser[];
@@ -40,6 +40,13 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
       console.error('Failed to open external URL:', error);
       // Fallback to window.open if SDK fails
       window.open(url, '_blank');
+    }
+  };
+
+  const openExplorerExternal = (address: string) => {
+    const { url } = getExplorerUrl(address);
+    if (url) {
+      handleExternalLink(url);
     }
   };
   return (
@@ -175,7 +182,7 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
                     ETH
                   </span>
                   <button
-                    onClick={() => openExplorer(address)}
+                    onClick={() => openExplorerExternal(address)}
                     className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
                              transition-colors cursor-pointer hover:underline truncate"
                     title="View on BaseScan"
@@ -212,7 +219,7 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
                     SOL
                   </span>
                   <button
-                    onClick={() => openExplorer(address)}
+                    onClick={() => openExplorerExternal(address)}
                     className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
                              transition-colors cursor-pointer hover:underline truncate"
                     title="View on Solscan"
@@ -254,7 +261,7 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
                 Custody
               </span>
               <button
-                onClick={() => openExplorer(user.custody_address)}
+                onClick={() => openExplorerExternal(user.custody_address)}
                 className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
                          transition-colors cursor-pointer hover:underline truncate"
                 title="View on BaseScan"
@@ -304,7 +311,7 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
                       FC ETH
                     </span>
                     <button
-                      onClick={() => openExplorer(user.bankrData?.farcaster?.evmAddress || '')}
+                      onClick={() => openExplorerExternal(user.bankrData?.farcaster?.evmAddress || '')}
                       className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
                                transition-colors cursor-pointer hover:underline truncate"
                       title="View on BaseScan"
@@ -335,7 +342,7 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
                       FC SOL
                     </span>
                     <button
-                      onClick={() => openExplorer(user.bankrData?.farcaster?.solanaAddress || '')}
+                      onClick={() => openExplorerExternal(user.bankrData?.farcaster?.solanaAddress || '')}
                       className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
                                transition-colors cursor-pointer hover:underline truncate"
                       title="View on Solscan"
@@ -381,7 +388,7 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
                       𝕏 ETH
                     </span>
                     <button
-                      onClick={() => openExplorer(user.bankrData?.twitter?.evmAddress || '')}
+                      onClick={() => openExplorerExternal(user.bankrData?.twitter?.evmAddress || '')}
                       className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
                                transition-colors cursor-pointer hover:underline truncate"
                       title="View on BaseScan"
@@ -412,7 +419,7 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
                       𝕏 SOL
                     </span>
                     <button
-                      onClick={() => openExplorer(user.bankrData?.twitter?.solanaAddress || '')}
+                      onClick={() => openExplorerExternal(user.bankrData?.twitter?.solanaAddress || '')}
                       className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
                                transition-colors cursor-pointer hover:underline truncate"
                       title="View on Solscan"

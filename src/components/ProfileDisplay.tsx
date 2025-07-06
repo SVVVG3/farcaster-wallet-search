@@ -34,20 +34,15 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
   copyToClipboard: (text: string) => void;
 }) {
   const handleExternalLink = async (url: string) => {
-    console.log('Attempting to open URL:', url);
-    
     // Check if we're in a Farcaster mini app environment
     const isInMiniApp = typeof window !== 'undefined' && 
                        (window.parent !== window || 
                         window.location.href.includes('farcaster') ||
                         window.navigator.userAgent.includes('Farcaster'));
     
-    console.log('Environment check - isInMiniApp:', isInMiniApp);
-    
     if (isInMiniApp) {
       try {
         if (sdk && sdk.actions && sdk.actions.openUrl) {
-          console.log('Using Farcaster SDK to open URL');
           await sdk.actions.openUrl(url);
           return;
         }
@@ -58,7 +53,6 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
     }
     
     // Default behavior for desktop/web browsers
-    console.log('Using window.open to open URL');
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 

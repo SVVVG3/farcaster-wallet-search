@@ -62,6 +62,13 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
       handleExternalLink(url);
     }
   };
+
+  const scrollToBankrAddresses = () => {
+    const verifiedAddressesSection = document.querySelector('[data-section="verified-addresses"]');
+    if (verifiedAddressesSection) {
+      verifiedAddressesSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 md:p-6 space-y-4">
       {/* Header with avatar and basic info */}
@@ -82,22 +89,33 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
             <div className="absolute -bottom-1 -right-1 w-5 h-5 flex items-center justify-center">
               <svg width="20" height="20" viewBox="0 0 100 100" className="absolute inset-0">
                 <path d="
-                  M30 5
-                  Q35 0 40 0
-                  H60
-                  Q65 0 70 5
-                  L95 30
-                  Q100 35 100 40
-                  V60
-                  Q100 65 95 70
-                  L70 95
-                  Q65 100 60 100
-                  H40
-                  Q35 100 30 95
-                  L5 70
-                  Q0 65 0 60
-                  V40
-                  Q0 35 5 30
+                  M50 0
+                  Q55 2 58 8
+                  L70 15
+                  Q75 12 80 15
+                  L92 22
+                  Q95 25 92 30
+                  L85 42
+                  Q88 45 85 50
+                  L92 70
+                  Q95 75 92 78
+                  L80 85
+                  Q75 88 70 85
+                  L58 92
+                  Q55 98 50 100
+                  Q45 98 42 92
+                  L30 85
+                  Q25 88 20 85
+                  L8 78
+                  Q5 75 8 70
+                  L15 58
+                  Q12 55 15 50
+                  L8 30
+                  Q5 25 8 22
+                  L20 15
+                  Q25 12 30 15
+                  L42 8
+                  Q45 2 50 0
                   Z
                 " fill="#8A63D2"/>
               </svg>
@@ -158,8 +176,13 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
                 </span>
               )}
               {(user.bankrData?.farcaster?.bankrClub || user.bankrData?.twitter?.bankrClub) && (
-                <span className="px-2 py-0.5 bg-gradient-to-r from-yellow-400 to-orange-500 text-white 
-                               text-xs font-bold rounded-full shadow-lg flex items-center space-x-1">
+                <button
+                  onClick={scrollToBankrAddresses}
+                  className="px-2 py-0.5 bg-gradient-to-r from-yellow-400 to-orange-500 text-white 
+                           text-xs font-bold rounded-full shadow-lg flex items-center space-x-1 
+                           hover:from-yellow-500 hover:to-orange-600 transition-all duration-200 
+                           cursor-pointer"
+                >
                   <Image
                     src="/BankrLogo.png"
                     alt="Bankr"
@@ -168,7 +191,7 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
                     className="w-4 h-3"
                   />
                   <span>BANKR CLUB</span>
-                </span>
+                </button>
               )}
             </div>
           </div>
@@ -216,7 +239,7 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
 
       {/* Verified Addresses */}
       {(user.verified_addresses?.eth_addresses?.length > 0 || user.verified_addresses?.sol_addresses?.length > 0) && (
-        <div className="space-y-2 border-t border-gray-200 dark:border-gray-600 pt-4">
+        <div className="space-y-2 border-t border-gray-200 dark:border-gray-600 pt-4" data-section="verified-addresses">
           <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Verified Addresses</h4>
           <div className="space-y-1">
             {user.verified_addresses.eth_addresses?.map((address, index) => (

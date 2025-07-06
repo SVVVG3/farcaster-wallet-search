@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     images: ["/og-image.svg"],
     creator: "@_svvvg3",
   },
-  manifest: "/farcaster.json",
+
 };
 
 export default function RootLayout({
@@ -62,7 +62,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="manifest" href="/farcaster.json" />
         <link rel="preconnect" href="https://auth.farcaster.xyz" />
         <link rel="icon" href="/favicon.ico" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />

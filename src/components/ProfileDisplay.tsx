@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
+import { sdk } from '@farcaster/miniapp-sdk';
 import { FarcasterUser } from '@/lib/neynar';
 
 interface ProfileDisplayProps {
@@ -53,8 +54,23 @@ function truncateAddress(address: string): string {
 }
 
 function UserProfile({ user, onCopy }: { user: FarcasterUser; onCopy: () => void }) {
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = async (text: string) => {
     navigator.clipboard.writeText(text);
+    
+    // Add haptic feedback using Farcaster SDK
+    try {
+      const capabilities = await sdk.getCapabilities?.();
+      if (capabilities?.includes('haptics.notificationOccurred')) {
+        await sdk.haptics.notificationOccurred('success');
+      }
+    } catch (error) {
+      console.log('Haptics not available:', error);
+      // Fallback to browser vibration for non-Farcaster environments
+      if ('vibrate' in navigator) {
+        navigator.vibrate(50);
+      }
+    }
+    
     onCopy();
   };
   return (
@@ -406,8 +422,23 @@ export default function ProfileDisplay({ users, notFoundAddresses }: ProfileDisp
     setToast({ isVisible: false, message: '' });
   };
 
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = async (text: string) => {
     navigator.clipboard.writeText(text);
+    
+    // Add haptic feedback using Farcaster SDK
+    try {
+      const capabilities = await sdk.getCapabilities?.();
+      if (capabilities?.includes('haptics.notificationOccurred')) {
+        await sdk.haptics.notificationOccurred('success');
+      }
+    } catch (error) {
+      console.log('Haptics not available:', error);
+      // Fallback to browser vibration for non-Farcaster environments
+      if ('vibrate' in navigator) {
+        navigator.vibrate(50);
+      }
+    }
+    
     handleCopy();
   };
 

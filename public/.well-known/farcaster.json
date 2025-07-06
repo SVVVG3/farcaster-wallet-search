@@ -1,8 +1,8 @@
 {
   "accountAssociation": {
-    "header": "",
-    "payload": "",
-    "signature": ""
+    "header": "eyJmaWQiOjQ2NjExMSwidHlwZSI6ImF1dGgiLCJrZXkiOiIweEJiMTRkQjlmNjBlODA2ODQ2MzM1Zjc5NDgxRDk5OGFiYzY2RWZDMjAifQ",
+    "payload": "eyJkb21haW4iOiJ3YWxsZXRzZWFyY2gudmVyY2VsLmFwcCJ9",
+    "signature": "2g2YajBNKHomoHxED28x0F0VqJ5VNNvg3ZtaySSBc/RggaIrUbE2p8sfNCHC26G7aaKXhFCyoO+gfwZnbQ4UxRs="
   },
   "miniapp": {
     "version": "1",
@@ -11,21 +11,18 @@
     "homeUrl": "https://walletsearch.vercel.app",
     "imageUrl": "https://walletsearch.vercel.app/og-image.svg",
     "buttonTitle": "🔍 Search Wallets",
-    "subtitle": "Find Farcaster profiles by wallet addresses",
+    "subtitle": "Find profiles by wallets",
     "description": "Search Farcaster profiles by wallet addresses and usernames with comprehensive Bankr integration. Supports Ethereum, Solana addresses and Farcaster usernames.",
     "primaryCategory": "utility",
     "splashImageUrl": "https://walletsearch.vercel.app/favicon.ico",
     "splashBackgroundColor": "#4F46E5",
-    "tagline": "Find Farcaster profiles linked to wallet addresses",
+    "tagline": "Profile search made easy",
     "heroImageUrl": "https://walletsearch.vercel.app/og-image.svg",
     "tags": [
-      "wallet",
-      "search",
-      "farcaster",
-      "ethereum",
-      "solana",
-      "bankr",
-      "utility"
+      "finance",
+      "utilities",
+      "social",
+      "productivity"
     ],
     "castShareUrl": "https://walletsearch.vercel.app",
     "ogTitle": "Farcaster Wallet Search",

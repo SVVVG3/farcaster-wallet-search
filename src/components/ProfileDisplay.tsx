@@ -34,18 +34,31 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
   copyToClipboard: (text: string) => void;
 }) {
   const handleExternalLink = async (url: string) => {
-    // Try Farcaster SDK first if available
-    try {
-      if (sdk && sdk.actions && sdk.actions.openUrl) {
-        await sdk.actions.openUrl(url);
-        return;
+    console.log('Attempting to open URL:', url);
+    
+    // Check if we're in a Farcaster mini app environment
+    const isInMiniApp = typeof window !== 'undefined' && 
+                       (window.parent !== window || 
+                        window.location.href.includes('farcaster') ||
+                        window.navigator.userAgent.includes('Farcaster'));
+    
+    console.log('Environment check - isInMiniApp:', isInMiniApp);
+    
+    if (isInMiniApp) {
+      try {
+        if (sdk && sdk.actions && sdk.actions.openUrl) {
+          console.log('Using Farcaster SDK to open URL');
+          await sdk.actions.openUrl(url);
+          return;
+        }
+      } catch (error) {
+        console.error('Failed to open external URL with SDK:', error);
+        // Fall through to window.open fallback
       }
-    } catch (error) {
-      console.error('Failed to open external URL with SDK:', error);
-      // Fall through to window.open fallback
     }
     
     // Default behavior for desktop/web browsers
+    console.log('Using window.open to open URL');
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 

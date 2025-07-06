@@ -60,11 +60,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <link rel="preconnect" href="https://auth.farcaster.xyz" />
         <link rel="icon" href="/favicon.ico" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
         <meta name="theme-color" content="#4F46E5" />
         <meta name="fc:miniapp" content='{"version":"1","imageUrl":"https://walletsearch.vercel.app/WalletSearchEmbed.png","button":{"title":"🔍 Search Wallets","action":{"type":"launch_miniapp","name":"Wallet Search","url":"https://walletsearch.vercel.app","splashImageUrl":"https://walletsearch.vercel.app/WalletSearchIcon.png","splashBackgroundColor":"#000000"}}}' />
         <meta name="fc:frame" content='{"version":"1","imageUrl":"https://walletsearch.vercel.app/WalletSearchEmbed.png","button":{"title":"🔍 Search Wallets","action":{"type":"launch_frame","name":"Wallet Search","url":"https://walletsearch.vercel.app","splashImageUrl":"https://walletsearch.vercel.app/WalletSearchIcon.png","splashBackgroundColor":"#000000"}}}' />

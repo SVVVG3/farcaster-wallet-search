@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { sdk } from '@farcaster/miniapp-sdk';
+import Image from 'next/image';
 import AddressInput from '@/components/AddressInput';
 import ProfileDisplay from '@/components/ProfileDisplay';
 import { SearchResult } from '@/lib/neynar';
@@ -66,8 +67,14 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3 flex-1 min-w-0">
-              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">FC</span>
+              <div className="w-10 h-10 flex items-center justify-center">
+                <Image
+                  src="/WalletSearchLogo.png"
+                  alt="Wallet Search"
+                  width={40}
+                  height={40}
+                  className="rounded-lg"
+                />
               </div>
               <div className="min-w-0">
                 <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white truncate">
@@ -191,14 +198,32 @@ export default function Home() {
             <p>
               Powered by{' '}
               <a
-                href="https://neynar.com"
+                href="https://neynar.com/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 dark:text-blue-400 hover:underline"
               >
-                Neynar API
+                Neynar
               </a>
-              {' '}• Built for the Farcaster community
+              {' '}&{' '}
+              <a
+                href="https://bankr.bot/api"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                Bankr API
+              </a>
+              {' '}• Vibe Coded w/ love by{' '}
+              <a
+                href="https://farcaster.xyz/svvvg3.eth"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                SVVVG3
+              </a>
+              {' '}for the Farcaster community 💜
             </p>
           </div>
         </div>

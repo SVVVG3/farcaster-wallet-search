@@ -55,23 +55,24 @@ function truncateAddress(address: string): string {
 
 function UserProfile({ user, onCopy }: { user: FarcasterUser; onCopy: () => void }) {
   const copyToClipboard = async (text: string) => {
-    navigator.clipboard.writeText(text);
-    
-    // Add haptic feedback using Farcaster SDK
     try {
-      const capabilities = await sdk.getCapabilities?.();
-      if (capabilities?.includes('haptics.notificationOccurred')) {
+      await navigator.clipboard.writeText(text);
+      
+      // Add haptic feedback using Farcaster SDK
+      try {
         await sdk.haptics.notificationOccurred('success');
+      } catch (error) {
+        console.log('Haptics not available:', error);
+        // Fallback to browser vibration for non-Farcaster environments
+        if ('vibrate' in navigator) {
+          navigator.vibrate(50);
+        }
       }
+      
+      onCopy();
     } catch (error) {
-      console.log('Haptics not available:', error);
-      // Fallback to browser vibration for non-Farcaster environments
-      if ('vibrate' in navigator) {
-        navigator.vibrate(50);
-      }
+      console.error('Failed to copy text:', error);
     }
-    
-    onCopy();
   };
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 md:p-6 space-y-4">
@@ -423,23 +424,24 @@ export default function ProfileDisplay({ users, notFoundAddresses }: ProfileDisp
   };
 
   const copyToClipboard = async (text: string) => {
-    navigator.clipboard.writeText(text);
-    
-    // Add haptic feedback using Farcaster SDK
     try {
-      const capabilities = await sdk.getCapabilities?.();
-      if (capabilities?.includes('haptics.notificationOccurred')) {
+      await navigator.clipboard.writeText(text);
+      
+      // Add haptic feedback using Farcaster SDK
+      try {
         await sdk.haptics.notificationOccurred('success');
+      } catch (error) {
+        console.log('Haptics not available:', error);
+        // Fallback to browser vibration for non-Farcaster environments
+        if ('vibrate' in navigator) {
+          navigator.vibrate(50);
+        }
       }
+      
+      handleCopy();
     } catch (error) {
-      console.log('Haptics not available:', error);
-      // Fallback to browser vibration for non-Farcaster environments
-      if ('vibrate' in navigator) {
-        navigator.vibrate(50);
-      }
+      console.error('Failed to copy text:', error);
     }
-    
-    handleCopy();
   };
 
   if (users.length === 0 && notFoundAddresses.length === 0) {

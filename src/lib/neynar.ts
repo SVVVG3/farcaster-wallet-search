@@ -67,36 +67,83 @@ export async function searchUsersByAddresses(addresses: string[]): Promise<Searc
   try {
     console.log('Searching for users with addresses:', addresses);
     
-    // Use the Neynar SDK to fetch users by addresses
-    const response = await client.fetchBulkUsersByEthOrSolAddress({
-      addresses: addresses
-    });
+    // Try SDK first, fallback to direct API if it fails
+    try {
+      const response = await client.fetchBulkUsersByEthOrSolAddress({
+        addresses: addresses
+      });
 
-    console.log('API Response:', response);
+      console.log('SDK API Response:', response);
 
-    // Extract users from the response - API returns { "address": [users] } format
-    const allUsers: FarcasterUser[] = [];
-    const foundAddresses: string[] = [];
-    
-    for (const [address, users] of Object.entries(response)) {
-      if (Array.isArray(users) && users.length > 0) {
-        allUsers.push(...(users as FarcasterUser[]));
-        foundAddresses.push(address);
+      // Extract users from the response - API returns { "address": [users] } format
+      const allUsers: FarcasterUser[] = [];
+      const foundAddresses: string[] = [];
+      
+      for (const [address, users] of Object.entries(response)) {
+        if (Array.isArray(users) && users.length > 0) {
+          allUsers.push(...(users as FarcasterUser[]));
+          foundAddresses.push(address);
+        }
       }
-    }
-    
-    // Find addresses that didn't return any users
-    const notFoundAddresses = addresses.filter(addr => 
-      !foundAddresses.some(foundAddr => 
-        foundAddr.toLowerCase() === addr.toLowerCase()
-      )
-    );
+      
+      // Find addresses that didn't return any users
+      const notFoundAddresses = addresses.filter(addr => 
+        !foundAddresses.some(foundAddr => 
+          foundAddr.toLowerCase() === addr.toLowerCase()
+        )
+      );
 
-    return {
-      users: allUsers,
-      searchedAddresses: addresses,
-      notFoundAddresses
-    };
+      return {
+        users: allUsers,
+        searchedAddresses: addresses,
+        notFoundAddresses
+      };
+    } catch (sdkError) {
+      console.log('SDK failed, falling back to direct API call:', sdkError);
+      
+      // Fallback to direct REST API call
+      const addressesParam = addresses.join(',');
+      const url = `https://api.neynar.com/v2/farcaster/user/bulk-by-address?addresses=${encodeURIComponent(addressesParam)}`;
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'accept': 'application/json',
+          'api_key': process.env.NEYNAR_API_KEY!
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('Direct API Response:', data);
+
+      // Extract users from the response - API returns { "address": [users] } format
+      const allUsers: FarcasterUser[] = [];
+      const foundAddresses: string[] = [];
+      
+      for (const [address, users] of Object.entries(data)) {
+        if (Array.isArray(users) && users.length > 0) {
+          allUsers.push(...(users as FarcasterUser[]));
+          foundAddresses.push(address);
+        }
+      }
+      
+      // Find addresses that didn't return any users
+      const notFoundAddresses = addresses.filter(addr => 
+        !foundAddresses.some(foundAddr => 
+          foundAddr.toLowerCase() === addr.toLowerCase()
+        )
+      );
+
+      return {
+        users: allUsers,
+        searchedAddresses: addresses,
+        notFoundAddresses
+      };
+    }
   } catch (error) {
     console.error('Error searching for users by addresses:', error);
     throw new Error(

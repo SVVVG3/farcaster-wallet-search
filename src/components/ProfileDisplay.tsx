@@ -64,10 +64,11 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
   };
 
   const scrollToBankrAddresses = () => {
-    const verifiedAddressesSection = document.querySelector('[data-section="verified-addresses"]');
-    if (verifiedAddressesSection) {
-      verifiedAddressesSection.scrollIntoView({ behavior: 'smooth' });
-    }
+    // Scroll to the very bottom of the page
+    window.scrollTo({ 
+      top: document.documentElement.scrollHeight, 
+      behavior: 'smooth' 
+    });
   };
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 md:p-6 space-y-4">
@@ -89,33 +90,23 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
             <div className="absolute -bottom-1 -right-1 w-5 h-5 flex items-center justify-center">
               <svg width="20" height="20" viewBox="0 0 100 100" className="absolute inset-0">
                 <path d="
-                  M50 0
-                  Q55 2 58 8
-                  L70 15
-                  Q75 12 80 15
-                  L92 22
-                  Q95 25 92 30
-                  L85 42
-                  Q88 45 85 50
-                  L92 70
-                  Q95 75 92 78
-                  L80 85
-                  Q75 88 70 85
-                  L58 92
-                  Q55 98 50 100
-                  Q45 98 42 92
-                  L30 85
-                  Q25 88 20 85
-                  L8 78
-                  Q5 75 8 70
-                  L15 58
-                  Q12 55 15 50
-                  L8 30
-                  Q5 25 8 22
-                  L20 15
-                  Q25 12 30 15
-                  L42 8
-                  Q45 2 50 0
+                  M50 5
+                  Q58 8 65 15
+                  Q72 8 80 15
+                  Q92 22 85 35
+                  Q92 42 85 50
+                  Q92 58 85 65
+                  Q92 78 80 85
+                  Q72 92 65 85
+                  Q58 92 50 95
+                  Q42 92 35 85
+                  Q28 92 20 85
+                  Q8 78 15 65
+                  Q8 58 15 50
+                  Q8 42 15 35
+                  Q8 22 20 15
+                  Q28 8 35 15
+                  Q42 8 50 5
                   Z
                 " fill="#8A63D2"/>
               </svg>

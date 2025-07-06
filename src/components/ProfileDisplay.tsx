@@ -47,8 +47,22 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
   const triggerHaptic = async () => {
     try {
       if ((await isInMiniApp()) && sdk && sdk.haptics) {
-        console.log('📳 Triggering Farcaster haptic feedback');
-        await sdk.haptics.impactOccurred('medium');
+        console.log('📳 Checking haptic capabilities');
+        
+        // Check if haptics are supported
+        if (sdk.getCapabilities) {
+          const capabilities = await sdk.getCapabilities();
+          if (capabilities.includes('haptics.impactOccurred')) {
+            console.log('✅ Haptics supported, triggering feedback');
+            await sdk.haptics.impactOccurred('medium');
+          } else {
+            console.log('❌ Haptics not supported on this device');
+          }
+        } else {
+          // Fallback for older SDK versions
+          console.log('📳 Using fallback haptic method');
+          await sdk.haptics.impactOccurred('medium');
+        }
       } else {
         console.log('❌ Not in mini app or haptics not available');
       }
@@ -60,6 +74,9 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
   const handleExternalLink = async (url: string) => {
     console.log('🔗 Opening external link:', url);
     await triggerHaptic();
+    
+    // Small delay to allow haptic feedback to be felt before navigation
+    await new Promise(resolve => setTimeout(resolve, 50));
     
     // Only use SDK if we're in mini app environment
     if (await isInMiniApp()) {
@@ -182,10 +199,7 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
               {(user.bankrData?.farcaster?.bankrClub || user.bankrData?.twitter?.bankrClub) && (
                 <button
                   onClick={scrollToBankrAddresses}
-                  className="px-2 py-0.5 bg-gradient-to-r from-yellow-400 to-orange-500 text-white 
-                           text-xs font-bold rounded-full shadow-lg flex items-center space-x-1 
-                           hover:from-yellow-500 hover:to-orange-600 transition-all duration-200 
-                           cursor-pointer"
+                  className="px-3 py-0.5 text-gray-900 dark:text-white text-xs font-bold rounded-full flex items-center space-x-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200 cursor-pointer"
                 >
                   <Image
                     src="/BankrLogo.png"

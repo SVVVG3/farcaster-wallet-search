@@ -231,7 +231,7 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
               return (
                 <div key={index} className="flex items-center space-x-2 bg-gray-50 dark:bg-gray-700 
                                            rounded-lg px-3 py-2">
-                  <div className="flex items-center justify-center w-8 h-6 bg-gray-200 dark:bg-gray-600 rounded">
+                  <div className="flex items-center justify-center w-8 h-6">
                     {isXAccount ? (
                       <Image
                         src="/Xlogo.png"
@@ -267,15 +267,15 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
       )}
 
       {/* Verified Addresses */}
-      {(user.verified_addresses?.eth_addresses?.length > 0 || user.verified_addresses?.sol_addresses?.length > 0) && (
+      {(user.verified_addresses?.eth_addresses?.length > 0 || user.verified_addresses?.sol_addresses?.length > 0 || user.custody_address) && (
         <div className="space-y-2 border-t border-gray-200 dark:border-gray-600 pt-4" data-section="verified-addresses">
           <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Verified Addresses</h4>
           <div className="space-y-1">
             {/* Primary ETH Address */}
-            {user.verified_addresses.primary?.eth_address && (
+            {user.verified_addresses?.primary?.eth_address && (
               <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-3 md:py-2">
                 <div className="flex items-center space-x-2 flex-1 min-w-0">
-                  <div className="flex items-center justify-center w-8 h-6 bg-blue-100 dark:bg-blue-900 rounded">
+                  <div className="flex items-center justify-center w-8 h-6">
                     <Image
                       src="/ETHlogo.png"
                       alt="ETH"
@@ -312,10 +312,10 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
             )}
 
             {/* Primary SOL Address */}
-            {user.verified_addresses.primary?.sol_address && (
+            {user.verified_addresses?.primary?.sol_address && (
               <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-3 md:py-2">
                 <div className="flex items-center space-x-2 flex-1 min-w-0">
-                  <div className="flex items-center justify-center w-8 h-6 bg-purple-100 dark:bg-purple-900 rounded">
+                  <div className="flex items-center justify-center w-8 h-6">
                     <Image
                       src="/SOLlogo.png"
                       alt="SOL"
@@ -351,12 +351,52 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
               </div>
             )}
 
+            {/* Custody Address */}
+            {user.custody_address && (
+              <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-3 md:py-2">
+                <div className="flex items-center space-x-2 flex-1 min-w-0">
+                  <div className="flex items-center justify-center w-8 h-6">
+                    <Image
+                      src="/ETHlogo.png"
+                      alt="ETH"
+                      width={16}
+                      height={16}
+                      className="w-4 h-4"
+                    />
+                  </div>
+                  <button
+                    onClick={() => openExplorerExternal(user.custody_address)}
+                    className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
+                             transition-colors cursor-pointer hover:underline truncate"
+                    title="View on BaseScan"
+                  >
+                    {truncateAddress(user.custody_address)}
+                  </button>
+                  <span className="px-1.5 py-0.5 bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 
+                               text-xs font-medium rounded">
+                    Custody
+                  </span>
+                </div>
+                <button
+                  onClick={() => copyToClipboard(user.custody_address)}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors 
+                           min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md ml-2
+                           hover:bg-gray-100 dark:hover:bg-gray-600 active:bg-gray-200 dark:active:bg-gray-500"
+                  title="Copy address"
+                >
+                  <span className="text-lg">
+                    {copiedAddress === user.custody_address ? '✅' : '📋'}
+                  </span>
+                </button>
+              </div>
+            )}
+
             {/* Non-primary ETH Addresses */}
-            {user.verified_addresses.eth_addresses?.filter(address => address !== user.verified_addresses.primary?.eth_address).map((address, index) => (
+            {user.verified_addresses?.eth_addresses?.filter(address => address !== user.verified_addresses.primary?.eth_address).map((address, index) => (
               <div key={`eth-${index}`} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 
                                                    rounded-lg px-3 py-3 md:py-2">
                 <div className="flex items-center space-x-2 flex-1 min-w-0">
-                  <div className="flex items-center justify-center w-8 h-6 bg-blue-100 dark:bg-blue-900 rounded">
+                  <div className="flex items-center justify-center w-8 h-6">
                     <Image
                       src="/ETHlogo.png"
                       alt="ETH"
@@ -389,11 +429,11 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
             ))}
             
             {/* Non-primary SOL Addresses */}
-            {user.verified_addresses.sol_addresses?.filter(address => address !== user.verified_addresses.primary?.sol_address).map((address, index) => (
+            {user.verified_addresses?.sol_addresses?.filter(address => address !== user.verified_addresses.primary?.sol_address).map((address, index) => (
               <div key={`sol-${index}`} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 
                                                    rounded-lg px-3 py-3 md:py-2">
                 <div className="flex items-center space-x-2 flex-1 min-w-0">
-                  <div className="flex items-center justify-center w-8 h-6 bg-purple-100 dark:bg-purple-900 rounded">
+                  <div className="flex items-center justify-center w-8 h-6">
                     <Image
                       src="/SOLlogo.png"
                       alt="SOL"
@@ -428,39 +468,7 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
         </div>
       )}
 
-      {/* Custody Address */}
-      {user.custody_address && (
-        <div className="space-y-2 border-t border-gray-200 dark:border-gray-600 pt-4">
-          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Custody Address</h4>
-          <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-3 md:py-2">
-            <div className="flex items-center space-x-2 flex-1 min-w-0">
-              <span className="px-2 py-1 bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 
-                             text-xs font-medium rounded">
-                Custody
-              </span>
-              <button
-                onClick={() => openExplorerExternal(user.custody_address)}
-                className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
-                         transition-colors cursor-pointer hover:underline truncate"
-                title="View on BaseScan"
-              >
-                {truncateAddress(user.custody_address)}
-              </button>
-            </div>
-            <button
-              onClick={() => copyToClipboard(user.custody_address)}
-              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors 
-                       min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md ml-2
-                       hover:bg-gray-100 dark:hover:bg-gray-600 active:bg-gray-200 dark:active:bg-gray-500"
-              title="Copy address"
-            >
-              <span className="text-lg">
-                {copiedAddress === user.custody_address ? '✅' : '📋'}
-              </span>
-            </button>
-          </div>
-        </div>
-      )}
+
 
       {/* Bankr Wallet Information */}
       {(user.bankrData?.farcaster || user.bankrData?.twitter) && (
@@ -493,13 +501,13 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
                 <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 
                                rounded-lg px-3 py-3 md:py-2">
                   <div className="flex items-center space-x-2 flex-1 min-w-0">
-                    <div className="flex items-center justify-center w-8 h-6 bg-yellow-100 dark:bg-yellow-900 rounded px-1">
+                    <div className="flex items-center justify-center w-8 h-6">
                       <Image
                         src="/ETHlogo.png"
                         alt="ETH"
-                        width={14}
-                        height={14}
-                        className="w-3.5 h-3.5"
+                        width={16}
+                        height={16}
+                        className="w-4 h-4"
                       />
                     </div>
                     <button
@@ -529,13 +537,13 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
                 <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 
                                rounded-lg px-3 py-3 md:py-2">
                   <div className="flex items-center space-x-2 flex-1 min-w-0">
-                    <div className="flex items-center justify-center w-8 h-6 bg-yellow-100 dark:bg-yellow-900 rounded px-1">
+                    <div className="flex items-center justify-center w-8 h-6">
                       <Image
                         src="/SOLlogo.png"
                         alt="SOL"
-                        width={14}
-                        height={14}
-                        className="w-3.5 h-3.5"
+                        width={16}
+                        height={16}
+                        className="w-4 h-4"
                       />
                     </div>
                     <button
@@ -580,13 +588,13 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
                 <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 
                                rounded-lg px-3 py-3 md:py-2">
                   <div className="flex items-center space-x-2 flex-1 min-w-0">
-                    <div className="flex items-center justify-center w-8 h-6 bg-blue-100 dark:bg-blue-900 rounded px-1">
+                    <div className="flex items-center justify-center w-8 h-6">
                       <Image
                         src="/ETHlogo.png"
                         alt="ETH"
-                        width={14}
-                        height={14}
-                        className="w-3.5 h-3.5"
+                        width={16}
+                        height={16}
+                        className="w-4 h-4"
                       />
                     </div>
                     <button
@@ -616,13 +624,13 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
                 <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 
                                rounded-lg px-3 py-3 md:py-2">
                   <div className="flex items-center space-x-2 flex-1 min-w-0">
-                    <div className="flex items-center justify-center w-8 h-6 bg-blue-100 dark:bg-blue-900 rounded px-1">
+                    <div className="flex items-center justify-center w-8 h-6">
                       <Image
                         src="/SOLlogo.png"
                         alt="SOL"
-                        width={14}
-                        height={14}
-                        className="w-3.5 h-3.5"
+                        width={16}
+                        height={16}
+                        className="w-4 h-4"
                       />
                     </div>
                     <button

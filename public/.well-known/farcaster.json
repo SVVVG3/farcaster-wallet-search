@@ -6,18 +6,18 @@
   },
   "miniapp": {
     "version": "1",
-    "name": "Farcaster Wallet Search",
-    "iconUrl": "https://walletsearch.vercel.app/favicon.ico",
+    "name": "Wallet Search",
+    "iconUrl": "https://walletsearch.vercel.app/WalletSearchIcon.png",
     "homeUrl": "https://walletsearch.vercel.app",
-    "imageUrl": "https://walletsearch.vercel.app/og-image.svg",
+    "imageUrl": "https://walletsearch.vercel.app/WalletSearchEmbed.png",
     "buttonTitle": "🔍 Search Wallets",
     "subtitle": "Find profiles by wallets",
     "description": "Search Farcaster profiles by wallet addresses and usernames with comprehensive Bankr integration. Supports Ethereum, Solana addresses and Farcaster usernames.",
     "primaryCategory": "utility",
-    "splashImageUrl": "https://walletsearch.vercel.app/favicon.ico",
-    "splashBackgroundColor": "#4F46E5",
+    "splashImageUrl": "https://walletsearch.vercel.app/WalletSearchIcon.png",
+    "splashBackgroundColor": "#000000",
     "tagline": "Profile search made easy",
-    "heroImageUrl": "https://walletsearch.vercel.app/og-image.svg",
+    "heroImageUrl": "https://walletsearch.vercel.app/WalletSearchEmbed.png",
     "tags": [
       "finance",
       "utilities",
@@ -25,8 +25,9 @@
       "productivity"
     ],
     "castShareUrl": "https://walletsearch.vercel.app",
-    "ogTitle": "Farcaster Wallet Search",
+    "webhookUrl": "https://api.neynar.com/f/app/07ae1000-a457-4ac4-a756-ff2c32ab912f/event",
+    "ogTitle": "Wallet Search",
     "ogDescription": "Search Farcaster profiles by wallet addresses and usernames with Bankr integration",
-    "ogImageUrl": "https://walletsearch.vercel.app/og-image.svg"
+    "ogImageUrl": "https://walletsearch.vercel.app/WalletSearchEmbed.png"
   }
 } 

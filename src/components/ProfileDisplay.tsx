@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { sdk } from '@farcaster/miniapp-sdk';
 import { FarcasterUser } from '@/lib/neynar';
-import { openExplorer, getExplorerUrl } from '@/lib/validation';
+import { openExplorer } from '@/lib/validation';
 
 interface ProfileDisplayProps {
   users: FarcasterUser[];

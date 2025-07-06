@@ -25,7 +25,54 @@ export default function Home() {
       }
     };
     
+    // Aggressive zoom prevention for mobile
+    const preventZoom = (e: TouchEvent) => {
+      if (e.touches.length > 1) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+    
+    const preventWheelZoom = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+    
+    const preventKeyboardZoom = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '-' || e.key === '0')) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
+    const preventGestureZoom = (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    
+    // Add event listeners for all zoom prevention
+    document.addEventListener('touchstart', preventZoom, { passive: false });
+    document.addEventListener('touchmove', preventZoom, { passive: false });
+    document.addEventListener('wheel', preventWheelZoom, { passive: false });
+    document.addEventListener('keydown', preventKeyboardZoom, { passive: false });
+    document.addEventListener('gesturestart', preventGestureZoom, { passive: false });
+    document.addEventListener('gesturechange', preventGestureZoom, { passive: false });
+    document.addEventListener('gestureend', preventGestureZoom, { passive: false });
+    
     initializeMiniApp();
+    
+    // Cleanup
+    return () => {
+      document.removeEventListener('touchstart', preventZoom);
+      document.removeEventListener('touchmove', preventZoom);
+      document.removeEventListener('wheel', preventWheelZoom);
+      document.removeEventListener('keydown', preventKeyboardZoom);
+      document.removeEventListener('gesturestart', preventGestureZoom);
+      document.removeEventListener('gesturechange', preventGestureZoom);
+      document.removeEventListener('gestureend', preventGestureZoom);
+    };
   }, []);
 
   const handleSearch = async (inputs: string[]) => {

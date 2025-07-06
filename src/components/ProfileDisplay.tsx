@@ -54,6 +54,16 @@ function truncateAddress(address: string): string {
 }
 
 function UserProfile({ user, onCopy }: { user: FarcasterUser; onCopy: () => void }) {
+  const handleExternalLink = async (url: string) => {
+    try {
+      await sdk.actions.openUrl(url);
+    } catch (error) {
+      console.error('Failed to open external URL:', error);
+      // Fallback to window.open if SDK fails
+      window.open(url, '_blank');
+    }
+  };
+
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -162,18 +172,33 @@ function UserProfile({ user, onCopy }: { user: FarcasterUser; onCopy: () => void
         <div className="space-y-2 border-t border-gray-200 dark:border-gray-600 pt-4">
           <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Connected Accounts</h4>
           <div className="space-y-1">
-            {user.verified_accounts.map((account, index) => (
-              <div key={index} className="flex items-center space-x-2 bg-gray-50 dark:bg-gray-700 
-                                         rounded-lg px-3 py-2">
-                <span className="px-2 py-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 
-                               text-xs font-medium rounded capitalize">
-                  {account.platform}
-                </span>
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  @{account.username}
-                </span>
-              </div>
-            ))}
+            {user.verified_accounts.map((account, index) => {
+              const isXAccount = account.platform.toLowerCase() === 'x';
+              const profileUrl = isXAccount ? `https://x.com/${account.username}` : null;
+              
+              return (
+                <div key={index} className="flex items-center space-x-2 bg-gray-50 dark:bg-gray-700 
+                                           rounded-lg px-3 py-2">
+                  <span className="px-2 py-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 
+                                 text-xs font-medium rounded capitalize">
+                    {account.platform}
+                  </span>
+                  {isXAccount && profileUrl ? (
+                    <button
+                      onClick={() => handleExternalLink(profileUrl)}
+                      className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
+                               transition-colors cursor-pointer hover:underline"
+                    >
+                      @{account.username}
+                    </button>
+                  ) : (
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      @{account.username}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

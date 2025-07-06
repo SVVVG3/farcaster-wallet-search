@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { sdk } from '@farcaster/miniapp-sdk';
 import { FarcasterUser } from '@/lib/neynar';
 
@@ -11,33 +11,7 @@ interface ProfileDisplayProps {
   notFoundAddresses: string[];
 }
 
-interface ToastProps {
-  message: string;
-  isVisible: boolean;
-  onClose: () => void;
-}
 
-function Toast({ message, isVisible, onClose }: ToastProps) {
-  useEffect(() => {
-    if (isVisible) {
-      const timer = setTimeout(() => {
-        onClose();
-      }, 2000); // Hide after 2 seconds
-      return () => clearTimeout(timer);
-    }
-  }, [isVisible, onClose]);
-
-  if (!isVisible) return null;
-
-  return (
-    <div className="fixed top-4 left-4 right-4 md:left-auto md:right-4 md:max-w-sm z-50 animate-in slide-in-from-top-2 duration-300">
-      <div className="bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center space-x-2">
-        <span className="text-base">✅</span>
-        <span className="text-sm font-medium">{message}</span>
-      </div>
-    </div>
-  );
-}
 
 function formatNumber(num: number): string {
   if (num >= 1000000) {
@@ -53,7 +27,11 @@ function truncateAddress(address: string): string {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 
-function UserProfile({ user, onCopy }: { user: FarcasterUser; onCopy: () => void }) {
+function UserProfile({ user, copiedAddresses, copyToClipboard }: { 
+  user: FarcasterUser; 
+  copiedAddresses: Set<string>;
+  copyToClipboard: (text: string) => void;
+}) {
   const handleExternalLink = async (url: string) => {
     try {
       await sdk.actions.openUrl(url);
@@ -61,27 +39,6 @@ function UserProfile({ user, onCopy }: { user: FarcasterUser; onCopy: () => void
       console.error('Failed to open external URL:', error);
       // Fallback to window.open if SDK fails
       window.open(url, '_blank');
-    }
-  };
-
-  const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      
-      // Add haptic feedback using Farcaster SDK
-      try {
-        await sdk.haptics.notificationOccurred('success');
-      } catch (error) {
-        console.log('Haptics not available:', error);
-        // Fallback to browser vibration for non-Farcaster environments
-        if ('vibrate' in navigator) {
-          navigator.vibrate(50);
-        }
-      }
-      
-      onCopy();
-    } catch (error) {
-      console.error('Failed to copy text:', error);
     }
   };
   return (
@@ -233,7 +190,9 @@ function UserProfile({ user, onCopy }: { user: FarcasterUser; onCopy: () => void
                            hover:bg-gray-100 dark:hover:bg-gray-600 active:bg-gray-200 dark:active:bg-gray-500"
                   title="Copy address"
                 >
-                  <span className="text-lg">📋</span>
+                  <span className="text-lg">
+                    {copiedAddresses.has(address) ? '✅' : '📋'}
+                  </span>
                 </button>
               </div>
             ))}
@@ -263,7 +222,9 @@ function UserProfile({ user, onCopy }: { user: FarcasterUser; onCopy: () => void
                            hover:bg-gray-100 dark:hover:bg-gray-600 active:bg-gray-200 dark:active:bg-gray-500"
                   title="Copy address"
                 >
-                  <span className="text-lg">📋</span>
+                  <span className="text-lg">
+                    {copiedAddresses.has(address) ? '✅' : '📋'}
+                  </span>
                 </button>
               </div>
             ))}
@@ -292,7 +253,9 @@ function UserProfile({ user, onCopy }: { user: FarcasterUser; onCopy: () => void
                        hover:bg-gray-100 dark:hover:bg-gray-600 active:bg-gray-200 dark:active:bg-gray-500"
               title="Copy address"
             >
-              <span className="text-lg">📋</span>
+              <span className="text-lg">
+                {copiedAddresses.has(user.custody_address) ? '✅' : '📋'}
+              </span>
             </button>
           </div>
         </div>
@@ -335,7 +298,9 @@ function UserProfile({ user, onCopy }: { user: FarcasterUser; onCopy: () => void
                              hover:bg-gray-100 dark:hover:bg-gray-600 active:bg-gray-200 dark:active:bg-gray-500"
                     title="Copy address"
                   >
-                    <span className="text-lg">📋</span>
+                    <span className="text-lg">
+                      {copiedAddresses.has(user.bankrData?.farcaster?.evmAddress || '') ? '✅' : '📋'}
+                    </span>
                   </button>
                 </div>
               )}
@@ -359,7 +324,9 @@ function UserProfile({ user, onCopy }: { user: FarcasterUser; onCopy: () => void
                              hover:bg-gray-100 dark:hover:bg-gray-600 active:bg-gray-200 dark:active:bg-gray-500"
                     title="Copy address"
                   >
-                    <span className="text-lg">📋</span>
+                    <span className="text-lg">
+                      {copiedAddresses.has(user.bankrData?.farcaster?.solanaAddress || '') ? '✅' : '📋'}
+                    </span>
                   </button>
                 </div>
               )}
@@ -398,7 +365,9 @@ function UserProfile({ user, onCopy }: { user: FarcasterUser; onCopy: () => void
                              hover:bg-gray-100 dark:hover:bg-gray-600 active:bg-gray-200 dark:active:bg-gray-500"
                     title="Copy address"
                   >
-                    <span className="text-lg">📋</span>
+                    <span className="text-lg">
+                      {copiedAddresses.has(user.bankrData?.twitter?.evmAddress || '') ? '✅' : '📋'}
+                    </span>
                   </button>
                 </div>
               )}
@@ -422,7 +391,9 @@ function UserProfile({ user, onCopy }: { user: FarcasterUser; onCopy: () => void
                              hover:bg-gray-100 dark:hover:bg-gray-600 active:bg-gray-200 dark:active:bg-gray-500"
                     title="Copy address"
                   >
-                    <span className="text-lg">📋</span>
+                    <span className="text-lg">
+                      {copiedAddresses.has(user.bankrData?.twitter?.solanaAddress || '') ? '✅' : '📋'}
+                    </span>
                   </button>
                 </div>
               )}
@@ -435,18 +406,7 @@ function UserProfile({ user, onCopy }: { user: FarcasterUser; onCopy: () => void
 }
 
 export default function ProfileDisplay({ users, notFoundAddresses }: ProfileDisplayProps) {
-  const [toast, setToast] = useState({ isVisible: false, message: '' });
-
-  const handleCopy = () => {
-    setToast({ 
-      isVisible: true, 
-      message: `Address copied to clipboard!` 
-    });
-  };
-
-  const hideToast = () => {
-    setToast({ isVisible: false, message: '' });
-  };
+  const [copiedAddresses, setCopiedAddresses] = useState<Set<string>>(new Set());
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -463,7 +423,18 @@ export default function ProfileDisplay({ users, notFoundAddresses }: ProfileDisp
         }
       }
       
-      handleCopy();
+      // Show checkmark for this specific address
+      setCopiedAddresses(prev => new Set(prev).add(text));
+      
+      // Reset checkmark after 2 seconds
+      setTimeout(() => {
+        setCopiedAddresses(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(text);
+          return newSet;
+        });
+      }, 2000);
+      
     } catch (error) {
       console.error('Failed to copy text:', error);
     }
@@ -475,13 +446,6 @@ export default function ProfileDisplay({ users, notFoundAddresses }: ProfileDisp
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6">
-      <Toast 
-        message={toast.message} 
-        isVisible={toast.isVisible} 
-        onClose={hideToast} 
-      />
-
-
       {/* Found profiles */}
       {users.length > 0 && (
         <div className="space-y-4">
@@ -490,7 +454,12 @@ export default function ProfileDisplay({ users, notFoundAddresses }: ProfileDisp
           </h3>
           <div className="grid gap-6">
             {users.map((user, index) => (
-              <UserProfile key={`${user.fid}-${index}`} user={user} onCopy={handleCopy} />
+              <UserProfile 
+                key={`${user.fid}-${index}`} 
+                user={user} 
+                copiedAddresses={copiedAddresses}
+                copyToClipboard={copyToClipboard}
+              />
             ))}
           </div>
         </div>
@@ -518,7 +487,7 @@ export default function ProfileDisplay({ users, notFoundAddresses }: ProfileDisp
                     className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                     title="Copy address"
                   >
-                    📋
+                    {copiedAddresses.has(notFoundItem) ? '✅' : '📋'}
                   </button>
                 </div>
               ))}

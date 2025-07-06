@@ -111,6 +111,9 @@ export default function AddressInput({ onAddressSubmit, isLoading = false, disab
               onKeyPress={handleKeyPress}
               placeholder="0x..., Solana address, or @username"
               disabled={disabled || isLoading}
+              autoCapitalize="off"
+              autoCorrect="off"
+              spellCheck="false"
               className={`w-full px-4 py-3 border rounded-lg text-sm transition-colors
                 ${validation === null 
                   ? 'border-gray-300 dark:border-gray-600' 

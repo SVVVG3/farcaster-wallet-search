@@ -1,0 +1,23 @@
+{
+  "version": "1.0.0",
+  "name": "Farcaster Wallet Search",
+  "description": "Search Farcaster profiles by wallet addresses and usernames with Bankr integration",
+  "icon": "https://walletsearch.vercel.app/favicon.ico",
+  "homeUrl": "https://walletsearch.vercel.app",
+  "imageUrl": "https://walletsearch.vercel.app/og-image.png",
+  "author": {
+    "name": "SVVVG3",
+    "url": "https://github.com/SVVVG3"
+  },
+  "permissions": {
+    "camera": false,
+    "microphone": false,
+    "location": false,
+    "notifications": false
+  },
+  "capabilities": {
+    "wallet": false,
+    "auth": false,
+    "payments": false
+  }
+} 

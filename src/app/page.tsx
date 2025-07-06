@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { sdk } from '@farcaster/miniapp-sdk';
 import AddressInput from '@/components/AddressInput';
 import ProfileDisplay from '@/components/ProfileDisplay';
 import { SearchResult } from '@/lib/neynar';
@@ -9,6 +10,22 @@ export default function Home() {
   const [searchResults, setSearchResults] = useState<SearchResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Initialize Farcaster Mini App SDK
+  useEffect(() => {
+    const initializeMiniApp = async () => {
+      try {
+        // Call ready to hide the splash screen once app is loaded
+        await sdk.actions.ready();
+        console.log('Farcaster Mini App SDK initialized successfully');
+      } catch (error) {
+        console.error('Failed to initialize Farcaster Mini App SDK:', error);
+        // If SDK fails, app should still work for web users
+      }
+    };
+    
+    initializeMiniApp();
+  }, []);
 
   const handleSearch = async (inputs: string[]) => {
     setIsLoading(true);

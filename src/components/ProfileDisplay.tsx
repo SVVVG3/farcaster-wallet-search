@@ -78,9 +78,9 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
               target.src = '/default-avatar.png';
             }}
           />
-          {user.power_badge && (
+          {user.pro?.status === 'subscribed' && (
             <div className="absolute -top-1 -right-1 w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
-              <span className="text-white text-xs">⚡</span>
+              <span className="text-white text-xs">✓</span>
             </div>
           )}
         </div>
@@ -90,10 +90,11 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
             <h3 className="text-xl font-bold text-gray-900 dark:text-white truncate">
               {user.display_name || user.username}
             </h3>
-            {user.power_badge && (
+            {user.pro?.status === 'subscribed' && (
               <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 
-                             text-xs font-medium rounded-full">
-                Power User
+                             text-xs font-medium rounded-full flex items-center space-x-1">
+                <span>✓</span>
+                <span>Farcaster Pro</span>
               </span>
             )}
             {(user.bankrData?.farcaster?.bankrClub || user.bankrData?.twitter?.bankrClub) && (

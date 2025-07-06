@@ -39,6 +39,11 @@ export interface FarcasterUser {
   }>;
   custody_address: string;
   power_badge?: boolean;
+  pro?: {
+    status: 'subscribed' | 'unsubscribed' | 'inactive';
+    subscribed_at?: string;
+    expires_at?: string;
+  };
   score?: number;
   bankrData?: {
     farcaster: BankrData | null;

@@ -33,46 +33,39 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
   copiedAddress: string | null;
   copyToClipboard: (text: string) => void;
 }) {
-  // Check if we're in a mini app environment
-  const isInMiniApp = () => {
-    if (typeof window === 'undefined') return false;
-    
-    // Check for Farcaster mini app indicators
-    return window.location.hostname.includes('warpcast') ||
-           window.location.search.includes('utm_source=farcaster') ||
-           (typeof navigator !== 'undefined' && navigator.userAgent.includes('Farcaster')) ||
-           window.location.hostname.includes('farcaster');
-  };
-
   const triggerHaptic = () => {
     try {
-      // Only use haptics in mini app environment
-      if (isInMiniApp() && typeof window !== 'undefined' && 'navigator' in window && 'vibrate' in navigator) {
+      // Always try haptics - let the browser decide if it's available
+      if (typeof window !== 'undefined' && 'navigator' in window && 'vibrate' in navigator) {
+        console.log('📳 Triggering haptic feedback');
         navigator.vibrate(50);
+      } else {
+        console.log('❌ Haptic feedback not available');
       }
-    } catch {
-      // Silently fail if haptics not available
+    } catch (error) {
+      console.error('❌ Haptic feedback failed:', error);
     }
   };
 
   const handleExternalLink = async (url: string) => {
+    console.log('🔗 Opening external link:', url);
     triggerHaptic();
     
-    // Check if we're in a mini app environment
-    if (isInMiniApp()) {
-      try {
-        // Use SDK to open external URLs when in mini app
-        if (sdk && sdk.actions && sdk.actions.openUrl) {
-          await sdk.actions.openUrl(url);
-          return;
-        }
-      } catch (error) {
-        console.error('Failed to open external URL with SDK:', error);
-        // Fall through to window.open fallback
+    // Always try SDK first, then fallback to window.open
+    try {
+      if (sdk && sdk.actions && sdk.actions.openUrl) {
+        console.log('✅ Using SDK to open URL');
+        await sdk.actions.openUrl(url);
+        return;
+      } else {
+        console.log('❌ SDK not available, falling back to window.open');
       }
+    } catch (error) {
+      console.error('❌ Failed to open external URL with SDK:', error);
     }
     
-    // Default behavior for desktop/web browsers
+    // Fallback to window.open
+    console.log('🌐 Using window.open fallback');
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
@@ -110,7 +103,7 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
           {user.pro?.status === 'subscribed' && (
             <div className="absolute -bottom-1 -right-1 w-5 h-5">
               <Image
-                src="/FarcasterProBadge.png?v=2"
+                src="/FarcasterProBadge.png?v=20250103"
                 alt="Farcaster Pro"
                 width={20}
                 height={20}
@@ -167,7 +160,7 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
               {user.pro?.status === 'subscribed' && (
                 <span className="px-3 py-0.5 text-gray-900 dark:text-white text-xs font-bold rounded-full flex items-center space-x-1.5 bg-gray-100 dark:bg-gray-700">
                   <Image
-                    src="/FarcasterProBadge.png?v=2"
+                    src="/FarcasterProBadge.png?v=20250103"
                     alt="Farcaster Pro"
                     width={16}
                     height={16}
@@ -530,28 +523,21 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
 export default function ProfileDisplay({ users, notFoundAddresses }: ProfileDisplayProps) {
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
 
-  // Check if we're in a mini app environment
-  const isInMiniApp = () => {
-    if (typeof window === 'undefined') return false;
-    
-    // Check for Farcaster mini app indicators
-    return window.location.hostname.includes('warpcast') ||
-           window.location.search.includes('utm_source=farcaster') ||
-           (typeof navigator !== 'undefined' && navigator.userAgent.includes('Farcaster')) ||
-           window.location.hostname.includes('farcaster');
-  };
-
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
+      console.log('📋 Copied to clipboard:', text);
       
-      // Add haptic feedback only in mini app environment
+      // Add haptic feedback - always try it
       try {
-        if (isInMiniApp() && typeof window !== 'undefined' && 'navigator' in window && 'vibrate' in navigator) {
+        if (typeof window !== 'undefined' && 'navigator' in window && 'vibrate' in navigator) {
+          console.log('📳 Triggering haptic feedback for copy');
           navigator.vibrate(50);
+        } else {
+          console.log('❌ Haptic feedback not available for copy');
         }
-      } catch {
-        // Silently fail if haptics not available
+      } catch (error) {
+        console.error('❌ Haptic feedback failed for copy:', error);
       }
       
       // Show checkmark for this specific address (replaces any previous checkmark)

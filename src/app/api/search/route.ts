@@ -55,12 +55,8 @@ export async function POST(request: NextRequest) {
       console.log('Searching by addresses:', addresses);
       const addressResults = await searchUsersByAddresses(addresses);
       
-      // Convert address results to our unified format
-      for (const [, users] of Object.entries(addressResults)) {
-        if (Array.isArray(users) && users.length > 0) {
-          allUsers.push(...(users as FarcasterUser[]));
-        }
-      }
+      // Add users from address search results
+      allUsers.push(...addressResults.users);
       
       allSearchedInputs.push(...addressResults.searchedAddresses);
       allNotFoundInputs.push(...addressResults.notFoundAddresses);

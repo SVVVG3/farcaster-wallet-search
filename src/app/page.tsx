@@ -135,12 +135,12 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3 flex-1 min-w-0">
-              <div className="w-10 h-10 flex items-center justify-center">
+              <div className="w-20 h-20 flex items-center justify-center">
                 <Image
                   src="/WalletSearchLogo.png"
                   alt="Wallet Search"
-                  width={40}
-                  height={40}
+                  width={80}
+                  height={80}
                   className="rounded-lg"
                 />
               </div>

@@ -39,7 +39,7 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
       if (typeof window !== 'undefined' && 'navigator' in window && 'vibrate' in navigator) {
         navigator.vibrate(50);
       }
-    } catch (error) {
+    } catch {
       // Silently fail if haptics not available
     }
   };
@@ -533,7 +533,7 @@ export default function ProfileDisplay({ users, notFoundAddresses }: ProfileDisp
         if (typeof window !== 'undefined' && 'navigator' in window && 'vibrate' in navigator) {
           navigator.vibrate(50);
         }
-      } catch (error) {
+      } catch {
         // Silently fail if haptics not available
       }
       

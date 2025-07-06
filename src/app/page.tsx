@@ -105,7 +105,23 @@ export default function Home() {
     }
   };
 
-  const handleNewSearch = () => {
+  const triggerHaptic = async () => {
+    try {
+      const context = await sdk.context;
+      if (context && context.client && typeof context.client.clientFid === 'number') {
+        await sdk.haptics.impactOccurred('light');
+      }
+    } catch {
+      // Haptics not supported or failed, continue silently
+    }
+  };
+
+  const handleNewSearch = async () => {
+    try {
+      await triggerHaptic();
+    } catch {
+      // Haptics failed, continue with action
+    }
     setSearchResults(null);
     setError(null);
   };
@@ -158,12 +174,14 @@ export default function Home() {
             </div>
             
             {searchResults && (
-              <button
-                onClick={handleNewSearch}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 
-                         transition-colors text-sm font-medium ml-2 whitespace-nowrap
-                         min-w-[44px] min-h-[44px] flex items-center justify-center"
-              >
+                              <button
+                  onClick={handleNewSearch}
+                  className="px-4 py-2 text-white rounded-lg transition-colors text-sm font-medium ml-2 whitespace-nowrap
+                           min-w-[44px] min-h-[44px] flex items-center justify-center"
+                  style={{ backgroundColor: '#26c0b7' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1ea59c'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#26c0b7'}
+                >
                 New Search
               </button>
             )}

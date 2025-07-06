@@ -33,10 +33,21 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
   copiedAddress: string | null;
   copyToClipboard: (text: string) => void;
 }) {
+  // Check if we're in a mini app environment
+  const isInMiniApp = () => {
+    if (typeof window === 'undefined') return false;
+    
+    // Check for Farcaster mini app indicators
+    return window.location.hostname.includes('warpcast') ||
+           window.location.search.includes('utm_source=farcaster') ||
+           (typeof navigator !== 'undefined' && navigator.userAgent.includes('Farcaster')) ||
+           window.location.hostname.includes('farcaster');
+  };
+
   const triggerHaptic = () => {
     try {
-      // Try different haptic methods that might be available
-      if (typeof window !== 'undefined' && 'navigator' in window && 'vibrate' in navigator) {
+      // Only use haptics in mini app environment
+      if (isInMiniApp() && typeof window !== 'undefined' && 'navigator' in window && 'vibrate' in navigator) {
         navigator.vibrate(50);
       }
     } catch {
@@ -47,15 +58,18 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
   const handleExternalLink = async (url: string) => {
     triggerHaptic();
     
-    try {
-      // Use SDK to open external URLs when available
-      if (sdk && sdk.actions && sdk.actions.openUrl) {
-        await sdk.actions.openUrl(url);
-        return;
+    // Check if we're in a mini app environment
+    if (isInMiniApp()) {
+      try {
+        // Use SDK to open external URLs when in mini app
+        if (sdk && sdk.actions && sdk.actions.openUrl) {
+          await sdk.actions.openUrl(url);
+          return;
+        }
+      } catch (error) {
+        console.error('Failed to open external URL with SDK:', error);
+        // Fall through to window.open fallback
       }
-    } catch (error) {
-      console.error('Failed to open external URL with SDK:', error);
-      // Fall through to window.open fallback
     }
     
     // Default behavior for desktop/web browsers
@@ -96,7 +110,7 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
           {user.pro?.status === 'subscribed' && (
             <div className="absolute -bottom-1 -right-1 w-5 h-5">
               <Image
-                src="/FarcasterProBadge.png"
+                src="/FarcasterProBadge.png?v=2"
                 alt="Farcaster Pro"
                 width={20}
                 height={20}
@@ -153,7 +167,7 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
               {user.pro?.status === 'subscribed' && (
                 <span className="px-3 py-0.5 text-gray-900 dark:text-white text-xs font-bold rounded-full flex items-center space-x-1.5 bg-gray-100 dark:bg-gray-700">
                   <Image
-                    src="/FarcasterProBadge.png"
+                    src="/FarcasterProBadge.png?v=2"
                     alt="Farcaster Pro"
                     width={16}
                     height={16}
@@ -516,13 +530,24 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
 export default function ProfileDisplay({ users, notFoundAddresses }: ProfileDisplayProps) {
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
 
+  // Check if we're in a mini app environment
+  const isInMiniApp = () => {
+    if (typeof window === 'undefined') return false;
+    
+    // Check for Farcaster mini app indicators
+    return window.location.hostname.includes('warpcast') ||
+           window.location.search.includes('utm_source=farcaster') ||
+           (typeof navigator !== 'undefined' && navigator.userAgent.includes('Farcaster')) ||
+           window.location.hostname.includes('farcaster');
+  };
+
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
       
-      // Add haptic feedback
+      // Add haptic feedback only in mini app environment
       try {
-        if (typeof window !== 'undefined' && 'navigator' in window && 'vibrate' in navigator) {
+        if (isInMiniApp() && typeof window !== 'undefined' && 'navigator' in window && 'vibrate' in navigator) {
           navigator.vibrate(50);
         }
       } catch {

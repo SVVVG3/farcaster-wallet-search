@@ -79,10 +79,10 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
             }}
           />
           {user.pro?.status === 'subscribed' && (
-            <div className="absolute -top-1 -right-1 w-6 h-6 flex items-center justify-center"
+            <div className="absolute -bottom-1 -right-1 w-5 h-5 flex items-center justify-center border-2 border-white dark:border-gray-800"
                  style={{ 
                    backgroundColor: '#8A63D2',
-                   borderRadius: '50% 40% 60% 30%'
+                   borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%'
                  }}>
               <span className="text-white text-xs font-bold">✓</span>
             </div>

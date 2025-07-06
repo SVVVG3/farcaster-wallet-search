@@ -275,15 +275,13 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
             {user.verified_addresses?.primary?.eth_address && (
               <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-3 md:py-2">
                 <div className="flex items-center space-x-2 flex-1 min-w-0">
-                  <div className="flex items-center justify-center w-8 h-6">
-                    <Image
-                      src="/ETHlogo.png"
-                      alt="ETH"
-                      width={16}
-                      height={16}
-                      className="w-4 h-4"
-                    />
-                  </div>
+                  <Image
+                    src="/ETHlogo.png"
+                    alt="ETH"
+                    width={16}
+                    height={16}
+                    className="w-4 h-4"
+                  />
                   <button
                     onClick={() => openExplorerExternal(user.verified_addresses.primary!.eth_address!)}
                     className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
@@ -315,15 +313,13 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
             {user.verified_addresses?.primary?.sol_address && (
               <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-3 md:py-2">
                 <div className="flex items-center space-x-2 flex-1 min-w-0">
-                  <div className="flex items-center justify-center w-8 h-6">
-                    <Image
-                      src="/SOLlogo.png"
-                      alt="SOL"
-                      width={16}
-                      height={16}
-                      className="w-4 h-4"
-                    />
-                  </div>
+                  <Image
+                    src="/SOLlogo.png"
+                    alt="SOL"
+                    width={16}
+                    height={16}
+                    className="w-4 h-4"
+                  />
                   <button
                     onClick={() => openExplorerExternal(user.verified_addresses.primary!.sol_address!)}
                     className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
@@ -355,15 +351,13 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
             {user.custody_address && (
               <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-3 md:py-2">
                 <div className="flex items-center space-x-2 flex-1 min-w-0">
-                  <div className="flex items-center justify-center w-8 h-6">
-                    <Image
-                      src="/ETHlogo.png"
-                      alt="ETH"
-                      width={16}
-                      height={16}
-                      className="w-4 h-4"
-                    />
-                  </div>
+                  <Image
+                    src="/ETHlogo.png"
+                    alt="ETH"
+                    width={16}
+                    height={16}
+                    className="w-4 h-4"
+                  />
                   <button
                     onClick={() => openExplorerExternal(user.custody_address)}
                     className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
@@ -396,15 +390,13 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
               <div key={`eth-${index}`} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 
                                                    rounded-lg px-3 py-3 md:py-2">
                 <div className="flex items-center space-x-2 flex-1 min-w-0">
-                  <div className="flex items-center justify-center w-8 h-6">
-                    <Image
-                      src="/ETHlogo.png"
-                      alt="ETH"
-                      width={16}
-                      height={16}
-                      className="w-4 h-4"
-                    />
-                  </div>
+                  <Image
+                    src="/ETHlogo.png"
+                    alt="ETH"
+                    width={16}
+                    height={16}
+                    className="w-4 h-4"
+                  />
                   <button
                     onClick={() => openExplorerExternal(address)}
                     className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
@@ -433,15 +425,13 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
               <div key={`sol-${index}`} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 
                                                    rounded-lg px-3 py-3 md:py-2">
                 <div className="flex items-center space-x-2 flex-1 min-w-0">
-                  <div className="flex items-center justify-center w-8 h-6">
-                    <Image
-                      src="/SOLlogo.png"
-                      alt="SOL"
-                      width={16}
-                      height={16}
-                      className="w-4 h-4"
-                    />
-                  </div>
+                  <Image
+                    src="/SOLlogo.png"
+                    alt="SOL"
+                    width={16}
+                    height={16}
+                    className="w-4 h-4"
+                  />
                   <button
                     onClick={() => openExplorerExternal(address)}
                     className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 

@@ -231,36 +231,42 @@ export default function Home() {
             {/* Features */}
             <div className="mt-8 md:mt-12 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
               <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 md:p-6">
-                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-3 md:mb-4">
-                  <span className="text-blue-600 dark:text-blue-400 text-2xl">🔍</span>
+                <div className="flex items-center space-x-3 mb-3 md:mb-4">
+                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                    <span className="text-blue-600 dark:text-blue-400 text-2xl">🔍</span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Multi-Input Search
+                  </h3>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  Multi-Input Search
-                </h3>
                 <p className="text-gray-600 dark:text-gray-400 text-sm">
                   Search multiple wallet addresses and usernames at once to find all linked Farcaster profiles efficiently.
                 </p>
               </div>
 
               <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 md:p-6">
-                <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mb-3 md:mb-4">
-                  <span className="text-green-600 dark:text-green-400 text-2xl">⚡</span>
+                <div className="flex items-center space-x-3 mb-3 md:mb-4">
+                  <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+                    <span className="text-green-600 dark:text-green-400 text-2xl">⚡</span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Comprehensive Data
+                  </h3>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  Comprehensive Data
-                </h3>
                 <p className="text-gray-600 dark:text-gray-400 text-sm">
                   Get complete profile information including bio, follower counts, verified addresses, and more.
                 </p>
               </div>
 
               <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 md:p-6">
-                <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center mb-3 md:mb-4">
-                  <span className="text-purple-600 dark:text-purple-400 text-2xl">🌐</span>
+                <div className="flex items-center space-x-3 mb-3 md:mb-4">
+                  <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
+                    <span className="text-purple-600 dark:text-purple-400 text-2xl">🌐</span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Flexible Search
+                  </h3>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  Flexible Search
-                </h3>
                 <p className="text-gray-600 dark:text-gray-400 text-sm">
                   Works with Ethereum (0x...), Solana addresses, and Farcaster usernames to find connected profiles.
                 </p>

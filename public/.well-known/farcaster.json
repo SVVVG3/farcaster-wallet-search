@@ -4,7 +4,7 @@
     "payload": "eyJkb21haW4iOiJ3YWxsZXRzZWFyY2gudmVyY2VsLmFwcCJ9",
     "signature": "2g2YajBNKHomoHxED28x0F0VqJ5VNNvg3ZtaySSBc/RggaIrUbE2p8sfNCHC26G7aaKXhFCyoO+gfwZnbQ4UxRs="
   },
-  "frame": {
+  "miniapp": {
     "version": "1",
     "name": "Wallet Search",
     "iconUrl": "https://walletsearch.vercel.app/WalletSearchIcon.png",

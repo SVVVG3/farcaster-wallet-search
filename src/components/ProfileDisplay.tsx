@@ -366,7 +366,7 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
                   >
                     {truncateAddress(user.custody_address)}
                   </button>
-                  <span className="px-1.5 py-0.5 bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 
+                  <span className="px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 
                                text-xs font-medium rounded">
                     Custody
                   </span>
@@ -480,7 +480,7 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
               <div className="flex items-center space-x-2">
                 <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Farcaster Bankr</span>
                 {user.bankrData.farcaster.bankrClub && (
-                  <span className="px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 
+                  <span className="px-1.5 py-0.5 bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 
                                  text-xs font-medium rounded">
                     Club Member
                   </span>
@@ -567,7 +567,7 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
               <div className="flex items-center space-x-2">
                 <span className="text-xs font-medium text-gray-600 dark:text-gray-400">X Bankr</span>
                 {user.bankrData.twitter.bankrClub && (
-                  <span className="px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 
+                  <span className="px-1.5 py-0.5 bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 
                                  text-xs font-medium rounded">
                     Club Member
                   </span>

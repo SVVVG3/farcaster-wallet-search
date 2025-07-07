@@ -117,14 +117,14 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
       <div className="flex items-start space-x-4">
         <div className="relative">
           <Image
-            src={user.pfp_url || '/default-avatar.png'}
+            src={user.pfp_url || '/default-avatar.svg'}
             alt={`${user.display_name || user.username}'s avatar`}
             width={80}
             height={80}
             className="rounded-full ring-2 ring-gray-200 dark:ring-gray-600"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
-              target.src = '/default-avatar.png';
+              target.src = '/default-avatar.svg';
             }}
           />
           {user.pro?.status === 'subscribed' && (

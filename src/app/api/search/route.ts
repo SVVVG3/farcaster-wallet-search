@@ -59,6 +59,10 @@ export async function POST(request: NextRequest) {
       .filter(result => result.type === 'x_username')
       .map(result => result.input);
 
+    const ambiguousUsernames = validationResults
+      .filter(result => result.type === 'username')
+      .map(result => result.input);
+
     // Combine results from all search types
     const allUsers: FarcasterUser[] = [];
     const allSearchedInputs: string[] = [];
@@ -102,6 +106,28 @@ export async function POST(request: NextRequest) {
       allUsers.push(...xUsernameResults.users);
       allSearchedInputs.push(...xUsernameResults.searchedXUsernames);
       allNotFoundInputs.push(...xUsernameResults.notFoundXUsernames);
+    }
+
+    // Search ambiguous usernames (try Farcaster first, then X username for any not found)
+    if (ambiguousUsernames.length > 0) {
+      console.log('Searching ambiguous usernames:', ambiguousUsernames);
+      
+      // First try as Farcaster usernames
+      const farcasterResults = await searchUsersByUsernames(ambiguousUsernames);
+      allUsers.push(...farcasterResults.users);
+      allSearchedInputs.push(...farcasterResults.searchedUsernames);
+      
+      // For usernames not found as Farcaster usernames, try as X usernames
+      const notFoundAsFarcaster = farcasterResults.notFoundUsernames;
+      if (notFoundAsFarcaster.length > 0) {
+        console.log('Trying not-found usernames as X usernames:', notFoundAsFarcaster);
+        const xResults = await searchUsersByXUsernames(notFoundAsFarcaster);
+        allUsers.push(...xResults.users);
+        allSearchedInputs.push(...xResults.searchedXUsernames);
+        
+        // Only mark as not found if not found in both searches
+        allNotFoundInputs.push(...xResults.notFoundXUsernames);
+      }
     }
 
     // Remove duplicates based on FID (Farcaster ID)

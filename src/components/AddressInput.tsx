@@ -12,7 +12,7 @@ interface AddressInputProps {
 export default function AddressInput({ onAddressSubmit, isLoading = false, disabled = false }: AddressInputProps) {
   const [inputValue, setInputValue] = useState('');
   const [inputs, setInputs] = useState<string[]>([]);
-  const [validation, setValidation] = useState<{ isValid: boolean; type: 'ethereum' | 'solana' | 'farcaster' | 'fid' | 'x_username' | null; error?: string } | null>(null);
+  const [validation, setValidation] = useState<{ isValid: boolean; type: 'ethereum' | 'solana' | 'farcaster' | 'fid' | 'x_username' | 'username' | null; error?: string } | null>(null);
 
   const validateInput = useCallback((value: string) => {
     if (!value.trim()) {
@@ -155,6 +155,7 @@ export default function AddressInput({ onAddressSubmit, isLoading = false, disab
               validation.type === 'farcaster' ? 'Farcaster username' :
               validation.type === 'fid' ? 'FID' :
               validation.type === 'x_username' ? 'X username' :
+              validation.type === 'username' ? 'username' :
               `${validation.type} address`
             }
           </p>

@@ -120,7 +120,7 @@ export function validateUsername(username: string): {
  */
 export function validateAddressOrUsername(input: string): { 
   isValid: boolean; 
-  type: 'ethereum' | 'solana' | 'farcaster' | 'fid' | 'x_username' | null; 
+  type: 'ethereum' | 'solana' | 'farcaster' | 'fid' | 'x_username' | 'username' | null; 
   error?: string 
 } {
   if (!input || input.trim().length === 0) {
@@ -140,15 +140,30 @@ export function validateAddressOrUsername(input: string): {
     return { isValid: true, type: 'fid' };
   }
 
-  // Check X username first (more restrictive pattern - only alphanumeric + underscores)
-  if (isValidXUsername(trimmedInput)) {
-    return { isValid: true, type: 'x_username' };
-  }
-
-  // Then check Farcaster username (more permissive pattern - allows dots, hyphens, underscores)
-  const usernameValidation = validateUsername(trimmedInput);
-  if (usernameValidation.isValid) {
-    return usernameValidation;
+  // For username-like inputs, we need to handle the ambiguity between Farcaster and X usernames
+  // Since patterns overlap (e.g., "svvvg3" could be either), we'll use a generic 'username' type
+  // and let the search logic try both APIs to determine which one has the user
+  
+  // Check if it looks like a username (either Farcaster or X pattern)
+  const isFarcasterPattern = isValidFarcasterUsername(trimmedInput);
+  const isXPattern = isValidXUsername(trimmedInput);
+  
+  if (isFarcasterPattern || isXPattern) {
+    // If it matches both patterns or could be ambiguous, use generic 'username' type
+    // The search logic will try Farcaster first, then X username
+    if (isFarcasterPattern && isXPattern) {
+      return { isValid: true, type: 'username' }; // Ambiguous - try both APIs
+    }
+    
+    // If it only matches Farcaster pattern (has dots, hyphens, or .eth)
+    if (isFarcasterPattern && !isXPattern) {
+      return { isValid: true, type: 'farcaster' };
+    }
+    
+    // If it only matches X pattern (very rare case)
+    if (isXPattern && !isFarcasterPattern) {
+      return { isValid: true, type: 'x_username' };
+    }
   }
 
   return { 

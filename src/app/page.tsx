@@ -277,8 +277,8 @@ export default function Home() {
           /* Results */
           <ProfileDisplay
             users={searchResults.users}
-            searchedAddresses={searchResults.searchedAddresses}
-            notFoundAddresses={searchResults.notFoundAddresses}
+            searchedInputs={searchResults.searchedInputs}
+            notFoundInputs={searchResults.notFoundInputs}
           />
         )}
       </main>

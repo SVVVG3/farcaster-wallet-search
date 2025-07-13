@@ -8,8 +8,8 @@ import { getExplorerUrl } from '@/lib/validation';
 
 interface ProfileDisplayProps {
   users: FarcasterUser[];
-  searchedAddresses: string[];
-  notFoundAddresses: string[];
+  searchedInputs: string[];
+  notFoundInputs: string[];
 }
 
 
@@ -653,7 +653,7 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
   );
 }
 
-export default function ProfileDisplay({ users, notFoundAddresses }: ProfileDisplayProps) {
+export default function ProfileDisplay({ users, notFoundInputs }: ProfileDisplayProps) {
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
 
   // Check if we're in a mini app environment using SDK context
@@ -697,7 +697,7 @@ export default function ProfileDisplay({ users, notFoundAddresses }: ProfileDisp
     }
   };
 
-  if (users.length === 0 && notFoundAddresses.length === 0) {
+  if (users.length === 0 && notFoundInputs.length === 0) {
     return null;
   }
 
@@ -722,8 +722,8 @@ export default function ProfileDisplay({ users, notFoundAddresses }: ProfileDisp
         </div>
       )}
 
-      {/* Not found addresses */}
-      {notFoundAddresses.length > 0 && (
+      {/* Not found inputs */}
+      {notFoundInputs.length > 0 && (
         <div className="space-y-3">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
             No Profiles Found
@@ -733,7 +733,7 @@ export default function ProfileDisplay({ users, notFoundAddresses }: ProfileDisp
               The following addresses don&apos;t have linked Farcaster profiles:
             </p>
             <div className="space-y-2">
-              {notFoundAddresses.map((notFoundItem, index) => (
+              {notFoundInputs.map((notFoundItem: string, index: number) => (
                 <div key={index} className="flex items-center justify-between bg-white dark:bg-gray-700 
                                            rounded-lg px-3 py-2 border border-gray-200 dark:border-gray-600">
                   <span className="font-mono text-sm text-gray-700 dark:text-gray-300">

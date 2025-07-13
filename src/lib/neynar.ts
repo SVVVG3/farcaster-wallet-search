@@ -53,8 +53,8 @@ export interface FarcasterUser {
 
 export interface SearchResult {
   users: FarcasterUser[];
-  searchedAddresses: string[];
-  notFoundAddresses: string[];
+  searchedInputs: string[];
+  notFoundInputs: string[];
 }
 
 export interface UsernameSearchResult {
@@ -112,8 +112,8 @@ export async function searchUsersByAddresses(addresses: string[]): Promise<Searc
 
       return {
         users: allUsers,
-        searchedAddresses: addresses,
-        notFoundAddresses
+        searchedInputs: addresses,
+        notFoundInputs: notFoundAddresses
       };
     } catch (sdkError) {
       console.log('SDK failed, falling back to direct API call:', sdkError);
@@ -157,8 +157,8 @@ export async function searchUsersByAddresses(addresses: string[]): Promise<Searc
 
       return {
         users: allUsers,
-        searchedAddresses: addresses,
-        notFoundAddresses
+        searchedInputs: addresses,
+        notFoundInputs: notFoundAddresses
       };
     }
   } catch (error) {

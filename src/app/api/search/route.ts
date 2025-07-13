@@ -70,8 +70,8 @@ export async function POST(request: NextRequest) {
       const addressResults = await searchUsersByAddresses(addresses);
       
       allUsers.push(...addressResults.users);
-      allSearchedInputs.push(...addressResults.searchedAddresses);
-      allNotFoundInputs.push(...addressResults.notFoundAddresses);
+      allSearchedInputs.push(...addressResults.searchedInputs);
+      allNotFoundInputs.push(...addressResults.notFoundInputs);
     }
 
     // Search by usernames if any provided

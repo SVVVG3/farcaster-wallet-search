@@ -331,31 +331,21 @@ export async function searchUsersByUsernames(usernames: string[]): Promise<Usern
     // Search for each username individually
     for (const username of usernames) {
       try {
-        console.log(`Searching for username: ${username}`);
+        console.log(`Looking up user by username: ${username}`);
         
-        // Use the Neynar SDK to search for users by username
-        const response = await client.searchUser({ q: username, limit: 10 });
+        // Use the Neynar SDK to lookup user by exact username
+        const response = await client.lookupUserByUsername({ username: username });
         
-        console.log(`Username search response for ${username}:`, response);
+        console.log(`Username lookup response for ${username}:`, response);
 
-        // Find exact match or closest match
-        const users = response.result?.users || [];
-        const exactMatch = users.find(user => 
-          user.username.toLowerCase() === username.toLowerCase()
-        );
-
-        if (exactMatch) {
-          allUsers.push(exactMatch as FarcasterUser);
-          foundUsernames.push(username);
-        } else if (users.length > 0) {
-          // If no exact match, take the first result (best match)
-          allUsers.push(users[0] as FarcasterUser);
+        if (response && response.user && response.user.fid) {
+          allUsers.push(response.user as FarcasterUser);
           foundUsernames.push(username);
         } else {
           notFoundUsernames.push(username);
         }
       } catch (error) {
-        console.error(`Error searching for username ${username}:`, error);
+        console.error(`Error looking up username ${username}:`, error);
         notFoundUsernames.push(username);
       }
     }

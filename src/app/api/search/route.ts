@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { searchUsersByAddresses, searchUsersByUsernames, FarcasterUser } from '@/lib/neynar';
+import { 
+  searchUsersByAddresses, 
+  searchUsersByUsernames, 
+  searchUsersByFIDs, 
+  searchUsersByXUsernames, 
+  FarcasterUser 
+} from '@/lib/neynar';
 import { validateAddressOrUsername } from '@/lib/validation';
 import { getBankrWalletData } from '@/lib/bankr';
 
@@ -10,7 +16,7 @@ export async function POST(request: NextRequest) {
     // Validate that inputs are provided
     if (!inputs || !Array.isArray(inputs) || inputs.length === 0) {
       return NextResponse.json(
-        { error: 'Please provide an array of wallet addresses or usernames' },
+        { error: 'Please provide an array of wallet addresses, usernames, FIDs, or X usernames' },
         { status: 400 }
       );
     }
@@ -36,7 +42,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Separate addresses and usernames
+    // Separate inputs by type
     const addresses = validationResults
       .filter(result => result.type === 'ethereum' || result.type === 'solana')
       .map(result => result.input);
@@ -45,7 +51,15 @@ export async function POST(request: NextRequest) {
       .filter(result => result.type === 'farcaster')
       .map(result => result.input);
 
-    // Combine results from both search types
+    const fids = validationResults
+      .filter(result => result.type === 'fid')
+      .map(result => result.input);
+
+    const xUsernames = validationResults
+      .filter(result => result.type === 'x_username')
+      .map(result => result.input);
+
+    // Combine results from all search types
     const allUsers: FarcasterUser[] = [];
     const allSearchedInputs: string[] = [];
     const allNotFoundInputs: string[] = [];
@@ -55,9 +69,7 @@ export async function POST(request: NextRequest) {
       console.log('Searching by addresses:', addresses);
       const addressResults = await searchUsersByAddresses(addresses);
       
-      // Add users from address search results
       allUsers.push(...addressResults.users);
-      
       allSearchedInputs.push(...addressResults.searchedAddresses);
       allNotFoundInputs.push(...addressResults.notFoundAddresses);
     }
@@ -70,6 +82,26 @@ export async function POST(request: NextRequest) {
       allUsers.push(...usernameResults.users);
       allSearchedInputs.push(...usernameResults.searchedUsernames);
       allNotFoundInputs.push(...usernameResults.notFoundUsernames);
+    }
+
+    // Search by FIDs if any provided
+    if (fids.length > 0) {
+      console.log('Searching by FIDs:', fids);
+      const fidResults = await searchUsersByFIDs(fids);
+      
+      allUsers.push(...fidResults.users);
+      allSearchedInputs.push(...fidResults.searchedFIDs);
+      allNotFoundInputs.push(...fidResults.notFoundFIDs);
+    }
+
+    // Search by X usernames if any provided
+    if (xUsernames.length > 0) {
+      console.log('Searching by X usernames:', xUsernames);
+      const xUsernameResults = await searchUsersByXUsernames(xUsernames);
+      
+      allUsers.push(...xUsernameResults.users);
+      allSearchedInputs.push(...xUsernameResults.searchedXUsernames);
+      allNotFoundInputs.push(...xUsernameResults.notFoundXUsernames);
     }
 
     // Remove duplicates based on FID (Farcaster ID)
@@ -128,8 +160,8 @@ export async function POST(request: NextRequest) {
       success: true,
       results: {
         users: enhancedUsers,
-        searchedAddresses: allSearchedInputs,
-        notFoundAddresses: allNotFoundInputs
+        searchedInputs: allSearchedInputs,
+        notFoundInputs: allNotFoundInputs
       }
     });
 
@@ -149,7 +181,13 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     message: 'Farcaster Wallet Search API',
-    usage: 'POST with { "inputs": ["0x...", "username"] }',
-    supportedInputs: ['Ethereum addresses (0x...)', 'Solana addresses (base58)', 'Farcaster usernames']
+    usage: 'POST with { "inputs": ["0x...", "username", "123", "twitteruser"] }',
+    supportedInputs: [
+      'Ethereum addresses (0x...)', 
+      'Solana addresses (base58)', 
+      'Farcaster usernames',
+      'Farcaster IDs (FIDs)',
+      'X (Twitter) usernames'
+    ]
   });
 } 

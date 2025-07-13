@@ -12,7 +12,7 @@ interface AddressInputProps {
 export default function AddressInput({ onAddressSubmit, isLoading = false, disabled = false }: AddressInputProps) {
   const [inputValue, setInputValue] = useState('');
   const [inputs, setInputs] = useState<string[]>([]);
-  const [validation, setValidation] = useState<{ isValid: boolean; type: 'ethereum' | 'solana' | 'farcaster' | null; error?: string } | null>(null);
+  const [validation, setValidation] = useState<{ isValid: boolean; type: 'ethereum' | 'solana' | 'farcaster' | 'fid' | 'x_username' | null; error?: string } | null>(null);
 
   const validateInput = useCallback((value: string) => {
     if (!value.trim()) {
@@ -93,10 +93,10 @@ export default function AddressInput({ onAddressSubmit, isLoading = false, disab
     <div className="w-full max-w-2xl mx-auto space-y-4">
       <div className="space-y-2">
         <label htmlFor="address-input" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-          Wallet Address or Username
+          Wallet Address, Username, FID, or X Username
         </label>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Enter Ethereum/Solana addresses or Farcaster usernames to find linked profiles
+          Enter Ethereum/Solana addresses, Farcaster usernames, FIDs, or X usernames to find linked profiles
         </p>
       </div>
 
@@ -109,7 +109,7 @@ export default function AddressInput({ onAddressSubmit, isLoading = false, disab
               value={inputValue}
               onChange={handleInputChange}
               onKeyPress={handleKeyPress}
-              placeholder="Enter wallet address or username"
+              placeholder="Enter wallet address, username, FID, or X username"
               disabled={disabled || isLoading}
               autoCapitalize="off"
               autoCorrect="off"
@@ -151,7 +151,12 @@ export default function AddressInput({ onAddressSubmit, isLoading = false, disab
 
         {validation && validation.isValid && (
           <p className="text-sm text-green-600 dark:text-green-400">
-            Valid {validation.type === 'farcaster' ? 'username' : `${validation.type} address`}
+            Valid {
+              validation.type === 'farcaster' ? 'Farcaster username' :
+              validation.type === 'fid' ? 'FID' :
+              validation.type === 'x_username' ? 'X username' :
+              `${validation.type} address`
+            }
           </p>
         )}
 

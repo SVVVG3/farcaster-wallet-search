@@ -63,6 +63,18 @@ export interface UsernameSearchResult {
   notFoundUsernames: string[];
 }
 
+export interface FIDSearchResult {
+  users: FarcasterUser[];
+  searchedFIDs: string[];
+  notFoundFIDs: string[];
+}
+
+export interface XUsernameSearchResult {
+  users: FarcasterUser[];
+  searchedXUsernames: string[];
+  notFoundXUsernames: string[];
+}
+
 /**
  * Search for Farcaster users by wallet addresses (Ethereum or Solana)
  * @param addresses - Array of wallet addresses to search for
@@ -151,6 +163,150 @@ export async function searchUsersByAddresses(addresses: string[]): Promise<Searc
     }
   } catch (error) {
     console.error('Error searching for users by addresses:', error);
+    throw new Error(
+      error instanceof Error 
+        ? `Failed to search users: ${error.message}`
+        : 'Failed to search users'
+    );
+  }
+}
+
+/**
+ * Search for Farcaster users by FIDs (Farcaster IDs)
+ * @param fids - Array of FIDs to search for
+ * @returns Promise with search results
+ */
+export async function searchUsersByFIDs(fids: string[]): Promise<FIDSearchResult> {
+  try {
+    console.log('Searching for users with FIDs:', fids);
+    
+    // Try SDK first, fallback to direct API if it fails
+    try {
+      const response = await client.fetchBulkUsers({
+        fids: fids.map(fid => parseInt(fid))
+      });
+
+      console.log('SDK API Response for FIDs:', response);
+
+      const allUsers: FarcasterUser[] = (response.users || []) as FarcasterUser[];
+      const foundFIDs: string[] = allUsers.map(user => user.fid.toString());
+      
+      // Find FIDs that didn't return any users
+      const notFoundFIDs = fids.filter(fid => 
+        !foundFIDs.includes(fid)
+      );
+
+      return {
+        users: allUsers,
+        searchedFIDs: fids,
+        notFoundFIDs
+      };
+    } catch (sdkError) {
+      console.log('SDK failed for FIDs, falling back to direct API call:', sdkError);
+      
+      // Fallback to direct REST API call
+      const fidsParam = fids.join(',');
+      const url = `https://api.neynar.com/v2/farcaster/user/bulk?fids=${encodeURIComponent(fidsParam)}`;
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'accept': 'application/json',
+          'api_key': process.env.NEYNAR_API_KEY!
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('Direct API Response for FIDs:', data);
+
+      const allUsers: FarcasterUser[] = data.users || [];
+      const foundFIDs: string[] = allUsers.map(user => user.fid.toString());
+      
+      // Find FIDs that didn't return any users
+      const notFoundFIDs = fids.filter(fid => 
+        !foundFIDs.includes(fid)
+      );
+
+      return {
+        users: allUsers,
+        searchedFIDs: fids,
+        notFoundFIDs
+      };
+    }
+  } catch (error) {
+    console.error('Error searching for users by FIDs:', error);
+    throw new Error(
+      error instanceof Error 
+        ? `Failed to search users: ${error.message}`
+        : 'Failed to search users'
+    );
+  }
+}
+
+/**
+ * Search for Farcaster users by X (Twitter) usernames
+ * @param xUsernames - Array of X usernames to search for
+ * @returns Promise with search results
+ */
+export async function searchUsersByXUsernames(xUsernames: string[]): Promise<XUsernameSearchResult> {
+  try {
+    console.log('Searching for users with X usernames:', xUsernames);
+    
+    const allUsers: FarcasterUser[] = [];
+    const foundXUsernames: string[] = [];
+    const notFoundXUsernames: string[] = [];
+
+    // Search for each X username individually
+    for (const xUsername of xUsernames) {
+      try {
+        console.log(`Searching for X username: ${xUsername}`);
+        
+        // Direct API call - no SDK method available for this endpoint
+        const url = `https://api.neynar.com/v2/farcaster/user/by_x_username/${encodeURIComponent(xUsername)}`;
+        
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'accept': 'application/json',
+            'api_key': process.env.NEYNAR_API_KEY!
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`X username search response for ${xUsername}:`, data);
+
+          // API returns a single user object, not an array
+          if (data && data.fid) {
+            allUsers.push(data as FarcasterUser);
+            foundXUsernames.push(xUsername);
+          } else {
+            notFoundXUsernames.push(xUsername);
+          }
+        } else if (response.status === 404) {
+          // User not found
+          console.log(`X username ${xUsername} not found`);
+          notFoundXUsernames.push(xUsername);
+        } else {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+      } catch (error) {
+        console.error(`Error searching for X username ${xUsername}:`, error);
+        notFoundXUsernames.push(xUsername);
+      }
+    }
+
+    return {
+      users: allUsers,
+      searchedXUsernames: xUsernames,
+      notFoundXUsernames
+    };
+  } catch (error) {
+    console.error('Error searching for users by X usernames:', error);
     throw new Error(
       error instanceof Error 
         ? `Failed to search users: ${error.message}`

@@ -3,8 +3,6 @@
  * This file doesn't import any Node.js-specific libraries
  */
 
-
-
 /**
  * Validate if a string is a valid Ethereum address
  * @param address - The address to validate
@@ -34,6 +32,27 @@ export function isValidFarcasterUsername(username: string): boolean {
   // Farcaster usernames: alphanumeric, hyphens, underscores, dots, 1-15 characters
   // Can end with .eth for ENS names
   return /^[a-zA-Z0-9._-]{1,15}(\.eth)?$/.test(username);
+}
+
+/**
+ * Validate if a string is a valid Farcaster ID (FID)
+ * @param fid - The FID to validate
+ * @returns boolean indicating if the FID is valid
+ */
+export function isValidFID(fid: string): boolean {
+  // FIDs are positive integers
+  return /^\d+$/.test(fid) && parseInt(fid) > 0;
+}
+
+/**
+ * Validate if a string is a valid X (Twitter) username
+ * @param username - The X username to validate
+ * @returns boolean indicating if the username is valid
+ */
+export function isValidXUsername(username: string): boolean {
+  // X usernames: 1-15 characters, alphanumeric and underscores only
+  // Can start with underscore, letter, or number
+  return /^[a-zA-Z0-9_]{1,15}$/.test(username);
 }
 
 /**
@@ -95,13 +114,13 @@ export function validateUsername(username: string): {
 }
 
 /**
- * Validate if a string is either a valid wallet address or username
+ * Validate if a string is either a valid wallet address, username, FID, or X username
  * @param input - The input to validate
  * @returns object with validation result and input type
  */
 export function validateAddressOrUsername(input: string): { 
   isValid: boolean; 
-  type: 'ethereum' | 'solana' | 'farcaster' | null; 
+  type: 'ethereum' | 'solana' | 'farcaster' | 'fid' | 'x_username' | null; 
   error?: string 
 } {
   if (!input || input.trim().length === 0) {
@@ -116,7 +135,17 @@ export function validateAddressOrUsername(input: string): {
     return addressValidation;
   }
 
-  // Then try username validation
+  // Check for FID (numeric)
+  if (isValidFID(trimmedInput)) {
+    return { isValid: true, type: 'fid' };
+  }
+
+  // Check for X username
+  if (isValidXUsername(trimmedInput)) {
+    return { isValid: true, type: 'x_username' };
+  }
+
+  // Then try Farcaster username validation
   const usernameValidation = validateUsername(trimmedInput);
   if (usernameValidation.isValid) {
     return usernameValidation;
@@ -125,7 +154,7 @@ export function validateAddressOrUsername(input: string): {
   return { 
     isValid: false, 
     type: null, 
-    error: 'Invalid format. Must be a valid wallet address (Ethereum/Solana) or Farcaster username.' 
+    error: 'Invalid format. Must be a valid wallet address (Ethereum/Solana), Farcaster username, FID, or X username.' 
   };
 }
 

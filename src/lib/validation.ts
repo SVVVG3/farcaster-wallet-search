@@ -140,15 +140,15 @@ export function validateAddressOrUsername(input: string): {
     return { isValid: true, type: 'fid' };
   }
 
-  // Check Farcaster username first (since this app is primarily for Farcaster)
+  // Check X username first (more restrictive pattern - only alphanumeric + underscores)
+  if (isValidXUsername(trimmedInput)) {
+    return { isValid: true, type: 'x_username' };
+  }
+
+  // Then check Farcaster username (more permissive pattern - allows dots, hyphens, underscores)
   const usernameValidation = validateUsername(trimmedInput);
   if (usernameValidation.isValid) {
     return usernameValidation;
-  }
-
-  // Then check for X username (for inputs that don't match Farcaster pattern)
-  if (isValidXUsername(trimmedInput)) {
-    return { isValid: true, type: 'x_username' };
   }
 
   return { 

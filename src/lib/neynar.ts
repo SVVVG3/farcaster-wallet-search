@@ -266,13 +266,13 @@ export async function searchUsersByXUsernames(xUsernames: string[]): Promise<XUs
         console.log(`Searching for X username: ${xUsername}`);
         
         // Direct API call - no SDK method available for this endpoint
-        const url = `https://api.neynar.com/v2/farcaster/user/by_x_username/${encodeURIComponent(xUsername)}`;
+        const url = `https://api.neynar.com/v2/farcaster/user/by_x_username/?x_username=${encodeURIComponent(xUsername)}`;
         
         const response = await fetch(url, {
           method: 'GET',
           headers: {
             'accept': 'application/json',
-            'api_key': process.env.NEYNAR_API_KEY!
+            'x-api-key': process.env.NEYNAR_API_KEY!
           }
         });
 
@@ -280,9 +280,12 @@ export async function searchUsersByXUsernames(xUsernames: string[]): Promise<XUs
           const data = await response.json();
           console.log(`X username search response for ${xUsername}:`, data);
 
-          // API returns a single user object, not an array
-          if (data && data.fid) {
-            allUsers.push(data as FarcasterUser);
+          // API returns an object with users array: {"users": [...]}
+          if (data && data.users && Array.isArray(data.users) && data.users.length > 0) {
+            // Add all users who have verified this X username
+            data.users.forEach((user: FarcasterUser) => {
+              allUsers.push(user);
+            });
             foundXUsernames.push(xUsername);
           } else {
             notFoundXUsernames.push(xUsername);
@@ -334,18 +337,37 @@ export async function searchUsersByUsernames(usernames: string[]): Promise<Usern
         console.log(`Looking up user by username: ${username}`);
         
         // Use the Neynar SDK to lookup user by exact username
-        const response = await client.lookupUserByUsername({ username: username });
+        // Note: viewerFid is optional but may help with response format
+        const response = await client.lookupUserByUsername({ 
+          username: username,
+          viewerFid: 1 // Using FID 1 as a default viewer
+        });
         
-        console.log(`Username lookup response for ${username}:`, response);
+        console.log(`Username lookup response for ${username}:`, JSON.stringify(response, null, 2));
 
+        // Check if user was found in response
         if (response && response.user && response.user.fid) {
+          console.log(`Found user for ${username}:`, response.user.username, 'FID:', response.user.fid);
           allUsers.push(response.user as FarcasterUser);
           foundUsernames.push(username);
         } else {
+          console.log(`No user found for ${username}. Response structure:`, Object.keys(response || {}));
           notFoundUsernames.push(username);
         }
       } catch (error) {
         console.error(`Error looking up username ${username}:`, error);
+        
+        // Log more details about the error
+        if (error instanceof Error) {
+          console.error(`Error message: ${error.message}`);
+          console.error(`Error stack: ${error.stack}`);
+        }
+        
+        // Check if it's a 404 (user not found) vs other errors
+        if (error && typeof error === 'object' && 'status' in error) {
+          console.error(`HTTP Status: ${(error as { status: unknown }).status}`);
+        }
+        
         notFoundUsernames.push(username);
       }
     }

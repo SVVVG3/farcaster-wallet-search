@@ -33,14 +33,30 @@ interface TokenRowProps {
 }
 
 function TokenRow({ token, index }: TokenRowProps) {
-  const formatBalance = (balance: string, decimals: number = 18): string => {
+  const formatBalance = (balance: string): string => {
     try {
-      const balanceNum = parseFloat(balance) / Math.pow(10, decimals);
-      if (balanceNum < 0.0001) return '<0.0001';
-      if (balanceNum < 1) return balanceNum.toFixed(4);
-      if (balanceNum < 1000) return balanceNum.toFixed(2);
-      if (balanceNum < 1000000) return (balanceNum / 1000).toFixed(1) + 'K';
-      return (balanceNum / 1000000).toFixed(1) + 'M';
+      // The balance from our TokenBalance interface is already in decimal format
+      // from the Neynar API (in_token field), no need to divide by decimals
+      const balanceNum = parseFloat(balance);
+      if (balanceNum === 0) return '0';
+      
+      // For very small amounts, show more precision or scientific notation
+      if (balanceNum < 0.001) {
+        if (balanceNum < 0.00001) {
+          return balanceNum.toExponential(2); // e.g., 2.97e-5
+        }
+        return balanceNum.toFixed(6); // e.g., 0.000530
+      }
+      
+      // For small amounts, show reasonable decimals
+      if (balanceNum < 1) return balanceNum.toFixed(4); // e.g., 0.0999
+      
+      // For moderate amounts
+      if (balanceNum < 1000) return balanceNum.toFixed(2); // e.g., 722.29
+      
+      // For large amounts, use K/M notation
+      if (balanceNum < 1000000) return (balanceNum / 1000).toFixed(1) + 'K'; // e.g., 7.5K
+      return (balanceNum / 1000000).toFixed(1) + 'M'; // e.g., 2.9M
     } catch {
       return balance;
     }
@@ -69,11 +85,16 @@ function TokenRow({ token, index }: TokenRowProps) {
               alt={`${token.token_name} logo`}
               width={32}
               height={32}
-              className="rounded-full absolute inset-0"
+              className="rounded-full absolute inset-0 bg-white"
+              onLoad={() => {
+                console.log(`✅ Loaded logo for ${token.token_symbol}: ${token.logo_url}`);
+              }}
               onError={(e) => {
+                console.log(`❌ Failed to load logo for ${token.token_symbol}: ${token.logo_url}`);
                 const target = e.target as HTMLImageElement;
                 target.style.display = 'none';
               }}
+              unoptimized={true} // Skip Next.js optimization for external images
             />
           )}
         </div>

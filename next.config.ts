@@ -27,6 +27,25 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      // Token logo providers
+      {
+        protocol: 'https',
+        hostname: 'assets.coingecko.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'raw.githubusercontent.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cryptologos.cc',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };

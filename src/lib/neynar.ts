@@ -470,7 +470,7 @@ export async function fetchUserTokenBalances(fid: number): Promise<TokenBalanceR
           if (!tokenAddress || tokenAddress === 'native') {
             // Handle native tokens
             if (symbol === 'ETH') {
-              return 'https://cryptologos.cc/logos/ethereum-eth-logo.png';
+              return 'https://assets.coingecko.com/coins/images/279/small/ethereum.png';
             }
             return undefined;
           }
@@ -483,14 +483,17 @@ export async function fetchUserTokenBalances(fid: number): Promise<TokenBalanceR
           // 2. CoinGecko asset platform  
           // 3. TokenLists for common tokens
           
-          // For well-known tokens, use direct logo URLs
+          // For well-known tokens, use reliable logo URLs
           const knownTokenLogos: { [key: string]: string } = {
-            '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913': 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png', // USDC
-            '0x4200000000000000000000000000000000000006': 'https://cryptologos.cc/logos/ethereum-eth-logo.png', // WETH
-            '0x940181a94a35a4569e4529a3cdfb74e38fd98631': 'https://s2.coinmarketcap.com/static/img/coins/128x128/21061.png', // AERO
-            '0x4ed4e862860bed51a9570b96d89af5e1b0efefed': 'https://s2.coinmarketcap.com/static/img/coins/128x128/28296.png', // DEGEN
-            '0x0578d8a44db98b23bf096a382e016e29a5ce0ffe': 'https://dd.dexscreener.com/ds-data/tokens/base/0x0578d8a44db98b23bf096a382e016e29a5ce0ffe.png', // HIGHER
-            '0x8c9037d1ef5c6d1f6816278c7aaf5491d24cd527': 'https://s2.coinmarketcap.com/static/img/coins/128x128/29890.png', // MOXIE
+            // Major tokens with reliable logos
+            '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913': 'https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png', // USDC
+            '0x4200000000000000000000000000000000000006': 'https://assets.coingecko.com/coins/images/2518/small/weth.png', // WETH
+            '0x940181a94a35a4569e4529a3cdfb74e38fd98631': 'https://assets.coingecko.com/coins/images/31745/small/token.png', // AERO 
+            '0x4ed4e862860bed51a9570b96d89af5e1b0efefed': 'https://assets.coingecko.com/coins/images/34515/small/android-chrome-512x512.png', // DEGEN
+            '0x0578d8a44db98b23bf096a382e016e29a5ce0ffe': 'https://assets.coingecko.com/coins/images/36617/small/higher.jpg', // HIGHER
+            '0x8c9037d1ef5c6d1f6816278c7aaf5491d24cd527': 'https://assets.coingecko.com/coins/images/38013/small/Frame_20_%281%29.png', // MOXIE
+            '0xa0e430870c4604ccfc7b38ca7845b1ff653d0ff1': 'https://assets.coingecko.com/coins/images/2518/small/weth.png', // mwETH (use ETH logo)
+            '0x1111111111166b7fe7bd91427724b487980afc69': 'https://assets.coingecko.com/coins/images/31622/small/zora-logo-200x200.png', // ZORA
           };
           
           // Check if we have a known logo for this token
@@ -504,14 +507,20 @@ export async function fetchUserTokenBalances(fid: number): Promise<TokenBalanceR
         };
 
         // Map to our TokenBalance interface
+        const logoUrl = getTokenLogoUrl(token?.contract_address || '', token?.symbol || '');
         const mappedToken: TokenBalance = {
           token_address: token?.contract_address || 'native',
           token_name: token?.name || token?.symbol || 'Unknown',
           token_symbol: token?.symbol || 'UNKNOWN',
           balance: balance?.in_token?.toString() || '0',
           value_usd: balance?.in_usdc || 0,
-          logo_url: getTokenLogoUrl(token?.contract_address || '', token?.symbol || ''),
+          logo_url: logoUrl,
         };
+        
+        // Log logo URL for debugging
+        if (logoUrl) {
+          console.log(`🖼️ Token ${mappedToken.token_symbol} logo URL: ${logoUrl}`);
+        }
         
         allTokens.push(mappedToken);
       }
@@ -519,55 +528,65 @@ export async function fetchUserTokenBalances(fid: number): Promise<TokenBalanceR
 
     console.log(`Found ${allTokens.length} total tokens across all addresses for FID ${fid}`);
 
-    // Filter out likely scam/fake tokens with suspicious characteristics
+    // Filter out known scam/fake tokens using targeted approach
     const isLikelyScamToken = (token: TokenBalance): boolean => {
       const value = token.value_usd || 0;
       const balance = parseFloat(token.balance) || 0;
-      
-      // Filter tokens with suspiciously high values compared to balance
-      // If a token has extremely high USD value but low actual token count, it's likely fake
-      if (value > 1000000 && balance < 1000) { // $1M+ value but less than 1K tokens
-        console.log(`Filtering likely scam token: ${token.token_name} (${token.token_symbol}) - $${value.toLocaleString()} from ${balance} tokens`);
-        return true;
-      }
-      
-      // More aggressive filtering for overvalued tokens (lowered threshold)
-      const pricePerToken = balance > 0 ? value / balance : 0;
-      if (pricePerToken > 1000) { // Individual token worth more than $1K (much more reasonable)
-        console.log(`Filtering overvalued token: ${token.token_name} (${token.token_symbol}) - $${pricePerToken.toLocaleString()} per token`);
-        return true;
-      }
-      
-      // Filter tokens with suspicious high total values (likely inflated)
-      if (value > 100000) { // Any single token position worth more than $100K is suspicious
-        console.log(`Filtering high-value suspicious token: ${token.token_name} (${token.token_symbol}) - $${value.toLocaleString()} total value`);
-        return true;
-      }
-      
-      // Filter tokens with suspicious names (common scam patterns)
-      const suspiciousNames = [
-        'visit', 'swap', 'claim', 'airdrop', 'free', 'bonus',
-        'winner', 'reward', 'gift', 'promo', '.com', '.xyz', 'phylactery'
-      ];
       const nameToCheck = (token.token_name || '').toLowerCase();
       const symbolToCheck = (token.token_symbol || '').toLowerCase();
+      const contractAddress = (token.token_address || '').toLowerCase();
       
-      if (suspiciousNames.some(suspicious => 
-        nameToCheck.includes(suspicious) || symbolToCheck.includes(suspicious)
-      )) {
-        console.log(`Filtering suspicious named token: ${token.token_name} (${token.token_symbol})`);
+      // Known scam token contracts, names, and symbols to blacklist
+      const knownScamTokens = {
+        // Contract addresses of known scam tokens
+        contracts: [
+          '0xc44a4f600f434c887be43449c8084ea0a08517b9', // PHY - Phylactery
+          '0xe9d43de0898df63ba125384240699f7e4bae61d9', // DRINK - Jelly Drink
+          '0xad20b837d28eff66af55ef0962c6bdb7c7888cb8', // HBK - Hoe Benk
+          '0xe3c84123d49cbfdfdfc94b9254525832eaca11f7', // Fake AERO with "visit" in symbol
+        ],
+        // Token names and symbols
+        names: ['phylactery', 'jelly drink', 'hoe benk'],
+        symbols: ['phy', 'drink', 'hbk'],
+        // Suspicious keywords in names/symbols
+        suspiciousKeywords: [
+          'visit', 'swap', 'claim', 'airdrop', 'free', 'bonus',
+          'winner', 'reward', 'gift', 'promo', '.com', '.xyz', '.to'
+        ]
+      };
+      
+      // Check contract address
+      if (knownScamTokens.contracts.includes(contractAddress)) {
+        console.log(`Filtering known scam contract: ${token.token_name} (${token.token_symbol}) - ${contractAddress}`);
         return true;
       }
       
-      // Known scam token addresses/symbols to filter
-      const knownScamTokens = [
-        'PHY', 'PHYLACTERY', 'HBK', 'DRINK', 'JELLY DRINK'
-      ];
-      
-      if (knownScamTokens.some(scam => 
-        nameToCheck.includes(scam.toLowerCase()) || symbolToCheck.includes(scam.toLowerCase())
-      )) {
+      // Check exact name/symbol matches
+      if (knownScamTokens.names.some(scam => nameToCheck === scam) ||
+          knownScamTokens.symbols.some(scam => symbolToCheck === scam)) {
         console.log(`Filtering known scam token: ${token.token_name} (${token.token_symbol})`);
+        return true;
+      }
+      
+      // Check for suspicious keywords in names/symbols
+      if (knownScamTokens.suspiciousKeywords.some(keyword => 
+        nameToCheck.includes(keyword) || symbolToCheck.includes(keyword)
+      )) {
+        console.log(`Filtering suspicious keyword token: ${token.token_name} (${token.token_symbol})`);
+        return true;
+      }
+      
+      // Filter extremely suspicious scenarios only
+      // 1. Tokens with impossibly high total values from tiny holdings
+      if (value > 10000000 && balance < 100) { // $10M+ from less than 100 tokens
+        console.log(`Filtering impossibly valued token: ${token.token_name} (${token.token_symbol}) - $${value.toLocaleString()} from ${balance} tokens`);
+        return true;
+      }
+      
+      // 2. Tokens with per-token value over $1M (even BTC is ~$100K)
+      const pricePerToken = balance > 0 ? value / balance : 0;
+      if (pricePerToken > 1000000) {
+        console.log(`Filtering extremely overvalued token: ${token.token_name} (${token.token_symbol}) - $${pricePerToken.toLocaleString()} per token`);
         return true;
       }
       

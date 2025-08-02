@@ -54,52 +54,51 @@ function TokenRow({ token, index }: TokenRowProps) {
   };
 
   return (
-    <div className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
-      <div className="flex items-center space-x-3 flex-1 min-w-0">
+    <div className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors min-w-0">
+      <div className="flex items-center space-x-3 flex-1 min-w-0 overflow-hidden">
         {/* Token Icon */}
-        <div className="flex-shrink-0">
-          {token.logo_url ? (
+        <div className="flex-shrink-0 relative">
+          <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+            <span className="text-white text-xs font-bold">
+              {token.token_symbol.charAt(0)}
+            </span>
+          </div>
+          {token.logo_url && (
             <Image
               src={token.logo_url}
               alt={`${token.token_name} logo`}
               width={32}
               height={32}
-              className="rounded-full"
+              className="rounded-full absolute inset-0"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.style.display = 'none';
               }}
             />
-          ) : (
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
-              <span className="text-white text-xs font-bold">
-                {token.token_symbol.charAt(0)}
-              </span>
-            </div>
           )}
         </div>
 
         {/* Token Info */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center space-x-2">
-            <h4 className="font-semibold text-gray-900 dark:text-white text-sm truncate">
+        <div className="flex-1 min-w-0 overflow-hidden">
+          <div className="flex items-center space-x-2 min-w-0">
+            <h4 className="font-semibold text-gray-900 dark:text-white text-sm truncate flex-1 min-w-0">
               {token.token_name || token.token_symbol}
             </h4>
-            <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
+            <span className="text-xs text-gray-500 dark:text-gray-400 font-mono flex-shrink-0">
               #{index + 1}
             </span>
           </div>
-          <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-300">
-            <span className="font-mono">{token.token_symbol}</span>
-            <span>•</span>
-            <span>{formatBalance(token.balance)}</span>
+          <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-300 min-w-0">
+            <span className="font-mono truncate">{token.token_symbol}</span>
+            <span className="flex-shrink-0">•</span>
+            <span className="truncate">{formatBalance(token.balance)}</span>
           </div>
         </div>
       </div>
 
       {/* USD Value */}
-      <div className="text-right flex-shrink-0">
-        <div className="font-semibold text-gray-900 dark:text-white text-sm">
+      <div className="text-right flex-shrink-0 ml-3">
+        <div className="font-semibold text-gray-900 dark:text-white text-sm whitespace-nowrap">
           {formatUsdValue(token.value_usd || 0)}
         </div>
       </div>
@@ -193,13 +192,13 @@ export default function TokenBalances({ fid, username }: TokenBalancesProps) {
   const totalValue = balanceData.total_value_usd;
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 space-y-4">
+    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 space-y-4 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between min-w-0">
         <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
           Token Holdings
         </h4>
-        <div className="text-right">
+        <div className="text-right flex-shrink-0">
           <div className="text-sm font-semibold text-gray-900 dark:text-white">
             ${totalValue > 0 ? totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
           </div>
@@ -210,7 +209,7 @@ export default function TokenBalances({ fid, username }: TokenBalancesProps) {
       </div>
 
       {/* Token List */}
-      <div className="space-y-1">
+      <div className="space-y-1 overflow-hidden">
         {balanceData.tokens.map((token, index) => (
           <TokenRow
             key={`${token.token_address}-${index}`}
@@ -222,7 +221,7 @@ export default function TokenBalances({ fid, username }: TokenBalancesProps) {
 
       {/* Footer note */}
       <div className="text-xs text-gray-500 dark:text-gray-400 text-center pt-2 border-t border-gray-200 dark:border-gray-600">
-        Showing top {balanceData.tokens.length} holdings on Base network
+        Showing top {balanceData.tokens.length} legitimate holdings on Base network
       </div>
     </div>
   );

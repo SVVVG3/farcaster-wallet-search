@@ -465,6 +465,21 @@ export async function fetchUserTokenBalances(fid: number): Promise<TokenBalanceR
         const token = tokenBalanceData.token;
         const balance = tokenBalanceData.balance;
         
+        // Get token logo URL from token list or CDN
+        const getTokenLogoUrl = (tokenAddress: string, symbol: string): string | undefined => {
+          if (!tokenAddress || tokenAddress === 'native') {
+            // Handle native ETH
+            if (symbol === 'ETH') {
+              return 'https://cryptologos.cc/logos/ethereum-eth-logo.png';
+            }
+            return undefined;
+          }
+          
+          // Use token lists or CDN services for token logos
+          // TrustWallet assets is a popular choice
+          return `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/${tokenAddress}/logo.png`;
+        };
+
         // Map to our TokenBalance interface
         const mappedToken: TokenBalance = {
           token_address: token?.contract_address || 'native',
@@ -472,7 +487,7 @@ export async function fetchUserTokenBalances(fid: number): Promise<TokenBalanceR
           token_symbol: token?.symbol || 'UNKNOWN',
           balance: balance?.in_token?.toString() || '0',
           value_usd: balance?.in_usdc || 0,
-          // Note: logo_url not provided in current API response
+          logo_url: getTokenLogoUrl(token?.contract_address || '', token?.symbol || ''),
         };
         
         allTokens.push(mappedToken);
@@ -481,9 +496,51 @@ export async function fetchUserTokenBalances(fid: number): Promise<TokenBalanceR
 
     console.log(`Found ${allTokens.length} total tokens across all addresses for FID ${fid}`);
 
-    // Sort by USD value (descending) and take top 10
-    const sortedTokens = allTokens
+    // Filter out likely scam/fake tokens with suspicious characteristics
+    const isLikelyScamToken = (token: TokenBalance): boolean => {
+      const value = token.value_usd || 0;
+      const balance = parseFloat(token.balance) || 0;
+      
+      // Filter tokens with suspiciously high values compared to balance
+      // If a token has extremely high USD value but low actual token count, it's likely fake
+      if (value > 1000000 && balance < 1000) { // $1M+ value but less than 1K tokens
+        console.log(`Filtering likely scam token: ${token.token_name} (${token.token_symbol}) - $${value.toLocaleString()} from ${balance} tokens`);
+        return true;
+      }
+      
+      // Filter tokens with impossibly high individual token values
+      const pricePerToken = balance > 0 ? value / balance : 0;
+      if (pricePerToken > 100000) { // Individual token worth more than $100K
+        console.log(`Filtering overvalued token: ${token.token_name} (${token.token_symbol}) - $${pricePerToken.toLocaleString()} per token`);
+        return true;
+      }
+      
+      // Filter tokens with suspicious names (common scam patterns)
+      const suspiciousNames = [
+        'visit', 'swap', 'claim', 'airdrop', 'free', 'bonus',
+        'winner', 'reward', 'gift', 'promo', '.com', '.xyz'
+      ];
+      const nameToCheck = (token.token_name || '').toLowerCase();
+      const symbolToCheck = (token.token_symbol || '').toLowerCase();
+      
+      if (suspiciousNames.some(suspicious => 
+        nameToCheck.includes(suspicious) || symbolToCheck.includes(suspicious)
+      )) {
+        console.log(`Filtering suspicious named token: ${token.token_name} (${token.token_symbol})`);
+        return true;
+      }
+      
+      return false;
+    };
+
+    // Filter out scam tokens and sort by USD value (descending) and take top 10
+    const filteredTokens = allTokens
       .filter((token: TokenBalance) => token.value_usd && token.value_usd > 0) // Only tokens with USD value
+      .filter((token: TokenBalance) => !isLikelyScamToken(token)); // Remove scam tokens
+    
+    console.log(`After scam filtering: ${filteredTokens.length} legitimate tokens remaining for FID ${fid}`);
+    
+    const sortedTokens = filteredTokens
       .sort((a: TokenBalance, b: TokenBalance) => (b.value_usd || 0) - (a.value_usd || 0))
       .slice(0, 10); // Top 10 only
 

@@ -81,7 +81,7 @@ function TokenRow({ token, index }: TokenRowProps) {
         {/* Token Info */}
         <div className="flex-1 min-w-0 overflow-hidden">
           <div className="flex items-center space-x-2 min-w-0">
-            <h4 className="font-semibold text-gray-900 dark:text-white text-sm truncate flex-1 min-w-0">
+            <h4 className="font-semibold text-gray-900 dark:text-white text-sm truncate max-w-[120px] sm:max-w-[180px]">
               {token.token_name || token.token_symbol}
             </h4>
             <span className="text-xs text-gray-500 dark:text-gray-400 font-mono flex-shrink-0">
@@ -89,9 +89,9 @@ function TokenRow({ token, index }: TokenRowProps) {
             </span>
           </div>
           <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-300 min-w-0">
-            <span className="font-mono truncate">{token.token_symbol}</span>
+            <span className="font-mono truncate max-w-[80px] sm:max-w-[120px]">{token.token_symbol}</span>
             <span className="flex-shrink-0">•</span>
-            <span className="truncate">{formatBalance(token.balance)}</span>
+            <span className="truncate max-w-[60px] sm:max-w-[100px]">{formatBalance(token.balance)}</span>
           </div>
         </div>
       </div>
@@ -192,30 +192,31 @@ export default function TokenBalances({ fid, username }: TokenBalancesProps) {
   const totalValue = balanceData.total_value_usd;
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 space-y-4 overflow-hidden">
+    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 space-y-4 overflow-hidden w-full max-w-full">
       {/* Header */}
       <div className="flex items-center justify-between min-w-0">
-        <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <h4 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
           Token Holdings
         </h4>
-        <div className="text-right flex-shrink-0">
-          <div className="text-sm font-semibold text-gray-900 dark:text-white">
+        <div className="text-right flex-shrink-0 ml-2">
+          <div className="text-sm font-semibold text-gray-900 dark:text-white whitespace-nowrap">
             ${totalValue > 0 ? totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
           </div>
-          <div className="text-xs text-gray-500 dark:text-gray-400">
+          <div className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
             {balanceData.tokens.length} token{balanceData.tokens.length !== 1 ? 's' : ''}
           </div>
         </div>
       </div>
 
       {/* Token List */}
-      <div className="space-y-1 overflow-hidden">
+      <div className="space-y-1 overflow-hidden w-full">
         {balanceData.tokens.map((token, index) => (
-          <TokenRow
-            key={`${token.token_address}-${index}`}
-            token={token}
-            index={index}
-          />
+          <div key={`${token.token_address}-${index}`} className="w-full max-w-full overflow-hidden">
+            <TokenRow
+              token={token}
+              index={index}
+            />
+          </div>
         ))}
       </div>
 

@@ -220,11 +220,6 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
         </div>
       )}
 
-      {/* Token Holdings */}
-      <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
-        <TokenBalances fid={user.fid} username={user.username} />
-      </div>
-
       {/* Connected Accounts */}
       {user.verified_accounts && user.verified_accounts.length > 0 && (
         <div className="space-y-2 border-t border-gray-200 dark:border-gray-600 pt-4">
@@ -271,6 +266,11 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
           </div>
         </div>
       )}
+
+      {/* Token Holdings */}
+      <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
+        <TokenBalances fid={user.fid} username={user.username} />
+      </div>
 
       {/* Verified Addresses */}
       {(user.verified_addresses?.eth_addresses?.length > 0 || user.verified_addresses?.sol_addresses?.length > 0 || user.custody_address) && (

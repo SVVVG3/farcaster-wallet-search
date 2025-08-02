@@ -421,9 +421,65 @@ export interface TokenBalanceResult {
  * @returns Promise with token balance results
  */
 export async function fetchUserTokenBalances(fid: number): Promise<TokenBalanceResult> {
+    // Get token logo URL from multiple sources with fallbacks
+  const getTokenLogoUrl = async (tokenAddress: string, symbol: string): Promise<string | undefined> => {
+    if (!tokenAddress || tokenAddress === 'native') {
+      // Handle native tokens
+      if (symbol === 'ETH') {
+        return 'https://assets.coingecko.com/coins/images/279/small/ethereum.png';
+      }
+      return undefined;
+    }
+    
+    // Convert to lowercase for consistency (most services expect lowercase)
+    const lowerCaseAddress = tokenAddress.toLowerCase();
+    
+    // For well-known tokens, use reliable logo URLs
+    const knownTokenLogos: { [key: string]: string } = {
+      // Major tokens with reliable logos
+      '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913': 'https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png', // USDC
+      '0x4200000000000000000000000000000000000006': 'https://assets.coingecko.com/coins/images/2518/small/weth.png', // WETH
+      '0x940181a94a35a4569e4529a3cdfb74e38fd98631': 'https://assets.coingecko.com/coins/images/31745/small/token.png', // AERO 
+      '0x4ed4e862860bed51a9570b96d89af5e1b0efefed': 'https://assets.coingecko.com/coins/images/34515/small/android-chrome-512x512.png', // DEGEN
+      '0x0578d8a44db98b23bf096a382e016e29a5ce0ffe': 'https://assets.coingecko.com/coins/images/36617/small/higher.jpg', // HIGHER
+      '0x8c9037d1ef5c6d1f6816278c7aaf5491d24cd527': 'https://assets.coingecko.com/coins/images/38013/small/Frame_20_%281%29.png', // MOXIE
+      '0x1111111111166b7fe7bd91427724b487980afc69': 'https://assets.coingecko.com/coins/images/31622/small/zora-logo-200x200.png', // ZORA
+    };
+    
+    // Check if we have a known logo for this token
+    if (knownTokenLogos[lowerCaseAddress]) {
+      return knownTokenLogos[lowerCaseAddress];
+    }
+    
+    // Try DexScreener API for token logo
+    try {
+      const dexScreenerUrl = `https://api.dexscreener.com/latest/dex/tokens/base/${tokenAddress}`;
+      const response = await fetch(dexScreenerUrl);
+      
+      if (response.ok) {
+        const data = await response.json();
+        // DexScreener returns an array of pairs, we want the first one with info
+        if (data.pairs && data.pairs.length > 0) {
+          for (const pair of data.pairs) {
+            if (pair.info && pair.info.imageUrl) {
+              console.log(`🎯 Found DexScreener logo for ${symbol}: ${pair.info.imageUrl}`);
+              return pair.info.imageUrl;
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.log(`⚠️ DexScreener API failed for ${symbol}:`, error);
+    }
+    
+    // Fall back to TrustWallet with proper checksum case
+    const checksumAddress = tokenAddress; // Keep original case for now
+    return `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/${checksumAddress}/logo.png`;
+  };
+
   try {
     console.log(`Fetching token balances for FID: ${fid}`);
-    
+
     const response = await client.fetchUserBalance({
       fid: fid,
       networks: ['base'] // Currently only 'base' network is supported
@@ -464,69 +520,36 @@ export async function fetchUserTokenBalances(fid: number): Promise<TokenBalanceR
         };
         const token = tokenBalanceData.token;
         const balance = tokenBalanceData.balance;
-        
-        // Get token logo URL from multiple sources with fallbacks
-        const getTokenLogoUrl = (tokenAddress: string, symbol: string): string | undefined => {
-          if (!tokenAddress || tokenAddress === 'native') {
-            // Handle native tokens
-            if (symbol === 'ETH') {
-              return 'https://assets.coingecko.com/coins/images/279/small/ethereum.png';
-            }
-            return undefined;
-          }
-          
-          // Convert to lowercase for consistency (most services expect lowercase)
-          const lowerCaseAddress = tokenAddress.toLowerCase();
-          
-          // Try multiple logo services as fallbacks
-          // 1. TrustWallet (Base network)
-          // 2. CoinGecko asset platform  
-          // 3. TokenLists for common tokens
-          
-          // For well-known tokens, use reliable logo URLs
-          const knownTokenLogos: { [key: string]: string } = {
-            // Major tokens with reliable logos
-            '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913': 'https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png', // USDC
-            '0x4200000000000000000000000000000000000006': 'https://assets.coingecko.com/coins/images/2518/small/weth.png', // WETH
-            '0x940181a94a35a4569e4529a3cdfb74e38fd98631': 'https://assets.coingecko.com/coins/images/31745/small/token.png', // AERO 
-            '0x4ed4e862860bed51a9570b96d89af5e1b0efefed': 'https://assets.coingecko.com/coins/images/34515/small/android-chrome-512x512.png', // DEGEN
-            '0x0578d8a44db98b23bf096a382e016e29a5ce0ffe': 'https://assets.coingecko.com/coins/images/36617/small/higher.jpg', // HIGHER
-            '0x8c9037d1ef5c6d1f6816278c7aaf5491d24cd527': 'https://assets.coingecko.com/coins/images/38013/small/Frame_20_%281%29.png', // MOXIE
-            '0xa0e430870c4604ccfc7b38ca7845b1ff653d0ff1': 'https://assets.coingecko.com/coins/images/2518/small/weth.png', // mwETH (use ETH logo)
-            '0x1111111111166b7fe7bd91427724b487980afc69': 'https://assets.coingecko.com/coins/images/31622/small/zora-logo-200x200.png', // ZORA
-          };
-          
-          // Check if we have a known logo for this token
-          if (knownTokenLogos[lowerCaseAddress]) {
-            return knownTokenLogos[lowerCaseAddress];
-          }
-          
-          // Fall back to TrustWallet with proper checksum case
-          const checksumAddress = tokenAddress; // Keep original case for now
-          return `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/${checksumAddress}/logo.png`;
-        };
 
-        // Map to our TokenBalance interface
-        const logoUrl = getTokenLogoUrl(token?.contract_address || '', token?.symbol || '');
+        // Map to our TokenBalance interface (temporarily without logo)
         const mappedToken: TokenBalance = {
           token_address: token?.contract_address || 'native',
           token_name: token?.name || token?.symbol || 'Unknown',
           token_symbol: token?.symbol || 'UNKNOWN',
           balance: balance?.in_token?.toString() || '0',
           value_usd: balance?.in_usdc || 0,
-          logo_url: logoUrl,
+          logo_url: undefined, // Will be populated later
         };
-        
-        // Log logo URL for debugging
-        if (logoUrl) {
-          console.log(`🖼️ Token ${mappedToken.token_symbol} logo URL: ${logoUrl}`);
-        }
         
         allTokens.push(mappedToken);
       }
     }
 
     console.log(`Found ${allTokens.length} total tokens across all addresses for FID ${fid}`);
+
+    // Populate token logos (async operation)
+    console.log(`🖼️ Fetching logos for ${allTokens.length} tokens...`);
+    await Promise.all(allTokens.map(async (token) => {
+      try {
+        const logoUrl = await getTokenLogoUrl(token.token_address, token.token_symbol);
+        token.logo_url = logoUrl;
+        if (logoUrl) {
+          console.log(`✅ Logo found for ${token.token_symbol}: ${logoUrl}`);
+        }
+      } catch (error) {
+        console.log(`❌ Failed to get logo for ${token.token_symbol}:`, error);
+      }
+    }));
 
     // Filter out known scam/fake tokens using targeted approach
     const isLikelyScamToken = (token: TokenBalance): boolean => {
@@ -554,17 +577,45 @@ export async function fetchUserTokenBalances(fid: number): Promise<TokenBalanceR
           'winner', 'reward', 'gift', 'promo', '.com', '.xyz', '.to'
         ]
       };
+
+      // DeFi staking/wrapped tokens to filter out
+      const defiStakingTokens = {
+        contracts: [
+          '0xa0e430870c4604ccfc7b38ca7845b1ff653d0ff1', // mwETH - Moonwell Flagship ETH
+          '0xc1256ae5ff1cf2719d4937adb3bbccab2e00a2ca', // mwUSDC - Moonwell Flagship USDC
+        ],
+        symbols: ['mweth', 'mwusdc'],
+        nameKeywords: ['moonwell flagship', 'staked', 'wrapped', 'yield', 'vault']
+      };
       
-      // Check contract address
+      // Check scam token contract addresses
       if (knownScamTokens.contracts.includes(contractAddress)) {
         console.log(`Filtering known scam contract: ${token.token_name} (${token.token_symbol}) - ${contractAddress}`);
         return true;
       }
       
-      // Check exact name/symbol matches
+      // Check DeFi staking token contract addresses
+      if (defiStakingTokens.contracts.includes(contractAddress)) {
+        console.log(`Filtering DeFi staking token: ${token.token_name} (${token.token_symbol}) - ${contractAddress}`);
+        return true;
+      }
+      
+      // Check exact name/symbol matches for scam tokens
       if (knownScamTokens.names.some(scam => nameToCheck === scam) ||
           knownScamTokens.symbols.some(scam => symbolToCheck === scam)) {
         console.log(`Filtering known scam token: ${token.token_name} (${token.token_symbol})`);
+        return true;
+      }
+      
+      // Check DeFi staking token symbols
+      if (defiStakingTokens.symbols.some(symbol => symbolToCheck === symbol)) {
+        console.log(`Filtering DeFi staking token by symbol: ${token.token_name} (${token.token_symbol})`);
+        return true;
+      }
+      
+      // Check DeFi staking token name keywords
+      if (defiStakingTokens.nameKeywords.some(keyword => nameToCheck.includes(keyword))) {
+        console.log(`Filtering DeFi staking token by name keyword: ${token.token_name} (${token.token_symbol})`);
         return true;
       }
       

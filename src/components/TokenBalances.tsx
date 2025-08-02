@@ -2,7 +2,25 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { fetchUserTokenBalances, TokenBalance, TokenBalanceResult } from '@/lib/neynar';
+
+// Token balance interfaces (moved here to avoid importing server-side code)
+interface TokenBalance {
+  token_address: string;
+  token_name: string;
+  token_symbol: string; 
+  balance: string;
+  balance_formatted?: string;
+  price_usd?: number;
+  value_usd?: number;
+  logo_url?: string;
+}
+
+interface TokenBalanceResult {
+  fid: number;
+  tokens: TokenBalance[];
+  total_value_usd: number;
+  error?: string;
+}
 
 interface TokenBalancesProps {
   fid: number;
@@ -118,7 +136,14 @@ export default function TokenBalances({ fid, username }: TokenBalancesProps) {
         setError(null);
         
         console.log(`TokenBalances: Fetching balances for FID ${fid} (@${username})`);
-        const result = await fetchUserTokenBalances(fid);
+        
+        const response = await fetch(`/api/balance?fid=${fid}`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const result: TokenBalanceResult = await response.json();
         
         console.log(`TokenBalances: Received ${result.tokens.length} tokens for @${username}`);
         setBalanceData(result);

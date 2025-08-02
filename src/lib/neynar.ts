@@ -441,13 +441,48 @@ export async function fetchUserTokenBalances(fid: number): Promise<TokenBalanceR
     }
 
     const balanceData = response.user_balance;
-    // Handle potential SDK type mismatches - extract tokens safely
-    const tokens = (balanceData as { tokens?: unknown[] }).tokens || [];
+    
+    // Extract tokens from all verified addresses
+    const addressBalances = (balanceData as { address_balances?: unknown[] }).address_balances || [];
+    console.log(`Found ${addressBalances.length} verified addresses for FID ${fid}`);
+    
+    // Flatten all token balances across all addresses
+    const allTokens: TokenBalance[] = [];
+    
+    for (const addressBalance of addressBalances) {
+      const addressBalanceData = addressBalance as { 
+        token_balances?: unknown[]; 
+        verified_address?: { address?: string } 
+      };
+      const tokenBalances = addressBalanceData.token_balances || [];
+      console.log(`Address ${addressBalanceData.verified_address?.address}: ${tokenBalances.length} tokens`);
+      
+      for (const tokenBalance of tokenBalances) {
+        const tokenBalanceData = tokenBalance as { 
+          token?: { name?: string; symbol?: string; contract_address?: string };
+          balance?: { in_token?: number; in_usdc?: number }
+        };
+        const token = tokenBalanceData.token;
+        const balance = tokenBalanceData.balance;
+        
+        // Map to our TokenBalance interface
+        const mappedToken: TokenBalance = {
+          token_address: token?.contract_address || 'native',
+          token_name: token?.name || token?.symbol || 'Unknown',
+          token_symbol: token?.symbol || 'UNKNOWN',
+          balance: balance?.in_token?.toString() || '0',
+          value_usd: balance?.in_usdc || 0,
+          // Note: logo_url not provided in current API response
+        };
+        
+        allTokens.push(mappedToken);
+      }
+    }
 
-    console.log(`Found ${tokens.length} tokens for FID ${fid}`);
+    console.log(`Found ${allTokens.length} total tokens across all addresses for FID ${fid}`);
 
     // Sort by USD value (descending) and take top 10
-    const sortedTokens = (tokens as TokenBalance[])
+    const sortedTokens = allTokens
       .filter((token: TokenBalance) => token.value_usd && token.value_usd > 0) // Only tokens with USD value
       .sort((a: TokenBalance, b: TokenBalance) => (b.value_usd || 0) - (a.value_usd || 0))
       .slice(0, 10); // Top 10 only

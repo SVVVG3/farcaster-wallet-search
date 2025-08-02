@@ -387,4 +387,93 @@ export async function searchUsersByUsernames(usernames: string[]): Promise<Usern
   }
 }
 
+// Token Balance Interfaces
+export interface TokenBalance {
+  token_address: string;
+  token_name: string;
+  token_symbol: string; 
+  balance: string;
+  balance_formatted?: string;
+  price_usd?: number;
+  value_usd?: number;
+  logo_url?: string;
+}
+
+export interface UserBalanceResponse {
+  user_balance: {
+    fid: number;
+    tokens: TokenBalance[];
+    total_value_usd?: number;
+  };
+}
+
+export interface TokenBalanceResult {
+  fid: number;
+  tokens: TokenBalance[];
+  total_value_usd: number;
+  error?: string;
+}
+
+/**
+ * Fetch token balances for a user by their FID
+ * Returns top 10 tokens sorted by USD value (highest first)
+ * @param fid - Farcaster ID of the user
+ * @returns Promise with token balance results
+ */
+export async function fetchUserTokenBalances(fid: number): Promise<TokenBalanceResult> {
+  try {
+    console.log(`Fetching token balances for FID: ${fid}`);
+    
+    const response = await client.fetchUserBalance({
+      fid: fid,
+      networks: ['base'] // Currently only 'base' network is supported
+    });
+
+    console.log(`Token balance response for FID ${fid}:`, JSON.stringify(response, null, 2));
+
+    if (!response || !response.user_balance) {
+      console.log(`No balance data found for FID ${fid}`);
+      return {
+        fid,
+        tokens: [],
+        total_value_usd: 0
+      };
+    }
+
+    const balanceData = response.user_balance;
+    // Handle potential SDK type mismatches - extract tokens safely
+    const tokens = (balanceData as { tokens?: unknown[] }).tokens || [];
+
+    console.log(`Found ${tokens.length} tokens for FID ${fid}`);
+
+    // Sort by USD value (descending) and take top 10
+    const sortedTokens = (tokens as TokenBalance[])
+      .filter((token: TokenBalance) => token.value_usd && token.value_usd > 0) // Only tokens with USD value
+      .sort((a: TokenBalance, b: TokenBalance) => (b.value_usd || 0) - (a.value_usd || 0))
+      .slice(0, 10); // Top 10 only
+
+    // Calculate total USD value
+    const totalValueUsd = sortedTokens.reduce((sum: number, token: TokenBalance) => sum + (token.value_usd || 0), 0);
+
+    console.log(`Returning ${sortedTokens.length} top tokens for FID ${fid}, total value: $${totalValueUsd.toFixed(2)}`);
+
+    return {
+      fid,
+      tokens: sortedTokens,
+      total_value_usd: totalValueUsd
+    };
+
+  } catch (error) {
+    console.error(`Error fetching token balances for FID ${fid}:`, error);
+    
+    // Return empty result with error for graceful degradation
+    return {
+      fid,
+      tokens: [],
+      total_value_usd: 0,
+      error: error instanceof Error ? error.message : 'Failed to fetch token balances'
+    };
+  }
+}
+
  

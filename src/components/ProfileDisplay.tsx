@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { sdk } from '@farcaster/miniapp-sdk';
 import { FarcasterUser } from '@/lib/neynar';
 import { getExplorerUrl } from '@/lib/validation';
+import TokenBalances from './TokenBalances';
 
 interface ProfileDisplayProps {
   users: FarcasterUser[];
@@ -218,6 +219,11 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
           </p>
         </div>
       )}
+
+      {/* Token Holdings */}
+      <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
+        <TokenBalances fid={user.fid} username={user.username} />
+      </div>
 
       {/* Connected Accounts */}
       {user.verified_accounts && user.verified_accounts.length > 0 && (

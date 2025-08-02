@@ -453,14 +453,14 @@ export async function fetchUserTokenBalances(fid: number): Promise<TokenBalanceR
     
     // Try DexScreener API for token logo
     try {
-      const dexScreenerUrl = `https://api.dexscreener.com/latest/dex/tokens/base/${tokenAddress}`;
+      const dexScreenerUrl = `https://api.dexscreener.com/tokens/v1/base/${tokenAddress}`;
       const response = await fetch(dexScreenerUrl);
       
       if (response.ok) {
         const data = await response.json();
         // DexScreener returns an array of pairs, we want the first one with info
-        if (data.pairs && data.pairs.length > 0) {
-          for (const pair of data.pairs) {
+        if (Array.isArray(data) && data.length > 0) {
+          for (const pair of data) {
             if (pair.info && pair.info.imageUrl) {
               console.log(`🎯 Found DexScreener logo for ${symbol}: ${pair.info.imageUrl}`);
               return pair.info.imageUrl;

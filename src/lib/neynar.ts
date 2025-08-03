@@ -537,9 +537,39 @@ export async function fetchUserTokenBalances(fid: number): Promise<TokenBalanceR
 
     console.log(`Found ${allTokens.length} total tokens across all addresses for FID ${fid}`);
 
+    // Aggregate tokens by contract address (combine same tokens from different wallets)
+    const tokenGroups = new Map<string, TokenBalance>();
+
+    for (const token of allTokens) {
+      // Use contract address as key (lowercase for consistency)
+      const key = token.token_address.toLowerCase();
+      
+      if (tokenGroups.has(key)) {
+        // Aggregate with existing token
+        const existing = tokenGroups.get(key)!;
+        const existingBalance = parseFloat(existing.balance) || 0;
+        const newTokenBalance = parseFloat(token.balance) || 0;
+        const combinedBalance = existingBalance + newTokenBalance;
+        const combinedValue = (existing.value_usd || 0) + (token.value_usd || 0);
+        
+        // Update the aggregated token
+        existing.balance = combinedBalance.toString();
+        existing.value_usd = combinedValue;
+        
+        console.log(`📊 Aggregated ${existing.token_symbol}: ${existingBalance} + ${newTokenBalance} = ${combinedBalance} (${existing.token_name})`);
+      } else {
+        // First occurrence of this token
+        tokenGroups.set(key, { ...token });
+      }
+    }
+
+    // Convert aggregated tokens back to array
+    const aggregatedTokens = Array.from(tokenGroups.values());
+    console.log(`After aggregation: ${aggregatedTokens.length} unique tokens for FID ${fid} (reduced from ${allTokens.length} individual entries)`);
+
     // Populate token logos (async operation)
-    console.log(`🖼️ Fetching logos for ${allTokens.length} tokens...`);
-    await Promise.all(allTokens.map(async (token) => {
+    console.log(`🖼️ Fetching logos for ${aggregatedTokens.length} tokens...`);
+    await Promise.all(aggregatedTokens.map(async (token) => {
       try {
         const logoUrl = await getTokenLogoUrl(token.token_address, token.token_symbol);
         token.logo_url = logoUrl;
@@ -645,7 +675,7 @@ export async function fetchUserTokenBalances(fid: number): Promise<TokenBalanceR
     };
 
     // Filter out scam tokens and sort by USD value (descending) and take top 10
-    const filteredTokens = allTokens
+    const filteredTokens = aggregatedTokens
       .filter((token: TokenBalance) => token.value_usd && token.value_usd > 0) // Only tokens with USD value
       .filter((token: TokenBalance) => !isLikelyScamToken(token)); // Remove scam tokens
     

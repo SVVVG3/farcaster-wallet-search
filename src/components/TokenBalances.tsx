@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { sdk } from '@farcaster/miniapp-sdk';
+import { getExplorerUrl } from '@/lib/validation';
 
 // Token balance interfaces (moved here to avoid importing server-side code)
 interface TokenBalance {
@@ -31,6 +33,76 @@ interface TokenRowProps {
   token: TokenBalance;
   index: number;
 }
+
+// Haptic feedback functions (similar to ProfileDisplay)
+const isInMiniApp = async () => {
+  try {
+    if (!sdk || !sdk.context) return false;
+    const context = await sdk.context;
+    return context && context.client && typeof context.client.clientFid === 'number';
+  } catch {
+    return false;
+  }
+};
+
+const triggerHaptic = async () => {
+  try {
+    if ((await isInMiniApp()) && sdk && sdk.haptics) {
+      console.log('📳 Checking haptic capabilities for token click');
+      
+      // Check if haptics are supported
+      if (sdk.getCapabilities) {
+        const capabilities = await sdk.getCapabilities();
+        if (capabilities.includes('haptics.impactOccurred')) {
+          console.log('✅ Haptics supported, triggering feedback for token');
+          await sdk.haptics.impactOccurred('medium');
+        } else {
+          console.log('❌ Haptics not supported on this device');
+        }
+      } else {
+        // Fallback for older SDK versions
+        console.log('📳 Using fallback haptic method for token');
+        await sdk.haptics.impactOccurred('medium');
+      }
+    } else {
+      console.log('❌ Not in mini app or haptics not available for token');
+    }
+  } catch (error) {
+    console.error('❌ Haptic feedback failed for token:', error);
+  }
+};
+
+const handleExternalLink = async (url: string) => {
+  console.log('🔗 Opening external token link:', url);
+  await triggerHaptic();
+  
+  // Small delay to allow haptic feedback to be felt before navigation
+  await new Promise(resolve => setTimeout(resolve, 50));
+  
+  // Only use SDK if we're in mini app environment
+  if (await isInMiniApp()) {
+    try {
+      if (sdk && sdk.actions && sdk.actions.openUrl) {
+        console.log('✅ Using SDK to open token URL');
+        await sdk.actions.openUrl(url);
+        return;
+      }
+    } catch (error) {
+      console.error('❌ Failed to open external token URL with SDK:', error);
+    }
+  }
+  
+  // Fallback to window.open for desktop browsers  
+  console.log('🌐 Using window.open fallback for token');
+  window.open(url, '_blank', 'noopener,noreferrer');
+};
+
+const openTokenExplorer = (tokenAddress: string) => {
+  const { url } = getExplorerUrl(tokenAddress);
+  if (url) {
+    handleExternalLink(url);
+  }
+};
 
 function TokenRow({ token, index }: TokenRowProps) {
   const formatBalance = (balance: string): string => {
@@ -70,7 +142,11 @@ function TokenRow({ token, index }: TokenRowProps) {
   };
 
   return (
-    <div className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors min-w-0">
+    <button
+      onClick={() => openTokenExplorer(token.token_address)}
+      className="w-full flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors min-w-0 cursor-pointer hover:shadow-sm"
+      title={`View ${token.token_name} contract on BaseScan`}
+    >
       <div className="flex items-center space-x-3 flex-1 min-w-0 overflow-hidden">
         {/* Token Icon */}
         <div className="flex-shrink-0 relative">
@@ -123,7 +199,7 @@ function TokenRow({ token, index }: TokenRowProps) {
           {formatUsdValue(token.value_usd || 0)}
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 

@@ -599,8 +599,8 @@ export async function fetchUserTokenBalances(fid: number): Promise<TokenBalanceR
           '0xe3c84123d49cbfdfdfc94b9254525832eaca11f7', // Fake AERO with "visit" in symbol
         ],
         // Token names and symbols
-        names: ['phylactery', 'jelly drink', 'hoe benk'],
-        symbols: ['phy', 'drink', 'hbk'],
+        names: ['phylactery', 'jelly drink', 'hoe benk', 'cappa juice'],
+        symbols: ['phy', 'drink', 'hbk', 'juice'],
         // Suspicious keywords in names/symbols
         suspiciousKeywords: [
           'visit', 'swap', 'claim', 'airdrop', 'free', 'bonus',

@@ -414,13 +414,44 @@ export interface TokenBalanceResult {
   error?: string;
 }
 
+// Function to fetch token balances for specific addresses using Base network APIs
+async function fetchTokenBalancesForAddresses(addresses: string[]): Promise<TokenBalance[]> {
+  const allTokens: TokenBalance[] = [];
+  
+  for (const address of addresses) {
+    console.log(`Fetching token balances for Bankr address: ${address}`);
+    
+    try {
+      // For now, we'll use a simple approach - in a production app you might want to use
+      // services like Moralis, Alchemy, or other token balance APIs
+      // This is a placeholder that returns empty results for Bankr addresses
+      console.log(`⚠️ Token balance fetching for individual addresses (${address}) not yet implemented`);
+      console.log(`📝 This would require integration with services like Moralis or Alchemy`);
+      
+      // TODO: Implement token balance fetching for individual addresses
+      // Example services that could be used:
+      // - Moralis API
+      // - Alchemy API  
+      // - Base network RPC calls
+      // - DexScreener API (limited)
+      
+    } catch (error) {
+      console.error(`Error fetching token balances for address ${address}:`, error);
+    }
+  }
+  
+  return allTokens;
+}
+
 /**
  * Fetch token balances for a user by their FID
  * Returns top 10 tokens sorted by USD value (highest first)
+ * Includes balances from both verified addresses (via Neynar) and Bankr wallets
  * @param fid - Farcaster ID of the user
+ * @param bankrAddresses - Optional array of Bankr wallet addresses to include
  * @returns Promise with token balance results
  */
-export async function fetchUserTokenBalances(fid: number): Promise<TokenBalanceResult> {
+export async function fetchUserTokenBalances(fid: number, bankrAddresses: string[] = []): Promise<TokenBalanceResult> {
     // Get token logo URL from multiple sources with fallbacks
   const getTokenLogoUrl = async (tokenAddress: string, symbol: string): Promise<string | undefined> => {
     if (!tokenAddress || tokenAddress === 'native') {
@@ -536,6 +567,19 @@ export async function fetchUserTokenBalances(fid: number): Promise<TokenBalanceR
     }
 
     console.log(`Found ${allTokens.length} total tokens across all addresses for FID ${fid}`);
+
+    // Fetch token balances for Bankr wallet addresses (if any)
+    if (bankrAddresses.length > 0) {
+      console.log(`Fetching token balances for ${bankrAddresses.length} Bankr wallet addresses`);
+      const bankrTokens = await fetchTokenBalancesForAddresses(bankrAddresses);
+      console.log(`Found ${bankrTokens.length} tokens from Bankr wallets`);
+      
+      // Add Bankr tokens to the combined list
+      allTokens.push(...bankrTokens);
+      console.log(`Combined total: ${allTokens.length} tokens (${allTokens.length - bankrTokens.length} from Neynar + ${bankrTokens.length} from Bankr)`);
+    } else {
+      console.log(`No Bankr wallet addresses provided for FID ${fid}`);
+    }
 
     // Aggregate tokens by contract address (combine same tokens from different wallets)
     const tokenGroups = new Map<string, TokenBalance>();

@@ -27,6 +27,7 @@ interface TokenBalanceResult {
 interface TokenBalancesProps {
   fid: number;
   username: string;
+  bankrAddresses?: string[];
 }
 
 interface TokenRowProps {
@@ -220,7 +221,7 @@ function LoadingSkeleton() {
   );
 }
 
-export default function TokenBalances({ fid, username }: TokenBalancesProps) {
+export default function TokenBalances({ fid, username, bankrAddresses = [] }: TokenBalancesProps) {
   const [balanceData, setBalanceData] = useState<TokenBalanceResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -233,7 +234,14 @@ export default function TokenBalances({ fid, username }: TokenBalancesProps) {
         
         console.log(`TokenBalances: Fetching balances for FID ${fid} (@${username})`);
         
-        const response = await fetch(`/api/balance?fid=${fid}`);
+        // Build query parameters
+        const params = new URLSearchParams({ fid: fid.toString() });
+        if (bankrAddresses.length > 0) {
+          params.set('bankrAddresses', bankrAddresses.join(','));
+          console.log(`TokenBalances: Including ${bankrAddresses.length} Bankr addresses: ${bankrAddresses.join(', ')}`);
+        }
+        
+        const response = await fetch(`/api/balance?${params.toString()}`);
         
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -257,7 +265,7 @@ export default function TokenBalances({ fid, username }: TokenBalancesProps) {
     };
 
     fetchBalances();
-  }, [fid, username]);
+  }, [fid, username, bankrAddresses]);
 
   // Don't render anything if loading and no data yet
   if (loading && !balanceData) {

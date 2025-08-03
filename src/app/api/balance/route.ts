@@ -5,6 +5,7 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const fidParam = searchParams.get('fid');
+    const bankrAddressesParam = searchParams.get('bankrAddresses');
 
     if (!fidParam) {
       return NextResponse.json(
@@ -21,9 +22,17 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Parse Bankr addresses if provided (comma-separated)
+    const bankrAddresses: string[] = bankrAddressesParam 
+      ? bankrAddressesParam.split(',').map(addr => addr.trim()).filter(addr => addr.length > 0)
+      : [];
+
     console.log(`Balance API: Fetching token balances for FID ${fid}`);
+    if (bankrAddresses.length > 0) {
+      console.log(`Balance API: Including ${bankrAddresses.length} Bankr addresses: ${bankrAddresses.join(', ')}`);
+    }
     
-    const balanceResult = await fetchUserTokenBalances(fid);
+    const balanceResult = await fetchUserTokenBalances(fid, bankrAddresses);
     
     console.log(`Balance API: Returning ${balanceResult.tokens.length} tokens for FID ${fid}`);
     

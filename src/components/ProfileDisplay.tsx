@@ -269,7 +269,16 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
 
       {/* Token Holdings */}
       <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
-        <TokenBalances fid={user.fid} username={user.username} />
+        <TokenBalances 
+          fid={user.fid} 
+          username={user.username}
+          bankrAddresses={[
+            ...(user.bankrData?.farcaster?.evmAddress ? [user.bankrData.farcaster.evmAddress] : []),
+            ...(user.bankrData?.farcaster?.solanaAddress ? [user.bankrData.farcaster.solanaAddress] : []),
+            ...(user.bankrData?.twitter?.evmAddress ? [user.bankrData.twitter.evmAddress] : []),
+            ...(user.bankrData?.twitter?.solanaAddress ? [user.bankrData.twitter.solanaAddress] : [])
+          ]}
+        />
       </div>
 
       {/* Verified Addresses */}

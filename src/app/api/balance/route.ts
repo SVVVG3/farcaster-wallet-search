@@ -78,10 +78,16 @@ export async function GET(request: NextRequest) {
       })
     );
     
+    // Add imageDataUri: null to remaining tokens for consistency
+    const remainingTokens = balanceResult.tokens.slice(10).map(token => ({
+      ...token,
+      imageDataUri: null
+    }));
+
     // Replace the tokens array with the enhanced version
     const enhancedResult = {
       ...balanceResult,
-      tokens: tokensWithImages.concat(balanceResult.tokens.slice(10)) // Keep remaining tokens without images
+      tokens: tokensWithImages.concat(remainingTokens)
     };
     
     console.log(`Balance API: Returning ${enhancedResult.tokens.length} tokens for FID ${fid}, ${tokensWithImages.filter(t => t.imageDataUri).length} with images`);

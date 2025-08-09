@@ -116,8 +116,10 @@ export async function GET(req: NextRequest) {
       {
         width: WIDTH,
         height: HEIGHT,
+        emoji: 'twemoji',
+        status: 200,
         headers: {
-          // Cache dynamic images as recommended by docs to avoid blank previews
+          'Content-Type': 'image/png',
           'Cache-Control': 'public, immutable, no-transform, max-age=300',
         },
       }
@@ -143,7 +145,9 @@ export async function GET(req: NextRequest) {
       {
         width: WIDTH,
         height: HEIGHT,
-        headers: { 'Cache-Control': 'public, no-transform, max-age=60' },
+        emoji: 'twemoji',
+        status: 200,
+        headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, no-transform, max-age=60' },
       }
     );
   }

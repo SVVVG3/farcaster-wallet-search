@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { ImageResponse } from 'next/og';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {
   try {
@@ -78,65 +78,35 @@ export async function GET(req: NextRequest) {
       return `$${(v / 1_000_000).toFixed(1)}M`;
     };
     
+    // If we got images, try to use one as background or create a simple text representation
+    const hasImages = tokensWithImages.some(t => t.imageDataUri);
+    
+    // Create text representation
+    const tokenText = tokensWithImages
+      .map((token, i) => `${i + 1}. ${token.token_symbol} ${formatUsd(token.value_usd)}`)
+      .join('\n');
+    
+    const content = `@${username}\nPortfolio: ${formatUsd(total_value_usd)}\n\n${tokenText}\n\nSearch by ETH/SOL wallet address or\nFarcaster/X username on Wallet Search 🔎`;
+
     return new ImageResponse(
       (
         <div
           style={{
+            fontSize: 18,
             color: 'white',
             background: '#0B1020',
             width: '100%',
             height: '100%',
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: 40,
+            padding: 50,
+            textAlign: 'center',
+            lineHeight: 1.6,
+            whiteSpace: 'pre-line',
           }}
         >
-          <div style={{ fontSize: 28, fontWeight: 'bold', marginBottom: 10 }}>
-            @{username}
-          </div>
-          <div style={{ fontSize: 20, marginBottom: 30, opacity: 0.9 }}>
-            Portfolio: {formatUsd(total_value_usd)}
-          </div>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            {tokensWithImages.map((token, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
-                {token.imageDataUri ? (
-                  <img 
-                    src={token.imageDataUri} 
-                    width={32} 
-                    height={32} 
-                    style={{ borderRadius: 16, marginRight: 12 }}
-                    alt=""
-                  />
-                ) : (
-                  <div style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 16,
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginRight: 12,
-                    fontSize: 14,
-                    fontWeight: 'bold'
-                  }}>
-                    {(token.token_symbol || 'T')[0]}
-                  </div>
-                )}
-                <div style={{ fontSize: 18, minWidth: 200 }}>
-                  {i + 1}. {token.token_symbol} {formatUsd(token.value_usd)}
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          <div style={{ fontSize: 14, opacity: 0.7, marginTop: 30, textAlign: 'center', lineHeight: 1.4 }}>
-            Search by ETH/SOL wallet address or Farcaster/X username on Wallet Search 🔎
-          </div>
+          {content}
         </div>
       ),
       {

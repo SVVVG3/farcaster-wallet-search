@@ -67,83 +67,49 @@ export async function GET(req: NextRequest) {
       tokens = [];
     }
 
-    // Simple two-column layout with token numbers 1–10
-    const left = (tokens || []).slice(0, 5);
-    const right = (tokens || []).slice(5, 10);
+    // Prepare simple rows for satori-safe rendering
+    const rows = (tokens || []).slice(0, 10).map((t, idx) => `${idx + 1}. ${t.token_symbol || t.token_name || 'TOKEN'}  ${formatUsd(t.value_usd)}`);
 
     return new ImageResponse(
       (
-        // Container
+        // Container (keep styles minimal for satori compatibility)
         <div style={{
           width: WIDTH,
           height: HEIGHT,
           display: 'flex',
           flexDirection: 'column',
-          background: 'linear-gradient(180deg, #0B1020 0%, #101524 100%)',
+          background: '#0B1020',
           color: '#E6E8F0',
-          padding: 48,
-          fontFamily: 'Inter, ui-sans-serif, system-ui',
+          padding: 40,
         }}>
           {/* Header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
               <div style={{ fontSize: 36, fontWeight: 800 }}>Wallet Search</div>
-              <div style={{ fontSize: 22, opacity: 0.9 }}>
-                Top 10 Token Holdings{username ? ` — @${username}` : ''}
-              </div>
+              <div style={{ fontSize: 22, opacity: 0.9 }}>Top 10 Token Holdings{username ? ` — @${username}` : ''}</div>
             </div>
-            <div style={{
-              fontSize: 20,
-              padding: '8px 14px',
-              borderRadius: 10,
-              background: '#1F6FEB',
-              color: 'white',
-              fontWeight: 700,
-            }}>
-              Total {formatUsd(total_value_usd)}
+            <div style={{ display: 'flex' }}>
+              <div style={{ fontSize: 20, padding: '8px 14px', borderRadius: 10, background: '#1F6FEB', color: 'white', fontWeight: 700 }}>
+                Total {formatUsd(total_value_usd)}
+              </div>
             </div>
           </div>
 
-          {/* List - avoid CSS grid (satori limitation) */}
-          <div style={{ marginTop: 28, display: 'flex', gap: 24, flex: 1 }}>
-            {[left, right].map((col, ci) => (
-              <div key={ci} style={{ display: 'flex', flexDirection: 'column' }}>
-                {col.map((t, i) => (
-                  <div key={`${t.token_address}-${i}`} style={{ display: 'flex', alignItems: 'center', marginBottom: 12, padding: '12px 14px', background: 'rgba(255,255,255,0.04)', borderRadius: 12 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: 999, background: '#6E8BFA', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <div style={{ color: 'white', fontWeight: 800 }}>
-                        {t.token_symbol?.slice(0, 1) || '?'}
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', marginLeft: 10, flex: 1 }}>
-                      <div style={{
-                        fontSize: 16,
-                        fontWeight: 700,
-                        maxWidth: 320,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}>
-                        {t.token_name || t.token_symbol}
-                      </div>
-                      <div style={{ fontSize: 14, opacity: 0.7, marginLeft: 8 }}>{t.token_symbol}</div>
-                    </div>
-                    <div style={{ fontSize: 14, color: '#A8FFCF', fontWeight: 700, marginRight: 10 }}>
-                      {formatUsd(t.value_usd)}
-                    </div>
-                    <div style={{ width: 28, height: 28, borderRadius: 6, background: 'rgba(255,255,255,0.08)', color: '#E6E8F0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800 }}>
-                      {ci === 0 ? i + 1 : i + 6}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ))}
+          {/* Simple list (satori-safe) */}
+          <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', flex: 1 }}>
+            {rows.length > 0 ? (
+              rows.map((line, i) => (
+                <div key={i} style={{ fontSize: 16, marginBottom: 8 }}>{line}</div>
+              ))
+            ) : (
+              <div style={{ fontSize: 18, opacity: 0.8 }}>No tokens found</div>
+            )}
           </div>
 
           {/* Footer */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', opacity: 0.8, fontSize: 16 }}>
-            <div>walletsearch.vercel.app</div>
-            <div>Search Wallets 🔎</div>
+          <div style={{ display: 'flex' }}>
+            <div style={{ flex: 1, opacity: 0.8, fontSize: 16 }}>walletsearch.vercel.app</div>
+            <div style={{ opacity: 0.8, fontSize: 16 }}>Search Wallets 🔎</div>
           </div>
         </div>
       ),

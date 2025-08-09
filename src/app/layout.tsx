@@ -66,8 +66,7 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, shrink-to-fit=no, viewport-fit=cover" />
         <meta name="theme-color" content="#4F46E5" />
-        {/* Keep global miniapp meta for homepage and generic shares */}
-        <meta name="fc:miniapp" content='{"version":"1","imageUrl":"https://walletsearch.vercel.app/WalletSearchEmbed.png","button":{"title":"🔍 Search Wallets","action":{"type":"launch_miniapp","name":"Wallet Search","url":"https://walletsearch.vercel.app","splashImageUrl":"https://walletsearch.vercel.app/WalletSearchIcon.png","splashBackgroundColor":"#000000"}}}' />
+        {/* Per-page routes (e.g., /share) will emit fc:miniapp meta. Keep layout clean to avoid duplicate tags. */}
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

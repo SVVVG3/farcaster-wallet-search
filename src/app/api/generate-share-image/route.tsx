@@ -60,12 +60,10 @@ export async function GET(req: NextRequest) {
 
     // Pre-fetch token logos for top 10 tokens
     const topTokens = tokens.slice(0, 10);
-    console.log(`Processing ${topTokens.length} tokens:`, topTokens.map(t => ({ symbol: t.token_symbol, logo_url: t.logo_url })));
     
     const tokensWithImages = await Promise.all(
-      topTokens.map(async (token, index) => {
+      topTokens.map(async (token) => {
         const logoImage = token.logo_url ? await loadImageWithTimeout(token.logo_url) : null;
-        console.log(`Token ${index + 1} (${token.token_symbol}): logo loaded = ${!!logoImage}`);
         return { ...token, logoImage };
       })
     );
@@ -148,19 +146,15 @@ export async function GET(req: NextRequest) {
         ctx.fillText((token.token_symbol || 'T')[0], x + LOGO_SIZE/2, y + LOGO_SIZE/2 + 6);
       }
 
-      // Draw token info text - using simple ASCII for now
+      // Draw token info text
       ctx.fillStyle = '#FFFFFF';
       ctx.font = '18px Arial';
       ctx.textAlign = 'left';
-      const tokenName = token.token_symbol || 'TOKEN';
-      const simpleTokenName = tokenName.replace(/[^\x00-\x7F]/g, ""); // Remove non-ASCII
-      ctx.fillText(`${i + 1}. ${simpleTokenName}`, x + LOGO_SIZE + 15, y + 20);
+      ctx.fillText(`${i + 1}. ${token.token_symbol || 'TOKEN'}`, x + LOGO_SIZE + 15, y + 20);
       
       ctx.fillStyle = '#E6E8F0';
       ctx.font = '16px Arial';
-      const usdValue = formatUsd(token.value_usd);
-      const simpleUsdValue = usdValue.replace(/[^\x00-\x7F]/g, ""); // Remove non-ASCII  
-      ctx.fillText(simpleUsdValue, x + LOGO_SIZE + 15, y + 40);
+      ctx.fillText(formatUsd(token.value_usd), x + LOGO_SIZE + 15, y + 40);
     }
 
     // Footer

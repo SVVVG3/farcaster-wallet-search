@@ -52,42 +52,34 @@ export async function GET(req: NextRequest) {
       return `$${(v / 1_000_000).toFixed(1)}M`;
     };
     
-    // Create a simple token list string to avoid complex JSX
-    const topTokens = tokens.slice(0, 5);
-    const tokenListText = topTokens.length > 0 
+    // Create a comprehensive single line with all info
+    const topTokens = tokens.slice(0, 3); // Show top 3 to fit in one line
+    const tokenList = topTokens.length > 0 
       ? topTokens.map((token, i) => 
           `${i + 1}. ${token.token_symbol || token.token_name || 'TOKEN'} ${formatUsd(token.value_usd)}`
-        ).join('  •  ')
+        ).join(' • ')
       : 'No tokens found';
+
+    const fullText = `@${username} • Portfolio: ${formatUsd(total_value_usd)} • Top Holdings: ${tokenList} • Search Wallets 🔎`;
 
     return new ImageResponse(
       (
         <div
           style={{
+            fontSize: 28,
             color: 'white',
             background: '#0B1020',
             width: '100%',
             height: '100%',
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
             padding: 50,
             textAlign: 'center',
+            lineHeight: 1.4,
           }}
         >
-          <div style={{ fontSize: 36, fontWeight: 'bold', marginBottom: 20 }}>
-            @{username}
-          </div>
-          <div style={{ fontSize: 24, marginBottom: 30 }}>
-            Total Portfolio: {formatUsd(total_value_usd)}
-          </div>
-          <div style={{ fontSize: 18, opacity: 0.9, lineHeight: 1.4 }}>
-            {tokenListText}
-          </div>
-          <div style={{ fontSize: 16, opacity: 0.7, marginTop: 30 }}>
-            Search Wallets 🔎
-          </div>
+          {fullText}
         </div>
       ),
       {

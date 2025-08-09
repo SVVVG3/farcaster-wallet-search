@@ -111,17 +111,10 @@ export async function GET(req: NextRequest) {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      overflow: 'hidden',
-                      position: 'relative',
                     }}>
-                      {t.logo_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={t.logo_url} alt={t.token_symbol} width={36} height={36} style={{ objectFit: 'cover' }} />
-                      ) : (
-                        <div style={{ color: 'white', fontWeight: 800 }}>
-                          {t.token_symbol?.slice(0, 1) || '?'}
-                        </div>
-                      )}
+                      <div style={{ color: 'white', fontWeight: 800 }}>
+                        {t.token_symbol?.slice(0, 1) || '?'}
+                      </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1 }}>
                       <div style={{

@@ -14,7 +14,8 @@ export async function generateMetadata(
 
   const v = Date.now().toString();
 
-  const url = new URL(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://walletsearch.vercel.app'}/api/generate-share-image`);
+  const origin = process.env.NEXT_PUBLIC_BASE_URL || 'https://walletsearch.vercel.app';
+  const url = new URL(`${origin}/api/generate-share-image`);
   if (fid) url.searchParams.set('fid', fid);
   if (username) url.searchParams.set('username', username);
   if (bankrAddresses) url.searchParams.set('bankrAddresses', bankrAddresses);
@@ -42,8 +43,8 @@ export async function generateMetadata(
           action: {
             type: 'launch_miniapp',
             name: 'Wallet Search',
-            url: process.env.NEXT_PUBLIC_BASE_URL || 'https://walletsearch.vercel.app',
-            splashImageUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://walletsearch.vercel.app'}/WalletSearchIcon.png`,
+            url: origin,
+            splashImageUrl: `${origin}/WalletSearchIcon.png`,
             splashBackgroundColor: '#000000',
           },
         },
@@ -56,8 +57,8 @@ export async function generateMetadata(
           action: {
             type: 'launch_frame',
             name: 'Wallet Search',
-            url: process.env.NEXT_PUBLIC_BASE_URL || 'https://walletsearch.vercel.app',
-            splashImageUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://walletsearch.vercel.app'}/WalletSearchIcon.png`,
+            url: origin,
+            splashImageUrl: `${origin}/WalletSearchIcon.png`,
             splashBackgroundColor: '#000000',
           },
         },

@@ -235,7 +235,7 @@ export default function TokenBalances({ fid, username, bankrAddresses = [] }: To
       if (bankrAddresses.length > 0) params.set('bankrAddresses', bankrAddresses.join(','));
       params.set('v', Date.now().toString());
       const shareUrl = `${base}/share?${params.toString()}`;
-      const text = `Check out @${username}'s top holdings on Wallet Search!`;
+      const text = `View @${username}'s top holdings across all Farcaster connected wallets on Wallet Search!`;
       if (sdk && sdk.actions && sdk.actions.composeCast) {
         await sdk.actions.composeCast({ text, embeds: [shareUrl] });
       } else {

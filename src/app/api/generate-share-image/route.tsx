@@ -52,97 +52,44 @@ export async function GET(req: NextRequest) {
       return `$${(v / 1_000_000).toFixed(1)}M`;
     };
 
-    // Pre-build JSX elements outside ImageResponse (following docs pattern)
-    const topTokens = tokens.slice(0, 3); // Start with 3 tokens
-    
-    // Build token elements array
-    const tokenElements = [];
-    for (let i = 0; i < topTokens.length; i++) {
-      const token = topTokens[i];
-      tokenElements.push(
-        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-          {token.imageDataUri ? (
-            <img
-              src={token.imageDataUri}
-              width="40"
-              height="40"
-              style={{ borderRadius: '50%' }}
-              alt=""
-            />
-          ) : (
-            <div style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '50%',
-              backgroundColor: '#4F46E5',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '16px',
+    // EXACT copy from docs - absolute simplest approach
+    return new ImageResponse(
+      (
+        <div
+          style={{
+            height: '100%',
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#0B1020',
+            color: 'white',
+            padding: '40px',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 60,
               fontWeight: 'bold',
-              color: 'white',
-            }}>
-              {(token.token_symbol || 'T')[0]}
-            </div>
-          )}
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: '18px', fontWeight: 'bold' }}>
-              {i + 1}. {token.token_symbol}
-            </div>
-            <div style={{ fontSize: '16px', color: '#E6E8F0' }}>
-              {formatUsd(token.value_usd)}
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    // Pre-build the complete JSX structure
-    const imageElement = (
-      <div
-        style={{
-          background: '#0B1020',
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          padding: '40px',
-          fontFamily: 'system-ui, sans-serif',
-          color: 'white',
-        }}
-      >
-        {/* Header */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '30px' }}>
-          <div style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>
+              textAlign: 'center',
+            }}
+          >
             @{username}
           </div>
-          <div style={{ fontSize: '24px', color: '#E6E8F0' }}>
+          <div
+            style={{
+              fontSize: 30,
+              marginTop: '20px',
+            }}
+          >
             Portfolio: {formatUsd(total_value_usd)}
           </div>
         </div>
-
-        {/* Token List */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', flex: 1 }}>
-          {tokenElements}
-        </div>
-
-        {/* Footer */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '30px', gap: '5px' }}>
-          <div style={{ fontSize: '14px', color: '#A0A0A0', textAlign: 'center' }}>
-            Search by ETH/SOL wallet address or
-          </div>
-          <div style={{ fontSize: '14px', color: '#A0A0A0', textAlign: 'center' }}>
-            Farcaster/X username on Wallet Search 🔎
-          </div>
-        </div>
-      </div>
-    );
-
-    return new ImageResponse(
-      imageElement,
+      ),
       {
         width: 1200,
-        height: 800, // 3:2 aspect ratio
+        height: 800,
       }
     );
   } catch (e) {

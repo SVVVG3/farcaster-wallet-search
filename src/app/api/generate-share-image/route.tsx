@@ -52,18 +52,9 @@ export async function GET(req: NextRequest) {
       return `$${(v / 1_000_000).toFixed(1)}M`;
     };
 
-    // Simple working layout - avoid .map() which crashes Satori
+    // Single column layout to test if 2-column is the issue
     const tokenList = tokens.slice(0, 10)
       .map((token, i) => `${i + 1}. ${token.token_symbol} ${formatUsd(token.value_usd)}`)
-      .join('    ');
-
-    // Create 2-column text layout
-    const leftColumn = tokens.slice(0, 5)
-      .map((token, i) => `${i + 1}. ${token.token_symbol} ${formatUsd(token.value_usd)}`)
-      .join('\n');
-    
-    const rightColumn = tokens.slice(5, 10)
-      .map((token, i) => `${i + 6}. ${token.token_symbol} ${formatUsd(token.value_usd)}`)
       .join('\n');
 
     return new ImageResponse(
@@ -100,29 +91,15 @@ export async function GET(req: NextRequest) {
             </div>
           </div>
 
-          {/* Two Column Layout */}
+          {/* Single Column Token List */}
           <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
             flex: 1,
-            gap: '60px',
+            fontSize: '18px',
+            lineHeight: '2.2',
+            whiteSpace: 'pre-line',
+            textAlign: 'center',
           }}>
-            <div style={{
-              flex: 1,
-              fontSize: '18px',
-              lineHeight: '2.5',
-              whiteSpace: 'pre-line',
-            }}>
-              {leftColumn}
-            </div>
-            <div style={{
-              flex: 1,
-              fontSize: '18px',
-              lineHeight: '2.5',
-              whiteSpace: 'pre-line',
-            }}>
-              {rightColumn}
-            </div>
+            {tokenList}
           </div>
 
           {/* Footer */}

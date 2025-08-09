@@ -79,18 +79,18 @@ export async function GET(req: NextRequest) {
             </div>
           </div>
 
-          {/* Token List - Simple vertical layout with images */}
+          {/* Token List - Manual elements (no .map() to avoid Satori crashes) */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', flex: 1 }}>
-            {topTokens.map((token, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                {/* Token Image */}
-                {token.imageDataUri ? (
+            {/* Token 1 */}
+            {topTokens[0] && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                {topTokens[0].imageDataUri ? (
                   <img
-                    src={token.imageDataUri}
+                    src={topTokens[0].imageDataUri}
                     width="40"
                     height="40"
                     style={{ borderRadius: '50%' }}
-                    alt={token.token_symbol}
+                    alt={topTokens[0].token_symbol}
                   />
                 ) : (
                   <div style={{
@@ -105,21 +105,95 @@ export async function GET(req: NextRequest) {
                     fontWeight: 'bold',
                     color: 'white',
                   }}>
-                    {(token.token_symbol || 'T')[0]}
+                    {(topTokens[0].token_symbol || 'T')[0]}
                   </div>
                 )}
-                
-                {/* Token Info */}
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   <div style={{ fontSize: '18px', fontWeight: 'bold' }}>
-                    {i + 1}. {token.token_symbol}
+                    1. {topTokens[0].token_symbol}
                   </div>
                   <div style={{ fontSize: '16px', color: '#E6E8F0' }}>
-                    {formatUsd(token.value_usd)}
+                    {formatUsd(topTokens[0].value_usd)}
                   </div>
                 </div>
               </div>
-            ))}
+            )}
+
+            {/* Token 2 */}
+            {topTokens[1] && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                {topTokens[1].imageDataUri ? (
+                  <img
+                    src={topTokens[1].imageDataUri}
+                    width="40"
+                    height="40"
+                    style={{ borderRadius: '50%' }}
+                    alt={topTokens[1].token_symbol}
+                  />
+                ) : (
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    backgroundColor: '#4F46E5',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    color: 'white',
+                  }}>
+                    {(topTokens[1].token_symbol || 'T')[0]}
+                  </div>
+                )}
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                    2. {topTokens[1].token_symbol}
+                  </div>
+                  <div style={{ fontSize: '16px', color: '#E6E8F0' }}>
+                    {formatUsd(topTokens[1].value_usd)}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Token 3 */}
+            {topTokens[2] && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                {topTokens[2].imageDataUri ? (
+                  <img
+                    src={topTokens[2].imageDataUri}
+                    width="40"
+                    height="40"
+                    style={{ borderRadius: '50%' }}
+                    alt={topTokens[2].token_symbol}
+                  />
+                ) : (
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    backgroundColor: '#4F46E5',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    color: 'white',
+                  }}>
+                    {(topTokens[2].token_symbol || 'T')[0]}
+                  </div>
+                )}
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                    3. {topTokens[2].token_symbol}
+                  </div>
+                  <div style={{ fontSize: '16px', color: '#E6E8F0' }}>
+                    {formatUsd(topTokens[2].value_usd)}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Footer */}

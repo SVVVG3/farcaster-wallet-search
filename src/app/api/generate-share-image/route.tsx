@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { createCanvas, loadImage, Image } from 'canvas';
+import { createCanvas, loadImage, Image, registerFont } from 'canvas';
 
 export const runtime = 'nodejs';
 
@@ -91,11 +91,11 @@ export async function GET(req: NextRequest) {
 
     // Header
     ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 32px sans-serif';
+    ctx.font = 'bold 32px Arial';
     ctx.textAlign = 'center';
     ctx.fillText(`@${username}`, WIDTH / 2, 60);
 
-    ctx.font = '24px sans-serif';
+    ctx.font = '24px Arial';
     ctx.fillStyle = '#E6E8F0';
     ctx.fillText(`Portfolio: ${formatUsd(total_value_usd)}`, WIDTH / 2, 100);
 
@@ -131,7 +131,7 @@ export async function GET(req: NextRequest) {
           ctx.fill();
           
           ctx.fillStyle = '#FFFFFF';
-          ctx.font = 'bold 16px sans-serif';
+          ctx.font = 'bold 16px Arial';
           ctx.textAlign = 'center';
           ctx.fillText((token.token_symbol || 'T')[0], x + LOGO_SIZE/2, y + LOGO_SIZE/2 + 6);
         }
@@ -143,25 +143,29 @@ export async function GET(req: NextRequest) {
         ctx.fill();
         
         ctx.fillStyle = '#FFFFFF';
-        ctx.font = 'bold 16px sans-serif';
+        ctx.font = 'bold 16px Arial';
         ctx.textAlign = 'center';
         ctx.fillText((token.token_symbol || 'T')[0], x + LOGO_SIZE/2, y + LOGO_SIZE/2 + 6);
       }
 
-      // Draw token info text
+      // Draw token info text - using simple ASCII for now
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = '18px sans-serif';
+      ctx.font = '18px Arial';
       ctx.textAlign = 'left';
-      ctx.fillText(`${i + 1}. ${token.token_symbol}`, x + LOGO_SIZE + 15, y + 20);
+      const tokenName = token.token_symbol || 'TOKEN';
+      const simpleTokenName = tokenName.replace(/[^\x00-\x7F]/g, ""); // Remove non-ASCII
+      ctx.fillText(`${i + 1}. ${simpleTokenName}`, x + LOGO_SIZE + 15, y + 20);
       
       ctx.fillStyle = '#E6E8F0';
-      ctx.font = '16px sans-serif';
-      ctx.fillText(formatUsd(token.value_usd), x + LOGO_SIZE + 15, y + 40);
+      ctx.font = '16px Arial';
+      const usdValue = formatUsd(token.value_usd);
+      const simpleUsdValue = usdValue.replace(/[^\x00-\x7F]/g, ""); // Remove non-ASCII  
+      ctx.fillText(simpleUsdValue, x + LOGO_SIZE + 15, y + 40);
     }
 
     // Footer
     ctx.fillStyle = '#A0A0A0';
-    ctx.font = '14px sans-serif';
+    ctx.font = '14px Arial';
     ctx.textAlign = 'center';
     ctx.fillText('Search by ETH/SOL wallet address or', WIDTH / 2, HEIGHT - 40);
     ctx.fillText('Farcaster/X username on Wallet Search', WIDTH / 2, HEIGHT - 20);

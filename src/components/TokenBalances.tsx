@@ -225,6 +225,28 @@ export default function TokenBalances({ fid, username, bankrAddresses = [] }: To
   const [balanceData, setBalanceData] = useState<TokenBalanceResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  const handleShare = async () => {
+    try {
+      await triggerHaptic();
+      const base = process.env.NEXT_PUBLIC_BASE_URL || 'https://walletsearch.vercel.app';
+      const params = new URLSearchParams({ fid: String(fid) });
+      if (username) params.set('username', username);
+      if (bankrAddresses.length > 0) params.set('bankrAddresses', bankrAddresses.join(','));
+      params.set('v', Date.now().toString());
+      const shareUrl = `${base}/share?${params.toString()}`;
+      const text = `Top tokens for @${username} on Base via Wallet Search`;
+      if (sdk && sdk.actions && sdk.actions.composeCast) {
+        await sdk.actions.composeCast({ text, embeds: [shareUrl] });
+      } else {
+        // Fallback: copy to clipboard and open
+        try { await navigator.clipboard.writeText(shareUrl); } catch {}
+        window.open(shareUrl, '_blank');
+      }
+    } catch (e) {
+      console.error('Share failed', e);
+    }
+  };
 
   useEffect(() => {
     const fetchBalances = async () => {
@@ -303,12 +325,21 @@ export default function TokenBalances({ fid, username, bankrAddresses = [] }: To
         <h4 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
           Token Holdings
         </h4>
-        <div className="text-right flex-shrink-0 ml-2">
-          <div className="text-sm font-semibold text-gray-900 dark:text-white whitespace-nowrap">
-            ${totalValue > 0 ? totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
-          </div>
-          <div className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
-            {balanceData.tokens.length} token{balanceData.tokens.length !== 1 ? 's' : ''}
+        <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+          <button
+            onClick={handleShare}
+            className="px-3 py-1.5 text-xs font-semibold rounded-md transition-colors text-white"
+            style={{ backgroundColor: '#1F6FEB' }}
+          >
+            Share
+          </button>
+          <div className="text-right">
+            <div className="text-sm font-semibold text-gray-900 dark:text-white whitespace-nowrap">
+              ${totalValue > 0 ? totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
+            </div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+              {balanceData.tokens.length} token{balanceData.tokens.length !== 1 ? 's' : ''}
+            </div>
           </div>
         </div>
       </div>

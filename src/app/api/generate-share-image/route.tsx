@@ -52,71 +52,38 @@ export async function GET(req: NextRequest) {
       return `$${(v / 1_000_000).toFixed(1)}M`;
     };
 
-    // Single column layout to test if 2-column is the issue
-    const tokenList = tokens.slice(0, 10)
+    // Back to the simplest working version
+    const tokenText = tokens.slice(0, 10)
       .map((token, i) => `${i + 1}. ${token.token_symbol} ${formatUsd(token.value_usd)}`)
       .join('\n');
+
+    const content = `@${username}\nPortfolio: ${formatUsd(total_value_usd)}\n\n${tokenText}\n\nSearch by ETH/SOL wallet address or\nFarcaster/X username on Wallet Search`;
 
     return new ImageResponse(
       (
         <div
           style={{
+            fontSize: 18,
+            color: 'white',
             background: '#0B1020',
             width: '100%',
             height: '100%',
             display: 'flex',
-            flexDirection: 'column',
-            padding: '40px',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 50,
+            textAlign: 'center',
+            lineHeight: 1.6,
+            whiteSpace: 'pre-line',
             fontFamily: 'system-ui, sans-serif',
-            color: 'white',
           }}
         >
-          {/* Header */}
-          <div style={{
-            textAlign: 'center',
-            marginBottom: '40px',
-          }}>
-            <div style={{
-              fontSize: '32px',
-              fontWeight: 'bold',
-              marginBottom: '10px',
-            }}>
-              @{username}
-            </div>
-            <div style={{
-              fontSize: '24px',
-              color: '#E6E8F0',
-            }}>
-              Portfolio: {formatUsd(total_value_usd)}
-            </div>
-          </div>
-
-          {/* Single Column Token List */}
-          <div style={{
-            flex: 1,
-            fontSize: '18px',
-            lineHeight: '2.2',
-            whiteSpace: 'pre-line',
-            textAlign: 'center',
-          }}>
-            {tokenList}
-          </div>
-
-          {/* Footer */}
-          <div style={{
-            textAlign: 'center',
-            marginTop: '40px',
-            fontSize: '14px',
-            color: '#A0A0A0',
-            lineHeight: '1.5',
-          }}>
-            Search by ETH/SOL wallet address or{'\n'}Farcaster/X username on Wallet Search 🔎
-          </div>
+          {content}
         </div>
       ),
       {
         width: 1200,
-        height: 800, // 3:2 aspect ratio
+        height: 800, // Keep 3:2 aspect ratio
       }
     );
   } catch (e) {

@@ -12,6 +12,7 @@
     "@farcaster/miniapp-sdk": "^0.1.4",
     "@neynar/nodejs-sdk": "^3.21.0",
     "autoprefixer": "^10.4.21",
+    "canvas": "^3.1.2",
     "dotenv": "^17.0.1",
     "ethers": "^6.15.0",
     "next": "15.3.5",

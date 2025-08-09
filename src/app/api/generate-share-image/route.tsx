@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { ImageResponse } from 'next/og';
+import { createCanvas, loadImage } from 'canvas';
 
 export const runtime = 'nodejs';
 
@@ -43,29 +43,24 @@ export async function GET(req: NextRequest) {
       // Fall back to empty data on fetch error
     }
 
-    // Helper function to fetch image and convert to data URI
-    const fetchImageAsDataUri = async (imageUrl: string): Promise<string | null> => {
+    // Helper function to load image with timeout
+    const loadImageWithTimeout = async (imageUrl: string, timeout = 5000): Promise<any | null> => {
       try {
-        const response = await fetch(imageUrl);
-        if (!response.ok) return null;
-        
-        const arrayBuffer = await response.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        const contentType = response.headers.get('content-type') || 'image/png';
-        const base64 = buffer.toString('base64');
-        
-        return `data:${contentType};base64,${base64}`;
+        return await Promise.race([
+          loadImage(imageUrl),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeout))
+        ]);
       } catch {
         return null;
       }
     };
 
-    // Pre-fetch token logos for top 6 tokens
-    const topTokens = tokens.slice(0, 6);
+    // Pre-fetch token logos for top 10 tokens
+    const topTokens = tokens.slice(0, 10);
     const tokensWithImages = await Promise.all(
       topTokens.map(async (token) => {
-        const imageDataUri = token.logo_url ? await fetchImageAsDataUri(token.logo_url) : null;
-        return { ...token, imageDataUri };
+        const logoImage = token.logo_url ? await loadImageWithTimeout(token.logo_url) : null;
+        return { ...token, logoImage };
       })
     );
 
@@ -78,39 +73,103 @@ export async function GET(req: NextRequest) {
       return `$${(v / 1_000_000).toFixed(1)}M`;
     };
     
-    // Create text representation
-    const tokenText = tokensWithImages
-      .map((token, i) => `${i + 1}. ${token.token_symbol} ${formatUsd(token.value_usd)}`)
-      .join('\n');
-    
-    const content = `@${username}\nPortfolio: ${formatUsd(total_value_usd)}\n\n${tokenText}\n\nSearch by ETH/SOL wallet address or\nFarcaster/X username on Wallet Search 🔎`;
+    // Canvas composition (like your other app)
+    const WIDTH = 1200;
+    const HEIGHT = 630;
+    const canvas = createCanvas(WIDTH, HEIGHT);
+    const ctx = canvas.getContext('2d');
 
-    return new ImageResponse(
-      (
-        <div
-          style={{
-            fontSize: 18,
-            color: 'white',
-            background: '#0B1020',
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 50,
-            textAlign: 'center',
-            lineHeight: 1.6,
-            whiteSpace: 'pre-line',
-          }}
-        >
-          {content}
-        </div>
-      ),
-      {
-        width: 1200,
-        height: 630,
+    // Background
+    ctx.fillStyle = '#0B1020';
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+    // Header
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 32px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(`@${username}`, WIDTH / 2, 60);
+
+    ctx.font = '24px Arial';
+    ctx.fillStyle = '#E6E8F0';
+    ctx.fillText(`Portfolio: ${formatUsd(total_value_usd)}`, WIDTH / 2, 100);
+
+    // Token list in 2 columns (5 left, 5 right)
+    const LOGO_SIZE = 40;
+    const ROW_HEIGHT = 60;
+    const START_Y = 160;
+    const LEFT_COL_X = 200;
+    const RIGHT_COL_X = 700;
+
+    for (let i = 0; i < Math.min(tokensWithImages.length, 10); i++) {
+      const token = tokensWithImages[i];
+      const isLeftColumn = i < 5;
+      const rowIndex = isLeftColumn ? i : i - 5;
+      const x = isLeftColumn ? LEFT_COL_X : RIGHT_COL_X;
+      const y = START_Y + (rowIndex * ROW_HEIGHT);
+
+      // Draw token logo or fallback circle
+      if (token.logoImage) {
+        try {
+          // Draw circular clipped logo
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(x + LOGO_SIZE/2, y + LOGO_SIZE/2, LOGO_SIZE/2, 0, Math.PI * 2);
+          ctx.clip();
+          ctx.drawImage(token.logoImage, x, y, LOGO_SIZE, LOGO_SIZE);
+          ctx.restore();
+        } catch {
+          // Fallback to circle
+          ctx.fillStyle = '#4F46E5';
+          ctx.beginPath();
+          ctx.arc(x + LOGO_SIZE/2, y + LOGO_SIZE/2, LOGO_SIZE/2, 0, Math.PI * 2);
+          ctx.fill();
+          
+          ctx.fillStyle = '#FFFFFF';
+          ctx.font = 'bold 16px Arial';
+          ctx.textAlign = 'center';
+          ctx.fillText((token.token_symbol || 'T')[0], x + LOGO_SIZE/2, y + LOGO_SIZE/2 + 6);
+        }
+      } else {
+        // Fallback circle with letter
+        ctx.fillStyle = '#4F46E5';
+        ctx.beginPath();
+        ctx.arc(x + LOGO_SIZE/2, y + LOGO_SIZE/2, LOGO_SIZE/2, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText((token.token_symbol || 'T')[0], x + LOGO_SIZE/2, y + LOGO_SIZE/2 + 6);
       }
-    );
+
+      // Draw token info text
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '18px Arial';
+      ctx.textAlign = 'left';
+      ctx.fillText(`${i + 1}. ${token.token_symbol}`, x + LOGO_SIZE + 15, y + 20);
+      
+      ctx.fillStyle = '#E6E8F0';
+      ctx.font = '16px Arial';
+      ctx.fillText(formatUsd(token.value_usd), x + LOGO_SIZE + 15, y + 40);
+    }
+
+    // Footer
+    ctx.fillStyle = '#A0A0A0';
+    ctx.font = '14px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Search by ETH/SOL wallet address or', WIDTH / 2, HEIGHT - 40);
+    ctx.fillText('Farcaster/X username on Wallet Search 🔎', WIDTH / 2, HEIGHT - 20);
+
+    // Return PNG buffer
+    const buffer = canvas.toBuffer('image/png');
+    
+    return new Response(buffer, {
+      status: 200,
+      headers: {
+        'Content-Type': 'image/png',
+        'Cache-Control': 'public, immutable, no-transform, max-age=300',
+      },
+    });
   } catch (e) {
     return new Response(`Error: ${e instanceof Error ? e.message : 'Unknown error'}`, {
       status: 500,

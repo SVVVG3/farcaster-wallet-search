@@ -45,8 +45,8 @@ export async function GET(req: NextRequest) {
         height: 630,
       }
     );
-  } catch (e: any) {
-    return new Response(`Failed to generate image: ${e.message}`, {
+  } catch (e) {
+    return new Response(`Failed to generate image: ${e instanceof Error ? e.message : 'Unknown error'}`, {
       status: 500,
     });
   }

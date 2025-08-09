@@ -55,16 +55,8 @@ export async function GET(req: NextRequest) {
     // Prepare top 10 tokens for display with visual elements
     const topTokens = tokens.slice(0, 10);
     
-    // Generate a simple color for each token based on its symbol
-    const getTokenColor = (symbol: string): string => {
-      const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57', 
-                     '#FF9FF3', '#54A0FF', '#5F27CD', '#00D2D3', '#FF9F43'];
-      const index = symbol.charCodeAt(0) % colors.length;
-      return colors[index];
-    };
-
     // Create formatted text with token icons using Unicode circles
-    const createTokenLine = (token: any, index: number): string => {
+    const createTokenLine = (token: { token_symbol?: string; token_name?: string; value_usd?: number }, index: number): string => {
       if (!token) return '';
       const symbol = token.token_symbol || token.token_name || 'TOKEN';
       const value = formatUsd(token.value_usd);

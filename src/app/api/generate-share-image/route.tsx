@@ -18,21 +18,12 @@ export async function GET(req: NextRequest) {
             width: '100%',
             height: '100%',
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
             padding: 50,
           }}
         >
-          <div style={{ fontSize: 48, fontWeight: 'bold', marginBottom: 20 }}>
-            Wallet Search
-          </div>
-          <div style={{ fontSize: 24, opacity: 0.8 }}>
-            Top Holdings for @{username}
-          </div>
-          <div style={{ fontSize: 18, opacity: 0.6, marginTop: 20 }}>
-            Search Wallets 🔎
-          </div>
+          Top Holdings for @{username} - Search Wallets 🔎
         </div>
       ),
       {

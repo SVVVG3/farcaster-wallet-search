@@ -98,9 +98,11 @@ export async function GET(req: NextRequest) {
           {/* Simple list (satori-safe) */}
           <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', flex: 1 }}>
             {rows.length > 0 ? (
-              rows.map((line, i) => (
-                <div key={i} style={{ fontSize: 16, marginBottom: 8 }}>{line}</div>
-              ))
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                {rows.map((line, i) => (
+                  <div key={i} style={{ fontSize: 16, marginBottom: 8 }}>{line}</div>
+                ))}
+              </div>
             ) : (
               <div style={{ fontSize: 18, opacity: 0.8 }}>No tokens found</div>
             )}

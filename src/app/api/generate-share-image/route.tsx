@@ -43,6 +43,32 @@ export async function GET(req: NextRequest) {
       // Fall back to empty data on fetch error
     }
 
+    // Helper function to fetch image and convert to data URI
+    const fetchImageAsDataUri = async (imageUrl: string): Promise<string | null> => {
+      try {
+        const response = await fetch(imageUrl);
+        if (!response.ok) return null;
+        
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        const contentType = response.headers.get('content-type') || 'image/png';
+        const base64 = buffer.toString('base64');
+        
+        return `data:${contentType};base64,${base64}`;
+      } catch {
+        return null;
+      }
+    };
+
+    // Pre-fetch token logos for top 6 tokens
+    const topTokens = tokens.slice(0, 6);
+    const tokensWithImages = await Promise.all(
+      topTokens.map(async (token) => {
+        const imageDataUri = token.logo_url ? await fetchImageAsDataUri(token.logo_url) : null;
+        return { ...token, imageDataUri };
+      })
+    );
+
     // Format USD values
     const formatUsd = (value?: number): string => {
       const v = value || 0;
@@ -52,9 +78,6 @@ export async function GET(req: NextRequest) {
       return `$${(v / 1_000_000).toFixed(1)}M`;
     };
     
-    // Try a simple approach with actual token images
-    const topTokens = tokens.slice(0, 6); // Show top 6 with images to keep it simple
-
     return new ImageResponse(
       (
         <div
@@ -77,41 +100,41 @@ export async function GET(req: NextRequest) {
             Portfolio: {formatUsd(total_value_usd)}
           </div>
           
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 20 }}>
-            {topTokens.map((token, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', marginBottom: 10 }}>
-                {token.logo_url ? (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            {tokensWithImages.map((token, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
+                {token.imageDataUri ? (
                   <img 
-                    src={token.logo_url} 
-                    width={24} 
-                    height={24} 
-                    style={{ borderRadius: 12, marginRight: 8 }}
+                    src={token.imageDataUri} 
+                    width={32} 
+                    height={32} 
+                    style={{ borderRadius: 16, marginRight: 12 }}
                     alt=""
                   />
                 ) : (
                   <div style={{
-                    width: 24,
-                    height: 24,
-                    borderRadius: 12,
-                    background: '#4F46E5',
+                    width: 32,
+                    height: 32,
+                    borderRadius: 16,
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    marginRight: 8,
-                    fontSize: 12,
+                    marginRight: 12,
+                    fontSize: 14,
                     fontWeight: 'bold'
                   }}>
                     {(token.token_symbol || 'T')[0]}
                   </div>
                 )}
-                <div style={{ fontSize: 16 }}>
+                <div style={{ fontSize: 18, minWidth: 200 }}>
                   {i + 1}. {token.token_symbol} {formatUsd(token.value_usd)}
                 </div>
               </div>
             ))}
           </div>
           
-          <div style={{ fontSize: 14, opacity: 0.7, marginTop: 20, textAlign: 'center' }}>
+          <div style={{ fontSize: 14, opacity: 0.7, marginTop: 30, textAlign: 'center', lineHeight: 1.4 }}>
             Search by ETH/SOL wallet address or Farcaster/X username on Wallet Search 🔎
           </div>
         </div>

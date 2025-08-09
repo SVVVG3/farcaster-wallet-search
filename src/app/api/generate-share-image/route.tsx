@@ -13,6 +13,8 @@ import { ImageResponse } from 'next/og';
 // IMPORTANT: ImageResponse is designed for the Edge runtime. Keep this route on Edge
 // and avoid importing Node-only modules here.
 export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 const WIDTH = 1200;
 const HEIGHT = 630;
@@ -66,8 +68,8 @@ export async function GET(req: NextRequest) {
     }
 
     // Simple two-column layout with token numbers 1–10
-    const left = tokens.slice(0, 5);
-    const right = tokens.slice(5, 10);
+    const left = (tokens || []).slice(0, 5);
+    const right = (tokens || []).slice(5, 10);
 
     return new ImageResponse(
       (
@@ -102,40 +104,18 @@ export async function GET(req: NextRequest) {
             </div>
           </div>
 
-          {/* List */}
-          <div style={{
-            marginTop: 28,
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: 24,
-            flex: 1,
-          }}>
+          {/* List - avoid CSS grid (satori limitation) */}
+          <div style={{ marginTop: 28, display: 'flex', gap: 24, flex: 1 }}>
             {[left, right].map((col, ci) => (
-              <div key={ci} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div key={ci} style={{ display: 'flex', flexDirection: 'column' }}>
                 {col.map((t, i) => (
-                  <div key={`${t.token_address}-${i}`} style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 16,
-                    background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    padding: '12px 14px',
-                    borderRadius: 12,
-                  }}>
-                    <div style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 999,
-                      background: 'linear-gradient(135deg,#6EE7F9 0%,#A78BFA 100%)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}>
+                  <div key={`${t.token_address}-${i}`} style={{ display: 'flex', alignItems: 'center', marginBottom: 12, padding: '12px 14px', background: 'rgba(255,255,255,0.04)', borderRadius: 12 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 999, background: '#6E8BFA', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <div style={{ color: 'white', fontWeight: 800 }}>
                         {t.token_symbol?.slice(0, 1) || '?'}
                       </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', marginLeft: 10, flex: 1 }}>
                       <div style={{
                         fontSize: 16,
                         fontWeight: 700,
@@ -146,22 +126,12 @@ export async function GET(req: NextRequest) {
                       }}>
                         {t.token_name || t.token_symbol}
                       </div>
-                      <div style={{ fontSize: 14, opacity: 0.7 }}>{t.token_symbol}</div>
+                      <div style={{ fontSize: 14, opacity: 0.7, marginLeft: 8 }}>{t.token_symbol}</div>
                     </div>
-                    <div style={{ fontSize: 14, color: '#A8FFCF', fontWeight: 700 }}>
+                    <div style={{ fontSize: 14, color: '#A8FFCF', fontWeight: 700, marginRight: 10 }}>
                       {formatUsd(t.value_usd)}
                     </div>
-                    <div style={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: 6,
-                      background: 'rgba(255,255,255,0.08)',
-                      color: '#E6E8F0',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontWeight: 800,
-                    }}>
+                    <div style={{ width: 28, height: 28, borderRadius: 6, background: 'rgba(255,255,255,0.08)', color: '#E6E8F0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800 }}>
                       {ci === 0 ? i + 1 : i + 6}
                     </div>
                   </div>

@@ -46,21 +46,26 @@ export async function GET(req: NextRequest) {
     // Helper function to load image with timeout
     const loadImageWithTimeout = async (imageUrl: string, timeout = 5000): Promise<Image | null> => {
       try {
+        // Add User-Agent and other headers to avoid blocking
         const result = await Promise.race([
           loadImage(imageUrl),
           new Promise<Image>((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeout))
         ]);
         return result;
-      } catch {
+      } catch (error) {
+        console.log(`Failed to load image: ${imageUrl}, Error: ${error}`);
         return null;
       }
     };
 
     // Pre-fetch token logos for top 10 tokens
     const topTokens = tokens.slice(0, 10);
+    console.log(`Processing ${topTokens.length} tokens:`, topTokens.map(t => ({ symbol: t.token_symbol, logo_url: t.logo_url })));
+    
     const tokensWithImages = await Promise.all(
-      topTokens.map(async (token) => {
+      topTokens.map(async (token, index) => {
         const logoImage = token.logo_url ? await loadImageWithTimeout(token.logo_url) : null;
+        console.log(`Token ${index + 1} (${token.token_symbol}): logo loaded = ${!!logoImage}`);
         return { ...token, logoImage };
       })
     );
@@ -86,11 +91,11 @@ export async function GET(req: NextRequest) {
 
     // Header
     ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 32px Arial';
+    ctx.font = 'bold 32px sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText(`@${username}`, WIDTH / 2, 60);
 
-    ctx.font = '24px Arial';
+    ctx.font = '24px sans-serif';
     ctx.fillStyle = '#E6E8F0';
     ctx.fillText(`Portfolio: ${formatUsd(total_value_usd)}`, WIDTH / 2, 100);
 
@@ -126,7 +131,7 @@ export async function GET(req: NextRequest) {
           ctx.fill();
           
           ctx.fillStyle = '#FFFFFF';
-          ctx.font = 'bold 16px Arial';
+          ctx.font = 'bold 16px sans-serif';
           ctx.textAlign = 'center';
           ctx.fillText((token.token_symbol || 'T')[0], x + LOGO_SIZE/2, y + LOGO_SIZE/2 + 6);
         }
@@ -138,28 +143,28 @@ export async function GET(req: NextRequest) {
         ctx.fill();
         
         ctx.fillStyle = '#FFFFFF';
-        ctx.font = 'bold 16px Arial';
+        ctx.font = 'bold 16px sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText((token.token_symbol || 'T')[0], x + LOGO_SIZE/2, y + LOGO_SIZE/2 + 6);
       }
 
       // Draw token info text
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = '18px Arial';
+      ctx.font = '18px sans-serif';
       ctx.textAlign = 'left';
       ctx.fillText(`${i + 1}. ${token.token_symbol}`, x + LOGO_SIZE + 15, y + 20);
       
       ctx.fillStyle = '#E6E8F0';
-      ctx.font = '16px Arial';
+      ctx.font = '16px sans-serif';
       ctx.fillText(formatUsd(token.value_usd), x + LOGO_SIZE + 15, y + 40);
     }
 
     // Footer
     ctx.fillStyle = '#A0A0A0';
-    ctx.font = '14px Arial';
+    ctx.font = '14px sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('Search by ETH/SOL wallet address or', WIDTH / 2, HEIGHT - 40);
-    ctx.fillText('Farcaster/X username on Wallet Search 🔎', WIDTH / 2, HEIGHT - 20);
+    ctx.fillText('Farcaster/X username on Wallet Search', WIDTH / 2, HEIGHT - 20);
 
     // Return PNG buffer
     const buffer = canvas.toBuffer('image/png');

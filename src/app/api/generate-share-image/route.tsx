@@ -63,90 +63,61 @@ export async function GET(req: NextRequest) {
       return colors[index];
     };
 
+    // Create formatted text with token icons using Unicode circles
+    const createTokenLine = (token: any, index: number): string => {
+      if (!token) return '';
+      const symbol = token.token_symbol || token.token_name || 'TOKEN';
+      const value = formatUsd(token.value_usd);
+      const icon = '●'; // Unicode circle as token icon
+      return `${icon} ${index}. ${symbol} ${value}`;
+    };
+
+    // Build the display content
+    const lines = [];
+    lines.push(`@${username} • Portfolio: ${formatUsd(total_value_usd)}`);
+    lines.push(''); // Empty line
+    
+    // Add tokens in 2-column format using spacing
+    for (let i = 0; i < 5; i++) {
+      const leftToken = topTokens[i];
+      const rightToken = topTokens[i + 5];
+      
+      const leftLine = leftToken ? createTokenLine(leftToken, i + 1) : '';
+      const rightLine = rightToken ? createTokenLine(rightToken, i + 6) : '';
+      
+      if (leftLine || rightLine) {
+        // Pad left side to create column effect
+        const paddedLeft = leftLine.padEnd(40, ' ');
+        lines.push(`${paddedLeft}${rightLine}`);
+      }
+    }
+    
+    lines.push(''); // Empty line
+    lines.push('Search by ETH/SOL wallet address or');
+    lines.push('Farcaster/X username on Wallet Search 🔎');
+    
+    const content = lines.join('\n');
+
     return new ImageResponse(
       (
         <div
           style={{
+            fontSize: 16,
             color: 'white',
             background: '#0B1020',
             width: '100%',
             height: '100%',
             display: 'flex',
-            flexDirection: 'column',
-            padding: 40,
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 50,
+            textAlign: 'center',
+            fontFamily: 'monospace',
+            lineHeight: 1.8,
+            whiteSpace: 'pre-line',
           }}
         >
-          {/* Header */}
-          <div style={{ textAlign: 'center', marginBottom: 30 }}>
-            <div style={{ fontSize: 32, fontWeight: 'bold' }}>@{username}</div>
-            <div style={{ fontSize: 24, marginTop: 10 }}>Portfolio: {formatUsd(total_value_usd)}</div>
-          </div>
-
-          {/* Two Column Layout with Token Icons */}
-          <div style={{ display: 'flex', flex: 1, justifyContent: 'space-between' }}>
-            {/* Left Column */}
-            <div style={{ flex: 1, paddingRight: 30 }}>
-              {topTokens.slice(0, 5).map((token, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
-                  {/* Token Icon */}
-                  <div style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 16,
-                    background: getTokenColor(token.token_symbol || 'T'),
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginRight: 12,
-                    fontSize: 14,
-                    fontWeight: 'bold',
-                    color: 'white',
-                  }}>
-                    {(token.token_symbol || token.token_name || 'T')[0].toUpperCase()}
-                  </div>
-                  {/* Token Info */}
-                  <div style={{ fontSize: 16 }}>
-                    {i + 1}. {token.token_symbol || token.token_name || 'TOKEN'} {formatUsd(token.value_usd)}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Right Column */}
-            <div style={{ flex: 1, paddingLeft: 30 }}>
-              {topTokens.slice(5, 10).map((token, i) => (
-                <div key={i + 5} style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
-                  {/* Token Icon */}
-                  <div style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 16,
-                    background: getTokenColor(token.token_symbol || 'T'),
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginRight: 12,
-                    fontSize: 14,
-                    fontWeight: 'bold',
-                    color: 'white',
-                  }}>
-                    {(token.token_symbol || token.token_name || 'T')[0].toUpperCase()}
-                  </div>
-                  {/* Token Info */}
-                  <div style={{ fontSize: 16 }}>
-                    {i + 6}. {token.token_symbol || token.token_name || 'TOKEN'} {formatUsd(token.value_usd)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div style={{ textAlign: 'center', marginTop: 20 }}>
-            <div style={{ fontSize: 14, opacity: 0.8, lineHeight: 1.4 }}>
-              Search by ETH/SOL wallet address or Farcaster/X username on Wallet Search 🔎
-            </div>
-          </div>
+          {content}
         </div>
       ),
       {

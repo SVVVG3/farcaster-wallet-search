@@ -52,34 +52,60 @@ export async function GET(req: NextRequest) {
       return `$${(v / 1_000_000).toFixed(1)}M`;
     };
     
-    // Create a comprehensive single line with all info
-    const topTokens = tokens.slice(0, 3); // Show top 3 to fit in one line
-    const tokenList = topTokens.length > 0 
-      ? topTokens.map((token, i) => 
-          `${i + 1}. ${token.token_symbol || token.token_name || 'TOKEN'} ${formatUsd(token.value_usd)}`
-        ).join(' • ')
-      : 'No tokens found';
+    // Prepare top 10 tokens for 2-column display
+    const topTokens = tokens.slice(0, 10);
+    const leftTokens = topTokens.slice(0, 5);
+    const rightTokens = topTokens.slice(5, 10);
 
-    const fullText = `@${username} • Portfolio: ${formatUsd(total_value_usd)} • Top Holdings: ${tokenList} • Search Wallets 🔎`;
+    // Create text strings for each column
+    const leftColumn = leftTokens.map((token, i) => 
+      `${i + 1}. ${token.token_symbol || token.token_name || 'TOKEN'} ${formatUsd(token.value_usd)}`
+    ).join('\n');
+
+    const rightColumn = rightTokens.map((token, i) => 
+      `${i + 6}. ${token.token_symbol || token.token_name || 'TOKEN'} ${formatUsd(token.value_usd)}`
+    ).join('\n');
 
     return new ImageResponse(
       (
         <div
           style={{
-            fontSize: 28,
             color: 'white',
             background: '#0B1020',
             width: '100%',
             height: '100%',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 50,
-            textAlign: 'center',
-            lineHeight: 1.4,
+            flexDirection: 'column',
+            padding: 40,
           }}
         >
-          {fullText}
+          {/* Header */}
+          <div style={{ textAlign: 'center', marginBottom: 30 }}>
+            <div style={{ fontSize: 32, fontWeight: 'bold' }}>@{username}</div>
+            <div style={{ fontSize: 24, marginTop: 10 }}>Portfolio: {formatUsd(total_value_usd)}</div>
+          </div>
+
+          {/* Two Column Layout */}
+          <div style={{ display: 'flex', flex: 1 }}>
+            {/* Left Column */}
+            <div style={{ flex: 1, paddingRight: 20 }}>
+              <div style={{ fontSize: 18, lineHeight: 1.6, whiteSpace: 'pre-line' }}>
+                {leftColumn || 'No tokens'}
+              </div>
+            </div>
+
+            {/* Right Column */}
+            <div style={{ flex: 1, paddingLeft: 20 }}>
+              <div style={{ fontSize: 18, lineHeight: 1.6, whiteSpace: 'pre-line' }}>
+                {rightColumn || ''}
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div style={{ textAlign: 'center', marginTop: 20 }}>
+            <div style={{ fontSize: 16, opacity: 0.8 }}>Search Wallets 🔎</div>
+          </div>
         </div>
       ),
       {

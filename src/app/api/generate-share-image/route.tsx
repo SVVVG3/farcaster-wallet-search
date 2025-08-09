@@ -1,7 +1,20 @@
 import { NextRequest } from 'next/server';
-import { createCanvas } from 'canvas';
+import { createCanvas, loadImage } from 'canvas';
 
 export const runtime = 'nodejs';
+
+// Helper function to draw fallback circle with token symbol
+function drawFallbackCircle(ctx: any, x: number, y: number, size: number, tokenSymbol?: string) {
+  ctx.fillStyle = '#4F46E5';
+  ctx.beginPath();
+  ctx.arc(x + size/2, y + size/2, size/2, 0, Math.PI * 2);
+  ctx.fill();
+  
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = 'bold 16px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText((tokenSymbol || 'T')[0], x + size/2, y + size/2 + 6);
+}
 
 export async function GET(req: NextRequest) {
   try {
@@ -29,8 +42,8 @@ export async function GET(req: NextRequest) {
     apiUrl.searchParams.set('fid', String(fid));
     if (bankrAddresses.length > 0) apiUrl.searchParams.set('bankrAddresses', bankrAddresses.join(','));
 
-        // Fetch token data
-    let tokens: Array<{ token_address: string; token_name: string; token_symbol: string; value_usd?: number; logo_url?: string }> = [];
+        // Fetch token data with image data URIs
+    let tokens: Array<{ token_address: string; token_name: string; token_symbol: string; value_usd?: number; logo_url?: string; imageDataUri?: string | null }> = [];
     let total_value_usd = 0;
 
     try {
@@ -73,19 +86,49 @@ export async function GET(req: NextRequest) {
     ctx.fillStyle = '#E6E8F0';
     ctx.fillText(`Portfolio: ${formatUsd(total_value_usd)}`, WIDTH / 2, 100);
 
-    // Token list (simple text format)
-    ctx.fillStyle = '#FFFFFF';
-    ctx.font = '18px Arial';
-    ctx.textAlign = 'left';
-    
-    const startY = 150;
-    const lineHeight = 25;
-    
+    // Token list in 2 columns with images
+    const LOGO_SIZE = 40;
+    const ROW_HEIGHT = 60;
+    const START_Y = 160;
+    const LEFT_COL_X = 200;
+    const RIGHT_COL_X = 700;
+
     for (let i = 0; i < Math.min(tokens.length, 10); i++) {
       const token = tokens[i];
-      const y = startY + (i * lineHeight);
-      const text = `${i + 1}. ${token.token_symbol} - ${formatUsd(token.value_usd)}`;
-      ctx.fillText(text, 100, y);
+      const isLeftColumn = i < 5;
+      const rowIndex = isLeftColumn ? i : i - 5;
+      const x = isLeftColumn ? LEFT_COL_X : RIGHT_COL_X;
+      const y = START_Y + (rowIndex * ROW_HEIGHT);
+
+      // Draw token logo or fallback circle
+      if (token.imageDataUri) {
+        try {
+          const img = await loadImage(token.imageDataUri);
+          // Draw circular clipped logo
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(x + LOGO_SIZE/2, y + LOGO_SIZE/2, LOGO_SIZE/2, 0, Math.PI * 2);
+          ctx.clip();
+          ctx.drawImage(img, x, y, LOGO_SIZE, LOGO_SIZE);
+          ctx.restore();
+        } catch {
+          // Fallback to circle
+          drawFallbackCircle(ctx, x, y, LOGO_SIZE, token.token_symbol);
+        }
+      } else {
+        // Fallback circle with letter
+        drawFallbackCircle(ctx, x, y, LOGO_SIZE, token.token_symbol);
+      }
+
+      // Draw token info text
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '18px Arial';
+      ctx.textAlign = 'left';
+      ctx.fillText(`${i + 1}. ${token.token_symbol}`, x + LOGO_SIZE + 15, y + 20);
+      
+      ctx.fillStyle = '#E6E8F0';
+      ctx.font = '16px Arial';
+      ctx.fillText(formatUsd(token.value_usd), x + LOGO_SIZE + 15, y + 40);
     }
 
     // Footer

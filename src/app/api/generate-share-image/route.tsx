@@ -29,14 +29,14 @@ export async function GET(req: NextRequest) {
     apiUrl.searchParams.set('fid', String(fid));
     if (bankrAddresses.length > 0) apiUrl.searchParams.set('bankrAddresses', bankrAddresses.join(','));
 
-    let tokens: Array<{ token_address: string; token_name: string; token_symbol: string; value_usd?: number; logo_url?: string; imageDataUri?: string | null }> = [];
+    // let tokens: Array<{ token_address: string; token_name: string; token_symbol: string; value_usd?: number; logo_url?: string; imageDataUri?: string | null }> = [];
     let total_value_usd = 0;
 
     try {
       const res = await fetch(apiUrl.toString(), { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
-        tokens = Array.isArray(data.tokens) ? data.tokens.slice(0, 10) : [];
+        // tokens = Array.isArray(data.tokens) ? data.tokens.slice(0, 10) : [];
         total_value_usd = typeof data.total_value_usd === 'number' ? data.total_value_usd : 0;
       }
     } catch {

@@ -52,9 +52,19 @@ export async function GET(req: NextRequest) {
       return `$${(v / 1_000_000).toFixed(1)}M`;
     };
 
-    // Create 2-column layout with token images (like your app)
-    const leftTokens = tokens.slice(0, 5);
-    const rightTokens = tokens.slice(5, 10);
+    // Simple working layout - avoid .map() which crashes Satori
+    const tokenList = tokens.slice(0, 10)
+      .map((token, i) => `${i + 1}. ${token.token_symbol} ${formatUsd(token.value_usd)}`)
+      .join('    ');
+
+    // Create 2-column text layout
+    const leftColumn = tokens.slice(0, 5)
+      .map((token, i) => `${i + 1}. ${token.token_symbol} ${formatUsd(token.value_usd)}`)
+      .join('\n');
+    
+    const rightColumn = tokens.slice(5, 10)
+      .map((token, i) => `${i + 6}. ${token.token_symbol} ${formatUsd(token.value_usd)}`)
+      .join('\n');
 
     return new ImageResponse(
       (
@@ -67,20 +77,18 @@ export async function GET(req: NextRequest) {
             flexDirection: 'column',
             padding: '40px',
             fontFamily: 'system-ui, sans-serif',
+            color: 'white',
           }}
         >
           {/* Header */}
           <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            marginBottom: '30px',
+            textAlign: 'center',
+            marginBottom: '40px',
           }}>
             <div style={{
               fontSize: '32px',
               fontWeight: 'bold',
-              color: 'white',
-              marginBottom: '8px',
+              marginBottom: '10px',
             }}>
               @{username}
             </div>
@@ -92,164 +100,40 @@ export async function GET(req: NextRequest) {
             </div>
           </div>
 
-          {/* Token Grid - 2 Columns */}
+          {/* Two Column Layout */}
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
             flex: 1,
             gap: '60px',
           }}>
-            {/* Left Column */}
             <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '20px',
               flex: 1,
+              fontSize: '18px',
+              lineHeight: '2.5',
+              whiteSpace: 'pre-line',
             }}>
-              {leftTokens.map((token, i) => (
-                <div key={i} style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '15px',
-                }}>
-                  {/* Token Image or Fallback */}
-                  {token.imageDataUri ? (
-                    <img
-                      src={token.imageDataUri}
-                      style={{
-                        width: '40px',
-                        height: '40px',
-                        borderRadius: '50%',
-                      }}
-                      alt={token.token_symbol}
-                    />
-                  ) : (
-                    <div style={{
-                      width: '40px',
-                      height: '40px',
-                      borderRadius: '50%',
-                      backgroundColor: '#4F46E5',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '16px',
-                      fontWeight: 'bold',
-                      color: 'white',
-                    }}>
-                      {(token.token_symbol || 'T')[0]}
-                    </div>
-                  )}
-                  
-                  {/* Token Info */}
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                  }}>
-                    <div style={{
-                      fontSize: '18px',
-                      fontWeight: 'bold',
-                      color: 'white',
-                    }}>
-                      {i + 1}. {token.token_symbol}
-                    </div>
-                    <div style={{
-                      fontSize: '16px',
-                      color: '#E6E8F0',
-                    }}>
-                      {formatUsd(token.value_usd)}
-                    </div>
-                  </div>
-                </div>
-              ))}
+              {leftColumn}
             </div>
-
-            {/* Right Column */}
             <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '20px',
               flex: 1,
+              fontSize: '18px',
+              lineHeight: '2.5',
+              whiteSpace: 'pre-line',
             }}>
-              {rightTokens.map((token, i) => (
-                <div key={i + 5} style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '15px',
-                }}>
-                  {/* Token Image or Fallback */}
-                  {token.imageDataUri ? (
-                    <img
-                      src={token.imageDataUri}
-                      style={{
-                        width: '40px',
-                        height: '40px',
-                        borderRadius: '50%',
-                      }}
-                      alt={token.token_symbol}
-                    />
-                  ) : (
-                    <div style={{
-                      width: '40px',
-                      height: '40px',
-                      borderRadius: '50%',
-                      backgroundColor: '#4F46E5',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '16px',
-                      fontWeight: 'bold',
-                      color: 'white',
-                    }}>
-                      {(token.token_symbol || 'T')[0]}
-                    </div>
-                  )}
-                  
-                  {/* Token Info */}
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                  }}>
-                    <div style={{
-                      fontSize: '18px',
-                      fontWeight: 'bold',
-                      color: 'white',
-                    }}>
-                      {i + 6}. {token.token_symbol}
-                    </div>
-                    <div style={{
-                      fontSize: '16px',
-                      color: '#E6E8F0',
-                    }}>
-                      {formatUsd(token.value_usd)}
-                    </div>
-                  </div>
-                </div>
-              ))}
+              {rightColumn}
             </div>
           </div>
 
           {/* Footer */}
           <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            marginTop: '30px',
-            gap: '5px',
+            textAlign: 'center',
+            marginTop: '40px',
+            fontSize: '14px',
+            color: '#A0A0A0',
+            lineHeight: '1.5',
           }}>
-            <div style={{
-              fontSize: '14px',
-              color: '#A0A0A0',
-              textAlign: 'center',
-            }}>
-              Search by ETH/SOL wallet address or
-            </div>
-            <div style={{
-              fontSize: '14px',
-              color: '#A0A0A0',
-              textAlign: 'center',
-            }}>
-              Farcaster/X username on Wallet Search 🔎
-            </div>
+            Search by ETH/SOL wallet address or{'\n'}Farcaster/X username on Wallet Search 🔎
           </div>
         </div>
       ),

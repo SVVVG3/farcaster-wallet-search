@@ -77,7 +77,7 @@ export async function GET(req: NextRequest) {
       return `$${(v / 1_000_000).toFixed(1)}M`;
     };
     
-    // Canvas composition (like your other app)
+    // Simple Canvas test - back to basics
     const WIDTH = 1200;
     const HEIGHT = 630;
     const canvas = createCanvas(WIDTH, HEIGHT);
@@ -87,82 +87,11 @@ export async function GET(req: NextRequest) {
     ctx.fillStyle = '#0B1020';
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-    // Header
+    // Simple text test
     ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 32px Arial';
+    ctx.font = '32px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText(`@${username}`, WIDTH / 2, 60);
-
-    ctx.font = '24px Arial';
-    ctx.fillStyle = '#E6E8F0';
-    ctx.fillText(`Portfolio: ${formatUsd(total_value_usd)}`, WIDTH / 2, 100);
-
-    // Token list in 2 columns (5 left, 5 right)
-    const LOGO_SIZE = 40;
-    const ROW_HEIGHT = 60;
-    const START_Y = 160;
-    const LEFT_COL_X = 200;
-    const RIGHT_COL_X = 700;
-
-    for (let i = 0; i < Math.min(tokensWithImages.length, 10); i++) {
-      const token = tokensWithImages[i];
-      const isLeftColumn = i < 5;
-      const rowIndex = isLeftColumn ? i : i - 5;
-      const x = isLeftColumn ? LEFT_COL_X : RIGHT_COL_X;
-      const y = START_Y + (rowIndex * ROW_HEIGHT);
-
-      // Draw token logo or fallback circle
-      if (token.logoImage) {
-        try {
-          // Draw circular clipped logo
-          ctx.save();
-          ctx.beginPath();
-          ctx.arc(x + LOGO_SIZE/2, y + LOGO_SIZE/2, LOGO_SIZE/2, 0, Math.PI * 2);
-          ctx.clip();
-          ctx.drawImage(token.logoImage, x, y, LOGO_SIZE, LOGO_SIZE);
-          ctx.restore();
-        } catch {
-          // Fallback to circle
-          ctx.fillStyle = '#4F46E5';
-          ctx.beginPath();
-          ctx.arc(x + LOGO_SIZE/2, y + LOGO_SIZE/2, LOGO_SIZE/2, 0, Math.PI * 2);
-          ctx.fill();
-          
-          ctx.fillStyle = '#FFFFFF';
-          ctx.font = 'bold 16px Arial';
-          ctx.textAlign = 'center';
-          ctx.fillText((token.token_symbol || 'T')[0], x + LOGO_SIZE/2, y + LOGO_SIZE/2 + 6);
-        }
-      } else {
-        // Fallback circle with letter
-        ctx.fillStyle = '#4F46E5';
-        ctx.beginPath();
-        ctx.arc(x + LOGO_SIZE/2, y + LOGO_SIZE/2, LOGO_SIZE/2, 0, Math.PI * 2);
-        ctx.fill();
-        
-        ctx.fillStyle = '#FFFFFF';
-        ctx.font = 'bold 16px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText((token.token_symbol || 'T')[0], x + LOGO_SIZE/2, y + LOGO_SIZE/2 + 6);
-      }
-
-      // Draw token info text
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = '18px Arial';
-      ctx.textAlign = 'left';
-      ctx.fillText(`${i + 1}. ${token.token_symbol || 'TOKEN'}`, x + LOGO_SIZE + 15, y + 20);
-      
-      ctx.fillStyle = '#E6E8F0';
-      ctx.font = '16px Arial';
-      ctx.fillText(formatUsd(token.value_usd), x + LOGO_SIZE + 15, y + 40);
-    }
-
-    // Footer
-    ctx.fillStyle = '#A0A0A0';
-    ctx.font = '14px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('Search by ETH/SOL wallet address or', WIDTH / 2, HEIGHT - 40);
-    ctx.fillText('Farcaster/X username on Wallet Search', WIDTH / 2, HEIGHT - 20);
+    ctx.fillText(`@${username}`, WIDTH / 2, HEIGHT / 2);
 
     // Return PNG buffer
     const buffer = canvas.toBuffer('image/png');

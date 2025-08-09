@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { createCanvas, loadImage, Image } from 'canvas';
+import { createCanvas } from 'canvas';
 
 export const runtime = 'nodejs';
 

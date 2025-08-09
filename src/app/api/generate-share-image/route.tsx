@@ -52,38 +52,210 @@ export async function GET(req: NextRequest) {
       return `$${(v / 1_000_000).toFixed(1)}M`;
     };
 
-    // Create simple text layout (like your successful app)
-    const tokenText = tokens.slice(0, 10)
-      .map((token, i) => `${i + 1}. ${token.token_symbol} ${formatUsd(token.value_usd)}`)
-      .join('\n');
-
-    const content = `@${username}\nPortfolio: ${formatUsd(total_value_usd)}\n\n${tokenText}\n\nSearch by ETH/SOL wallet address or\nFarcaster/X username on Wallet Search`;
+    // Create 2-column layout with token images (like your app)
+    const leftTokens = tokens.slice(0, 5);
+    const rightTokens = tokens.slice(5, 10);
 
     return new ImageResponse(
       (
         <div
           style={{
-            fontSize: 18,
-            color: 'white',
             background: '#0B1020',
             width: '100%',
             height: '100%',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 50,
-            textAlign: 'center',
-            lineHeight: 1.6,
-            whiteSpace: 'pre-line',
+            flexDirection: 'column',
+            padding: '40px',
             fontFamily: 'system-ui, sans-serif',
           }}
         >
-          {content}
+          {/* Header */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            marginBottom: '30px',
+          }}>
+            <div style={{
+              fontSize: '32px',
+              fontWeight: 'bold',
+              color: 'white',
+              marginBottom: '8px',
+            }}>
+              @{username}
+            </div>
+            <div style={{
+              fontSize: '24px',
+              color: '#E6E8F0',
+            }}>
+              Portfolio: {formatUsd(total_value_usd)}
+            </div>
+          </div>
+
+          {/* Token Grid - 2 Columns */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            flex: 1,
+            gap: '60px',
+          }}>
+            {/* Left Column */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '20px',
+              flex: 1,
+            }}>
+              {leftTokens.map((token, i) => (
+                <div key={i} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '15px',
+                }}>
+                  {/* Token Image or Fallback */}
+                  {token.imageDataUri ? (
+                    <img
+                      src={token.imageDataUri}
+                      style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '50%',
+                      }}
+                      alt={token.token_symbol}
+                    />
+                  ) : (
+                    <div style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '50%',
+                      backgroundColor: '#4F46E5',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '16px',
+                      fontWeight: 'bold',
+                      color: 'white',
+                    }}>
+                      {(token.token_symbol || 'T')[0]}
+                    </div>
+                  )}
+                  
+                  {/* Token Info */}
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}>
+                    <div style={{
+                      fontSize: '18px',
+                      fontWeight: 'bold',
+                      color: 'white',
+                    }}>
+                      {i + 1}. {token.token_symbol}
+                    </div>
+                    <div style={{
+                      fontSize: '16px',
+                      color: '#E6E8F0',
+                    }}>
+                      {formatUsd(token.value_usd)}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Right Column */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '20px',
+              flex: 1,
+            }}>
+              {rightTokens.map((token, i) => (
+                <div key={i + 5} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '15px',
+                }}>
+                  {/* Token Image or Fallback */}
+                  {token.imageDataUri ? (
+                    <img
+                      src={token.imageDataUri}
+                      style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '50%',
+                      }}
+                      alt={token.token_symbol}
+                    />
+                  ) : (
+                    <div style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '50%',
+                      backgroundColor: '#4F46E5',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '16px',
+                      fontWeight: 'bold',
+                      color: 'white',
+                    }}>
+                      {(token.token_symbol || 'T')[0]}
+                    </div>
+                  )}
+                  
+                  {/* Token Info */}
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}>
+                    <div style={{
+                      fontSize: '18px',
+                      fontWeight: 'bold',
+                      color: 'white',
+                    }}>
+                      {i + 6}. {token.token_symbol}
+                    </div>
+                    <div style={{
+                      fontSize: '16px',
+                      color: '#E6E8F0',
+                    }}>
+                      {formatUsd(token.value_usd)}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            marginTop: '30px',
+            gap: '5px',
+          }}>
+            <div style={{
+              fontSize: '14px',
+              color: '#A0A0A0',
+              textAlign: 'center',
+            }}>
+              Search by ETH/SOL wallet address or
+            </div>
+            <div style={{
+              fontSize: '14px',
+              color: '#A0A0A0',
+              textAlign: 'center',
+            }}>
+              Farcaster/X username on Wallet Search 🔎
+            </div>
+          </div>
         </div>
       ),
       {
         width: 1200,
-        height: 630,
+        height: 800, // 3:2 aspect ratio
       }
     );
   } catch (e) {

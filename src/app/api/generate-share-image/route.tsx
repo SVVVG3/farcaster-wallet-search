@@ -11,7 +11,7 @@ import { NextRequest } from 'next/server';
 import { ImageResponse } from 'next/og';
 import { fetchUserTokenBalances } from '@/lib/neynar';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 const WIDTH = 1200;
 const HEIGHT = 630;

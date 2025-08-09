@@ -4,7 +4,7 @@ import { createCanvas, loadImage } from 'canvas';
 export const runtime = 'nodejs';
 
 // Helper function to draw fallback circle with token symbol
-function drawFallbackCircle(ctx: any, x: number, y: number, size: number, tokenSymbol?: string) {
+function drawFallbackCircle(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, tokenSymbol?: string) {
   ctx.fillStyle = '#4F46E5';
   ctx.beginPath();
   ctx.arc(x + size/2, y + size/2, size/2, 0, Math.PI * 2);

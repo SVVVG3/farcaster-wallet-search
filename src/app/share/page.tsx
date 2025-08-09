@@ -1,12 +1,11 @@
-import type { Metadata, ResolvingMetadata } from 'next';
+import type { Metadata } from 'next';
 
 interface SharePageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export async function generateMetadata(
-  { searchParams }: SharePageProps,
-  _parent: ResolvingMetadata
+  { searchParams }: SharePageProps
 ): Promise<Metadata> {
   const params = await searchParams;
   const fid = typeof params.fid === 'string' ? params.fid : Array.isArray(params.fid) ? params.fid[0] : undefined;

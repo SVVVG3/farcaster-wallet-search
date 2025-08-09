@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
     apiUrl.searchParams.set('fid', String(fid));
     if (bankrAddresses.length > 0) apiUrl.searchParams.set('bankrAddresses', bankrAddresses.join(','));
 
-    let tokens: Array<{ token_address: string; token_name: string; token_symbol: string; value_usd?: number }> = []; 
+    let tokens: Array<{ token_address: string; token_name: string; token_symbol: string; value_usd?: number; logo_url?: string }> = []; 
     let total_value_usd = 0;
     
     try {
@@ -107,26 +107,68 @@ export async function GET(req: NextRequest) {
     
     const content = lines.join('\n');
 
+    // Try a simple approach with actual token images
+    const topTokens = tokens.slice(0, 6); // Show top 6 with images to keep it simple
+
     return new ImageResponse(
       (
         <div
           style={{
-            fontSize: 16,
             color: 'white',
             background: '#0B1020',
             width: '100%',
             height: '100%',
             display: 'flex',
+            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: 50,
-            textAlign: 'center',
-            fontFamily: 'monospace',
-            lineHeight: 1.8,
-            whiteSpace: 'pre-line',
+            padding: 40,
           }}
         >
-          {content}
+          <div style={{ fontSize: 28, fontWeight: 'bold', marginBottom: 10 }}>
+            @{username}
+          </div>
+          <div style={{ fontSize: 20, marginBottom: 30, opacity: 0.9 }}>
+            Portfolio: {formatUsd(total_value_usd)}
+          </div>
+          
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 20 }}>
+            {topTokens.map((token, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', marginBottom: 10 }}>
+                {token.logo_url ? (
+                  <img 
+                    src={token.logo_url} 
+                    width={24} 
+                    height={24} 
+                    style={{ borderRadius: 12, marginRight: 8 }}
+                    alt=""
+                  />
+                ) : (
+                  <div style={{
+                    width: 24,
+                    height: 24,
+                    borderRadius: 12,
+                    background: '#4F46E5',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginRight: 8,
+                    fontSize: 12,
+                    fontWeight: 'bold'
+                  }}>
+                    {(token.token_symbol || 'T')[0]}
+                  </div>
+                )}
+                <div style={{ fontSize: 16 }}>
+                  {i + 1}. {token.token_symbol} {formatUsd(token.value_usd)}
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <div style={{ fontSize: 14, opacity: 0.7, marginTop: 20, textAlign: 'center' }}>
+            Search by ETH/SOL wallet address or Farcaster/X username on Wallet Search 🔎
+          </div>
         </div>
       ),
       {

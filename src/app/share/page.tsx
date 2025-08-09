@@ -22,9 +22,6 @@ export async function generateMetadata(
 
   const imageUrl = url.toString();
 
-  // Important: Do NOT emit fc:miniapp/frame here. If the domain has a Mini App manifest,
-  // some clients will prioritize it and ignore per-page overrides. We intentionally
-  // return only OG/Twitter image metadata so this URL renders the dynamic image card.
   return {
     title: `Wallet Search — ${username ? '@' + username : 'Top Holdings'}`,
     description: 'Top 10 token holdings on Base',
@@ -34,6 +31,37 @@ export async function generateMetadata(
     twitter: {
       card: 'summary_large_image',
       images: [imageUrl],
+    },
+    other: {
+      // Per-page Mini App embed with dynamic image and button
+      'fc:miniapp': JSON.stringify({
+        version: '1',
+        imageUrl,
+        button: {
+          title: '🔍 Search Wallets',
+          action: {
+            type: 'launch_miniapp',
+            name: 'Wallet Search',
+            url: process.env.NEXT_PUBLIC_BASE_URL || 'https://walletsearch.vercel.app',
+            splashImageUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://walletsearch.vercel.app'}/WalletSearchIcon.png`,
+            splashBackgroundColor: '#000000',
+          },
+        },
+      }),
+      'fc:frame': JSON.stringify({
+        version: '1',
+        imageUrl,
+        button: {
+          title: '🔍 Search Wallets',
+          action: {
+            type: 'launch_frame',
+            name: 'Wallet Search',
+            url: process.env.NEXT_PUBLIC_BASE_URL || 'https://walletsearch.vercel.app',
+            splashImageUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://walletsearch.vercel.app'}/WalletSearchIcon.png`,
+            splashBackgroundColor: '#000000',
+          },
+        },
+      }),
     },
   };
 }

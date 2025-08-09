@@ -52,60 +52,57 @@ export async function GET(req: NextRequest) {
       return `$${(v / 1_000_000).toFixed(1)}M`;
     };
     
-    // Prepare top 10 tokens for 2-column display
+    // Create a formatted text layout that simulates 2 columns
     const topTokens = tokens.slice(0, 10);
-    const leftTokens = topTokens.slice(0, 5);
-    const rightTokens = topTokens.slice(5, 10);
+    
+    // Format all 10 tokens in a structured way
+    const tokenLines = [];
+    for (let i = 0; i < 5; i++) {
+      const leftToken = topTokens[i];
+      const rightToken = topTokens[i + 5];
+      
+      const leftText = leftToken 
+        ? `${i + 1}. ${leftToken.token_symbol || leftToken.token_name || 'TOKEN'} ${formatUsd(leftToken.value_usd)}`
+        : '';
+        
+      const rightText = rightToken 
+        ? `${i + 6}. ${rightToken.token_symbol || rightToken.token_name || 'TOKEN'} ${formatUsd(rightToken.value_usd)}`
+        : '';
+        
+      if (leftText || rightText) {
+        // Pad left text to create column effect
+        const paddedLeft = leftText.padEnd(35, ' ');
+        tokenLines.push(`${paddedLeft}${rightText}`);
+      }
+    }
+    
+    const formattedTokens = tokenLines.join('\n');
 
-    // Create text strings for each column
-    const leftColumn = leftTokens.map((token, i) => 
-      `${i + 1}. ${token.token_symbol || token.token_name || 'TOKEN'} ${formatUsd(token.value_usd)}`
-    ).join('\n');
-
-    const rightColumn = rightTokens.map((token, i) => 
-      `${i + 6}. ${token.token_symbol || token.token_name || 'TOKEN'} ${formatUsd(token.value_usd)}`
-    ).join('\n');
+    // Create one comprehensive text block with header, tokens, and footer
+    const header = `@${username} • Portfolio: ${formatUsd(total_value_usd)}\n\n`;
+    const footer = `\n\nSearch Wallets 🔎`;
+    const fullContent = header + formattedTokens + footer;
 
     return new ImageResponse(
       (
         <div
           style={{
+            fontSize: 18,
             color: 'white',
             background: '#0B1020',
             width: '100%',
             height: '100%',
             display: 'flex',
-            flexDirection: 'column',
-            padding: 40,
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 50,
+            textAlign: 'center',
+            fontFamily: 'monospace',
+            lineHeight: 1.6,
+            whiteSpace: 'pre-line',
           }}
         >
-          {/* Header */}
-          <div style={{ textAlign: 'center', marginBottom: 30 }}>
-            <div style={{ fontSize: 32, fontWeight: 'bold' }}>@{username}</div>
-            <div style={{ fontSize: 24, marginTop: 10 }}>Portfolio: {formatUsd(total_value_usd)}</div>
-          </div>
-
-          {/* Two Column Layout */}
-          <div style={{ display: 'flex', flex: 1 }}>
-            {/* Left Column */}
-            <div style={{ flex: 1, paddingRight: 20 }}>
-              <div style={{ fontSize: 18, lineHeight: 1.6, whiteSpace: 'pre-line' }}>
-                {leftColumn || 'No tokens'}
-              </div>
-            </div>
-
-            {/* Right Column */}
-            <div style={{ flex: 1, paddingLeft: 20 }}>
-              <div style={{ fontSize: 18, lineHeight: 1.6, whiteSpace: 'pre-line' }}>
-                {rightColumn || ''}
-              </div>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div style={{ textAlign: 'center', marginTop: 20 }}>
-            <div style={{ fontSize: 16, opacity: 0.8 }}>Search Wallets 🔎</div>
-          </div>
+          {fullContent}
         </div>
       ),
       {

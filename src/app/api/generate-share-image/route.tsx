@@ -78,9 +78,6 @@ export async function GET(req: NextRequest) {
       return `$${(v / 1_000_000).toFixed(1)}M`;
     };
     
-    // If we got images, try to use one as background or create a simple text representation
-    const hasImages = tokensWithImages.some(t => t.imageDataUri);
-    
     // Create text representation
     const tokenText = tokensWithImages
       .map((token, i) => `${i + 1}. ${token.token_symbol} ${formatUsd(token.value_usd)}`)

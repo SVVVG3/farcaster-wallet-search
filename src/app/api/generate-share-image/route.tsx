@@ -44,12 +44,13 @@ export async function GET(req: NextRequest) {
     }
 
     // Helper function to load image with timeout
-    const loadImageWithTimeout = async (imageUrl: string, timeout = 5000): Promise<any | null> => {
+    const loadImageWithTimeout = async (imageUrl: string, timeout = 5000): Promise<HTMLImageElement | null> => {
       try {
-        return await Promise.race([
+        const result = await Promise.race([
           loadImage(imageUrl),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeout))
+          new Promise<HTMLImageElement>((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeout))
         ]);
+        return result;
       } catch {
         return null;
       }

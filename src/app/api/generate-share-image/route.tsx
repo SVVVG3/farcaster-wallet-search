@@ -9,9 +9,10 @@
 
 import { NextRequest } from 'next/server';
 import { ImageResponse } from 'next/og';
-import { fetchUserTokenBalances } from '@/lib/neynar';
 
-export const runtime = 'nodejs';
+// IMPORTANT: ImageResponse is designed for the Edge runtime. Keep this route on Edge
+// and avoid importing Node-only modules here.
+export const runtime = 'edge';
 
 const WIDTH = 1200;
 const HEIGHT = 630;
@@ -43,8 +44,26 @@ export async function GET(req: NextRequest) {
       ? bankrAddressesParam.split(',').map((s) => s.trim()).filter(Boolean)
       : [];
 
-    // Fetch top 10 tokens using existing server-side function
-    const { tokens, total_value_usd } = await fetchUserTokenBalances(fid, bankrAddresses);
+    // Fetch token data via our Node API route to keep this Edge-safe
+    const origin = req.nextUrl.origin || 'https://walletsearch.vercel.app';
+    const apiUrl = new URL(`${origin}/api/balance`);
+    apiUrl.searchParams.set('fid', String(fid));
+    if (bankrAddresses.length > 0) apiUrl.searchParams.set('bankrAddresses', bankrAddresses.join(','));
+
+    let tokens: Array<{ token_address: string; token_name: string; token_symbol: string; value_usd?: number }>; 
+    let total_value_usd = 0;
+    try {
+      const res = await fetch(apiUrl.toString(), { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        tokens = Array.isArray(data.tokens) ? data.tokens : [];
+        total_value_usd = typeof data.total_value_usd === 'number' ? data.total_value_usd : 0;
+      } else {
+        tokens = [];
+      }
+    } catch {
+      tokens = [];
+    }
 
     // Simple two-column layout with token numbers 1–10
     const left = tokens.slice(0, 5);
@@ -161,10 +180,36 @@ export async function GET(req: NextRequest) {
       {
         width: WIDTH,
         height: HEIGHT,
+        headers: {
+          // Cache dynamic images as recommended by docs to avoid blank previews
+          'Cache-Control': 'public, immutable, no-transform, max-age=300',
+        },
       }
     );
   } catch {
-    return new Response('Failed to generate image', { status: 500 });
+    // Return a tiny fallback image to avoid blank embed if something fails
+    return new ImageResponse(
+      (
+        <div style={{
+          width: WIDTH,
+          height: HEIGHT,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#0B1020',
+          color: '#E6E8F0',
+          fontSize: 32,
+          fontWeight: 800,
+        }}>
+          Wallet Search
+        </div>
+      ),
+      {
+        width: WIDTH,
+        height: HEIGHT,
+        headers: { 'Cache-Control': 'public, no-transform, max-age=60' },
+      }
+    );
   }
 }
 

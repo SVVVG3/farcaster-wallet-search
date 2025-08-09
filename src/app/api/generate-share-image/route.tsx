@@ -52,6 +52,14 @@ export async function GET(req: NextRequest) {
       return `$${(v / 1_000_000).toFixed(1)}M`;
     };
     
+    // Create a simple token list string to avoid complex JSX
+    const topTokens = tokens.slice(0, 5);
+    const tokenListText = topTokens.length > 0 
+      ? topTokens.map((token, i) => 
+          `${i + 1}. ${token.token_symbol || token.token_name || 'TOKEN'} ${formatUsd(token.value_usd)}`
+        ).join('  •  ')
+      : 'No tokens found';
+
     return new ImageResponse(
       (
         <div
@@ -62,45 +70,23 @@ export async function GET(req: NextRequest) {
             height: '100%',
             display: 'flex',
             flexDirection: 'column',
-            padding: 40,
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 50,
+            textAlign: 'center',
           }}
         >
-          {/* Header */}
-          <div style={{ display: 'flex', marginBottom: 30 }}>
-            <div style={{ fontSize: 36, fontWeight: 'bold' }}>
-              @{username} • Total {formatUsd(total_value_usd)}
-            </div>
+          <div style={{ fontSize: 36, fontWeight: 'bold', marginBottom: 20 }}>
+            @{username}
           </div>
-
-          {/* Token List */}
-          <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-            {tokens.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                {tokens.slice(0, 5).map((token, i) => (
-                  <div key={i} style={{ 
-                    fontSize: 24, 
-                    marginBottom: 12,
-                    display: 'flex'
-                  }}>
-                    {i + 1}. {token.token_symbol || token.token_name || 'TOKEN'} - {formatUsd(token.value_usd)}
-                  </div>
-                ))}
-                {tokens.length > 5 && (
-                  <div style={{ fontSize: 20, opacity: 0.7, marginTop: 10 }}>
-                    ...and {tokens.length - 5} more tokens
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div style={{ fontSize: 24, opacity: 0.8 }}>No tokens found</div>
-            )}
+          <div style={{ fontSize: 24, marginBottom: 30 }}>
+            Total Portfolio: {formatUsd(total_value_usd)}
           </div>
-
-          {/* Footer */}
-          <div style={{ display: 'flex', marginTop: 20 }}>
-            <div style={{ fontSize: 20, opacity: 0.8 }}>
-              Search Wallets 🔎
-            </div>
+          <div style={{ fontSize: 18, opacity: 0.9, lineHeight: 1.4 }}>
+            {tokenListText}
+          </div>
+          <div style={{ fontSize: 16, opacity: 0.7, marginTop: 30 }}>
+            Search Wallets 🔎
           </div>
         </div>
       ),

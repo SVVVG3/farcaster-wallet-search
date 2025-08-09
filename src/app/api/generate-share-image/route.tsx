@@ -56,18 +56,52 @@ export async function GET(req: NextRequest) {
       (
         <div
           style={{
-            fontSize: 40,
             color: 'white',
             background: '#0B1020',
             width: '100%',
             height: '100%',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 50,
+            flexDirection: 'column',
+            padding: 40,
           }}
         >
-          @{username} • {tokens.length} tokens • Total {formatUsd(total_value_usd)} • Search Wallets 🔎
+          {/* Header */}
+          <div style={{ display: 'flex', marginBottom: 30 }}>
+            <div style={{ fontSize: 36, fontWeight: 'bold' }}>
+              @{username} • Total {formatUsd(total_value_usd)}
+            </div>
+          </div>
+
+          {/* Token List */}
+          <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+            {tokens.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                {tokens.slice(0, 5).map((token, i) => (
+                  <div key={i} style={{ 
+                    fontSize: 24, 
+                    marginBottom: 12,
+                    display: 'flex'
+                  }}>
+                    {i + 1}. {token.token_symbol || token.token_name || 'TOKEN'} - {formatUsd(token.value_usd)}
+                  </div>
+                ))}
+                {tokens.length > 5 && (
+                  <div style={{ fontSize: 20, opacity: 0.7, marginTop: 10 }}>
+                    ...and {tokens.length - 5} more tokens
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div style={{ fontSize: 24, opacity: 0.8 }}>No tokens found</div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div style={{ display: 'flex', marginTop: 20 }}>
+            <div style={{ fontSize: 20, opacity: 0.8 }}>
+              Search Wallets 🔎
+            </div>
+          </div>
         </div>
       ),
       {

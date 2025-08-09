@@ -55,12 +55,29 @@ export async function GET(req: NextRequest) {
     // Prepare top 10 tokens for display with visual elements
     const topTokens = tokens.slice(0, 10);
     
-    // Create formatted text with token icons using Unicode circles
+    // Create formatted text with token icons using different symbols
     const createTokenLine = (token: { token_symbol?: string; token_name?: string; value_usd?: number }, index: number): string => {
       if (!token) return '';
       const symbol = token.token_symbol || token.token_name || 'TOKEN';
       const value = formatUsd(token.value_usd);
-      const icon = '●'; // Unicode circle as token icon
+      
+      // Use different emojis/symbols for different token types
+      const getTokenIcon = (tokenSymbol: string): string => {
+        const s = tokenSymbol.toUpperCase();
+        if (s.includes('ETH') || s === 'WETH') return '🔷';
+        if (s.includes('BTC') || s === 'WBTC') return '🟠';
+        if (s.includes('USDC') || s.includes('USDT') || s.includes('DAI')) return '💵';
+        if (s.includes('SOL')) return '🟣';
+        if (s.includes('LINK')) return '🔗';
+        if (s.includes('UNI')) return '🦄';
+        if (s.includes('AAVE')) return '👻';
+        if (s.includes('COMP')) return '🏛️';
+        if (s.includes('SUSHI')) return '🍣';
+        if (s.includes('CRV')) return '🌊';
+        return '🪙'; // Default coin emoji
+      };
+      
+      const icon = getTokenIcon(symbol);
       return `${icon} ${index}. ${symbol} ${value}`;
     };
 

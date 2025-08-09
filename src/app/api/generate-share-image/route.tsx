@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { createCanvas, loadImage } from 'canvas';
+import { createCanvas, loadImage, Image } from 'canvas';
 
 export const runtime = 'nodejs';
 
@@ -44,11 +44,11 @@ export async function GET(req: NextRequest) {
     }
 
     // Helper function to load image with timeout
-    const loadImageWithTimeout = async (imageUrl: string, timeout = 5000): Promise<HTMLImageElement | null> => {
+    const loadImageWithTimeout = async (imageUrl: string, timeout = 5000): Promise<Image | null> => {
       try {
         const result = await Promise.race([
           loadImage(imageUrl),
-          new Promise<HTMLImageElement>((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeout))
+          new Promise<Image>((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeout))
         ]);
         return result;
       } catch {

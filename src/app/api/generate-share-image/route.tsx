@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { ImageResponse } from 'next/og';
 
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 export async function GET(req: NextRequest) {
   try {
@@ -93,33 +93,22 @@ export async function GET(req: NextRequest) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {leftTokens.map((token) => (
                 <div key={token.position} style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                  {/* Actual Token Image */}
-                  {token.imageUrl ? (
-                    <img
-                      src={token.imageUrl}
-                      width="32"
-                      height="32"
-                      style={{
-                        borderRadius: '50%',
-                        border: '2px solid #4F46E5',
-                      }}
-                      alt=""
-                    />
-                  ) : (
-                    <div style={{
-                      width: '32px',
-                      height: '32px',
-                      borderRadius: '50%',
-                      backgroundColor: '#4F46E5',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '12px',
-                      fontWeight: 'bold',
-                    }}>
-                      {token.position}
-                    </div>
-                  )}
+                  {/* Token Circle - Satori can't handle external images reliably */}
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    backgroundColor: `hsl(${(token.position - 1) * 36}, 70%, 50%)`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    color: 'white',
+                    border: '2px solid #4F46E5',
+                  }}>
+                    {token.position}
+                  </div>
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
                       {token.position}. {token.token_symbol}
@@ -136,33 +125,22 @@ export async function GET(req: NextRequest) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {rightTokens.map((token) => (
                 <div key={token.position} style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                  {/* Actual Token Image */}
-                  {token.imageUrl ? (
-                    <img
-                      src={token.imageUrl}
-                      width="32"
-                      height="32"
-                      style={{
-                        borderRadius: '50%',
-                        border: '2px solid #4F46E5',
-                      }}
-                      alt=""
-                    />
-                  ) : (
-                    <div style={{
-                      width: '32px',
-                      height: '32px',
-                      borderRadius: '50%',
-                      backgroundColor: '#4F46E5',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '12px',
-                      fontWeight: 'bold',
-                    }}>
-                      {token.position}
-                    </div>
-                  )}
+                  {/* Token Circle - Satori can't handle external images reliably */}
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    backgroundColor: `hsl(${(token.position - 1) * 36}, 70%, 50%)`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    color: 'white',
+                    border: '2px solid #4F46E5',
+                  }}>
+                    {token.position}
+                  </div>
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
                       {token.position}. {token.token_symbol}

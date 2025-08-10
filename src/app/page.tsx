@@ -267,6 +267,16 @@ export default function Home() {
         {!searchResults ? (
           /* Search Interface */
           <div className="max-w-2xl mx-auto">
+            {/* Tip Dev Button */}
+            <div className="flex justify-center mb-6">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600 dark:text-gray-300">
+                  Enjoying Wallet Search?
+                </span>
+                <TipDev />
+              </div>
+            </div>
+
             <div className="text-center mb-6 md:mb-8">
               <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3 md:mb-4">
                 Search Farcaster Profiles
@@ -385,42 +395,31 @@ export default function Home() {
       {/* Footer */}
       <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col items-center gap-4">
-            {/* Tip Dev Button */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-500 dark:text-gray-400">
-                Enjoying Wallet Search?
-              </span>
-              <TipDev />
-            </div>
-            
-            {/* Attribution */}
-            <div className="text-center text-sm text-gray-600 dark:text-gray-400">
-              <p>
-                Powered by{' '}
-                <button
-                  onClick={() => handleExternalLink('https://neynar.com/')}
-                  className="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer border-none bg-transparent p-0 font-inherit"
-                >
-                  Neynar
-                </button>
-                {' '}&{' '}
-                <button
-                  onClick={() => handleExternalLink('https://bankr.bot/api')}
-                  className="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer border-none bg-transparent p-0 font-inherit"
-                >
-                  Bankr API
-                </button>
-                {' '}• Vibe Coded w/ love by{' '}
-                <button
-                  onClick={handleFarcasterProfile}
-                  className="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer border-none bg-transparent p-0 font-inherit"
-                >
-                  SVVVG3
-                </button>
-                {' '}for the Farcaster community 💜
-              </p>
-            </div>
+          <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+            <p>
+              Powered by{' '}
+              <button
+                onClick={() => handleExternalLink('https://neynar.com/')}
+                className="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer border-none bg-transparent p-0 font-inherit"
+              >
+                Neynar
+              </button>
+              {' '}&{' '}
+              <button
+                onClick={() => handleExternalLink('https://bankr.bot/api')}
+                className="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer border-none bg-transparent p-0 font-inherit"
+              >
+                Bankr API
+              </button>
+              {' '}• Vibe Coded w/ love by{' '}
+              <button
+                onClick={handleFarcasterProfile}
+                className="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer border-none bg-transparent p-0 font-inherit"
+              >
+                SVVVG3
+              </button>
+              {' '}for the Farcaster community 💜
+            </p>
           </div>
         </div>
       </footer>

@@ -51,140 +51,172 @@ export async function GET(req: NextRequest) {
       return `$${(v / 1_000_000).toFixed(1)}M`;
     };
 
-    // FUCK SATORI! Use Node.js Canvas API to actually draw the images properly
-    const { createCanvas, loadImage } = await import('canvas');
-    
-    const canvas = createCanvas(1200, 800);
-    const ctx = canvas.getContext('2d');
-
-    // Background
-    ctx.fillStyle = '#0B1020';
-    ctx.fillRect(0, 0, 1200, 800);
-
-    // Header
-    ctx.fillStyle = 'white';
-    ctx.font = 'bold 32px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(`@${username}`, 600, 80);
-
-    ctx.font = '24px Arial';
-    ctx.fillStyle = '#E6E8F0';
-    ctx.fillText(`Portfolio: ${formatUsd(total_value_usd)}`, 600, 120);
-
-    // Draw tokens with actual images in 2 columns
-    const leftTokens = tokens.slice(0, 5);
-    const rightTokens = tokens.slice(5, 10);
-
-    // Left column
-    for (let i = 0; i < leftTokens.length; i++) {
-      const token = leftTokens[i];
-      const y = 180 + (i * 80);
+    // Canvas approach with actual token images - FINALLY!
+    try {
+      const { createCanvas, loadImage } = await import('canvas');
       
-      try {
-        // Load and draw token image
-        if (token.logo_url) {
-          const image = await loadImage(token.logo_url);
-          ctx.save();
-          ctx.beginPath();
-          ctx.arc(150, y, 20, 0, Math.PI * 2);
-          ctx.closePath();
-          ctx.clip();
-          ctx.drawImage(image, 130, y - 20, 40, 40);
-          ctx.restore();
-        } else {
-          // Fallback circle
+      const canvas = createCanvas(1200, 800);
+      const ctx = canvas.getContext('2d');
+
+      // Background
+      ctx.fillStyle = '#0B1020';
+      ctx.fillRect(0, 0, 1200, 800);
+
+      // Header
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 32px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(`@${username}`, 600, 80);
+
+      ctx.font = '24px Arial';
+      ctx.fillStyle = '#E6E8F0';
+      ctx.fillText(`Portfolio: ${formatUsd(total_value_usd)}`, 600, 120);
+
+      // Draw tokens with actual images in 2 columns
+      const leftTokens = tokens.slice(0, 5);
+      const rightTokens = tokens.slice(5, 10);
+
+      // Left column
+      for (let i = 0; i < leftTokens.length; i++) {
+        const token = leftTokens[i];
+        const y = 180 + (i * 80);
+        
+        try {
+          // Load and draw token image
+          if (token.logo_url) {
+            const image = await loadImage(token.logo_url);
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(150, y, 20, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.clip();
+            ctx.drawImage(image, 130, y - 20, 40, 40);
+            ctx.restore();
+          } else {
+            // Fallback circle
+            ctx.fillStyle = '#4F46E5';
+            ctx.beginPath();
+            ctx.arc(150, y, 20, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'white';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText((i + 1).toString(), 150, y + 4);
+          }
+
+          // Token text
+          ctx.fillStyle = 'white';
+          ctx.font = 'bold 18px Arial';
+          ctx.textAlign = 'left';
+          ctx.fillText(`${i + 1}. ${token.token_symbol}`, 200, y - 5);
+          
+          ctx.font = '16px Arial';
+          ctx.fillStyle = '#E6E8F0';
+          ctx.fillText(formatUsd(token.value_usd), 200, y + 20);
+        } catch (error) {
+          console.log(`Failed to load image for ${token.token_symbol}:`, error);
+          // Draw fallback circle
           ctx.fillStyle = '#4F46E5';
           ctx.beginPath();
           ctx.arc(150, y, 20, 0, Math.PI * 2);
           ctx.fill();
+          
+          // Token text even if image fails
           ctx.fillStyle = 'white';
-          ctx.font = '12px Arial';
-          ctx.textAlign = 'center';
-          ctx.fillText((i + 1).toString(), 150, y + 4);
+          ctx.font = 'bold 18px Arial';
+          ctx.textAlign = 'left';
+          ctx.fillText(`${i + 1}. ${token.token_symbol}`, 200, y - 5);
+          
+          ctx.font = '16px Arial';
+          ctx.fillStyle = '#E6E8F0';
+          ctx.fillText(formatUsd(token.value_usd), 200, y + 20);
         }
-
-        // Token text
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 18px Arial';
-        ctx.textAlign = 'left';
-        ctx.fillText(`${i + 1}. ${token.token_symbol}`, 200, y - 5);
-        
-        ctx.font = '16px Arial';
-        ctx.fillStyle = '#E6E8F0';
-        ctx.fillText(formatUsd(token.value_usd), 200, y + 20);
-      } catch (error) {
-        console.log(`Failed to load image for ${token.token_symbol}:`, error);
-        // Draw fallback
-        ctx.fillStyle = '#4F46E5';
-        ctx.beginPath();
-        ctx.arc(150, y, 20, 0, Math.PI * 2);
-        ctx.fill();
       }
-    }
 
-    // Right column
-    for (let i = 0; i < rightTokens.length; i++) {
-      const token = rightTokens[i];
-      const y = 180 + (i * 80);
-      
-      try {
-        // Load and draw token image
-        if (token.logo_url) {
-          const image = await loadImage(token.logo_url);
-          ctx.save();
-          ctx.beginPath();
-          ctx.arc(650, y, 20, 0, Math.PI * 2);
-          ctx.closePath();
-          ctx.clip();
-          ctx.drawImage(image, 630, y - 20, 40, 40);
-          ctx.restore();
-        } else {
-          // Fallback circle
+      // Right column
+      for (let i = 0; i < rightTokens.length; i++) {
+        const token = rightTokens[i];
+        const y = 180 + (i * 80);
+        
+        try {
+          // Load and draw token image
+          if (token.logo_url) {
+            const image = await loadImage(token.logo_url);
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(650, y, 20, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.clip();
+            ctx.drawImage(image, 630, y - 20, 40, 40);
+            ctx.restore();
+          } else {
+            // Fallback circle
+            ctx.fillStyle = '#4F46E5';
+            ctx.beginPath();
+            ctx.arc(650, y, 20, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'white';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText((i + 6).toString(), 650, y + 4);
+          }
+
+          // Token text
+          ctx.fillStyle = 'white';
+          ctx.font = 'bold 18px Arial';
+          ctx.textAlign = 'left';
+          ctx.fillText(`${i + 6}. ${token.token_symbol}`, 700, y - 5);
+          
+          ctx.font = '16px Arial';
+          ctx.fillStyle = '#E6E8F0';
+          ctx.fillText(formatUsd(token.value_usd), 700, y + 20);
+        } catch (error) {
+          console.log(`Failed to load image for ${token.token_symbol}:`, error);
+          // Draw fallback circle
           ctx.fillStyle = '#4F46E5';
           ctx.beginPath();
           ctx.arc(650, y, 20, 0, Math.PI * 2);
           ctx.fill();
+          
+          // Token text even if image fails
           ctx.fillStyle = 'white';
-          ctx.font = '12px Arial';
-          ctx.textAlign = 'center';
-          ctx.fillText((i + 6).toString(), 650, y + 4);
+          ctx.font = 'bold 18px Arial';
+          ctx.textAlign = 'left';
+          ctx.fillText(`${i + 6}. ${token.token_symbol}`, 700, y - 5);
+          
+          ctx.font = '16px Arial';
+          ctx.fillStyle = '#E6E8F0';
+          ctx.fillText(formatUsd(token.value_usd), 700, y + 20);
         }
-
-        // Token text
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 18px Arial';
-        ctx.textAlign = 'left';
-        ctx.fillText(`${i + 6}. ${token.token_symbol}`, 700, y - 5);
-        
-        ctx.font = '16px Arial';
-        ctx.fillStyle = '#E6E8F0';
-        ctx.fillText(formatUsd(token.value_usd), 700, y + 20);
-      } catch (error) {
-        console.log(`Failed to load image for ${token.token_symbol}:`, error);
-        // Draw fallback
-        ctx.fillStyle = '#4F46E5';
-        ctx.beginPath();
-        ctx.arc(650, y, 20, 0, Math.PI * 2);
-        ctx.fill();
       }
+
+      // Footer
+      ctx.fillStyle = '#9CA3AF';
+      ctx.font = '14px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('Search by ETH/SOL wallet address or Farcaster/X username on Wallet Search 🔎', 600, 750);
+
+      // Return PNG buffer
+      const buffer = canvas.toBuffer('image/png');
+      
+      return new Response(buffer, {
+        status: 200,
+        headers: {
+          'Content-Type': 'image/png',
+          'Cache-Control': 'public, max-age=3600',
+        },
+      });
+    } catch (canvasError) {
+      console.error('Canvas error:', canvasError);
+      
+      // Fallback to simple response
+      return new Response(`Canvas Error: ${canvasError instanceof Error ? canvasError.message : 'Unknown canvas error'}`, {
+        status: 500,
+        headers: {
+          'Content-Type': 'text/plain',
+        },
+      });
     }
-
-    // Footer
-    ctx.fillStyle = '#9CA3AF';
-    ctx.font = '14px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('Search by ETH/SOL wallet address or Farcaster/X username on Wallet Search 🔎', 600, 750);
-
-    // Return PNG buffer
-    const buffer = canvas.toBuffer('image/png');
-    
-    return new Response(buffer, {
-      status: 200,
-      headers: {
-        'Content-Type': 'image/png',
-        'Cache-Control': 'public, max-age=3600',
-      },
-    });
   } catch (e) {
     return new Response(`Error: ${e instanceof Error ? e.message : 'Unknown error'}`, {
       status: 500,

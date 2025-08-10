@@ -62,13 +62,13 @@ export async function GET(req: NextRequest) {
       ctx.fillStyle = '#0B1020';
       ctx.fillRect(0, 0, 1200, 800);
 
-      // Header
+      // Header - use sans-serif for better Vercel compatibility
       ctx.fillStyle = 'white';
-      ctx.font = 'bold 32px Arial';
+      ctx.font = 'bold 32px sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(`@${username}`, 600, 80);
 
-      ctx.font = '24px Arial';
+      ctx.font = '24px sans-serif';
       ctx.fillStyle = '#E6E8F0';
       ctx.fillText(`Portfolio: ${formatUsd(total_value_usd)}`, 600, 120);
 
@@ -85,7 +85,14 @@ export async function GET(req: NextRequest) {
           // Load and draw token image - prefer R2 URL if available
           const imageUrl = token.r2_image_url || token.logo_url;
           if (imageUrl) {
-            const image = await loadImage(imageUrl);
+            // Add timeout and better error handling for image loading
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const image = await Promise.race([
+              loadImage(imageUrl),
+              new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Image load timeout')), 5000)
+              )
+            ]) as any;
             ctx.save();
             ctx.beginPath();
             ctx.arc(150, y, 20, 0, Math.PI * 2);
@@ -100,22 +107,22 @@ export async function GET(req: NextRequest) {
             ctx.arc(150, y, 20, 0, Math.PI * 2);
             ctx.fill();
             ctx.fillStyle = 'white';
-            ctx.font = '12px Arial';
+            ctx.font = '12px sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText((i + 1).toString(), 150, y + 4);
           }
 
           // Token text
           ctx.fillStyle = 'white';
-          ctx.font = 'bold 18px Arial';
+          ctx.font = 'bold 18px sans-serif';
           ctx.textAlign = 'left';
           ctx.fillText(`${i + 1}. ${token.token_symbol}`, 200, y - 5);
           
-          ctx.font = '16px Arial';
+          ctx.font = '16px sans-serif';
           ctx.fillStyle = '#E6E8F0';
           ctx.fillText(formatUsd(token.value_usd), 200, y + 20);
         } catch (error) {
-          console.log(`Failed to load image for ${token.token_symbol}:`, error);
+          console.log(`Failed to load image for ${token.token_symbol} (${imageUrl}):`, error);
           // Draw fallback circle
           ctx.fillStyle = '#4F46E5';
           ctx.beginPath();
@@ -124,11 +131,11 @@ export async function GET(req: NextRequest) {
           
           // Token text even if image fails
           ctx.fillStyle = 'white';
-          ctx.font = 'bold 18px Arial';
+          ctx.font = 'bold 18px sans-serif';
           ctx.textAlign = 'left';
           ctx.fillText(`${i + 1}. ${token.token_symbol}`, 200, y - 5);
           
-          ctx.font = '16px Arial';
+          ctx.font = '16px sans-serif';
           ctx.fillStyle = '#E6E8F0';
           ctx.fillText(formatUsd(token.value_usd), 200, y + 20);
         }
@@ -143,7 +150,14 @@ export async function GET(req: NextRequest) {
           // Load and draw token image - prefer R2 URL if available
           const imageUrl = token.r2_image_url || token.logo_url;
           if (imageUrl) {
-            const image = await loadImage(imageUrl);
+            // Add timeout and better error handling for image loading
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const image = await Promise.race([
+              loadImage(imageUrl),
+              new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Image load timeout')), 5000)
+              )
+            ]) as any;
             ctx.save();
             ctx.beginPath();
             ctx.arc(650, y, 20, 0, Math.PI * 2);
@@ -158,22 +172,22 @@ export async function GET(req: NextRequest) {
             ctx.arc(650, y, 20, 0, Math.PI * 2);
             ctx.fill();
             ctx.fillStyle = 'white';
-            ctx.font = '12px Arial';
+            ctx.font = '12px sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText((i + 6).toString(), 650, y + 4);
           }
 
           // Token text
           ctx.fillStyle = 'white';
-          ctx.font = 'bold 18px Arial';
+          ctx.font = 'bold 18px sans-serif';
           ctx.textAlign = 'left';
           ctx.fillText(`${i + 6}. ${token.token_symbol}`, 700, y - 5);
           
-          ctx.font = '16px Arial';
+          ctx.font = '16px sans-serif';
           ctx.fillStyle = '#E6E8F0';
           ctx.fillText(formatUsd(token.value_usd), 700, y + 20);
         } catch (error) {
-          console.log(`Failed to load image for ${token.token_symbol}:`, error);
+          console.log(`Failed to load image for ${token.token_symbol} (${imageUrl}):`, error);
           // Draw fallback circle
           ctx.fillStyle = '#4F46E5';
           ctx.beginPath();
@@ -182,11 +196,11 @@ export async function GET(req: NextRequest) {
           
           // Token text even if image fails
           ctx.fillStyle = 'white';
-          ctx.font = 'bold 18px Arial';
+          ctx.font = 'bold 18px sans-serif';
           ctx.textAlign = 'left';
           ctx.fillText(`${i + 6}. ${token.token_symbol}`, 700, y - 5);
           
-          ctx.font = '16px Arial';
+          ctx.font = '16px sans-serif';
           ctx.fillStyle = '#E6E8F0';
           ctx.fillText(formatUsd(token.value_usd), 700, y + 20);
         }
@@ -194,7 +208,7 @@ export async function GET(req: NextRequest) {
 
       // Footer
       ctx.fillStyle = '#9CA3AF';
-      ctx.font = '14px Arial';
+      ctx.font = '14px sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText('Search by ETH/SOL wallet address or Farcaster/X username on Wallet Search 🔎', 600, 750);
 

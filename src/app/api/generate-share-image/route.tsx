@@ -52,33 +52,83 @@ export async function GET(req: NextRequest) {
       return `$${(v / 1_000_000).toFixed(1)}M`;
     };
 
-    // Create single-column token list - simplest approach that works
-    const tokenText = tokens.slice(0, 10)
-      .map((token, i) => `${i + 1}. ${token.token_symbol} ${formatUsd(token.value_usd)}`)
-      .join('\n');
-
-    const content = `@${username}\nPortfolio: ${formatUsd(total_value_usd)}\n\n${tokenText}\n\nSearch by ETH/SOL wallet address or\nFarcaster/X username on Wallet Search 🔎`;
-
+    // Simple layout with token images using external URLs
     return new ImageResponse(
       (
         <div
           style={{
-            fontSize: 18,
-            color: 'white',
             background: '#0B1020',
             width: '100%',
             height: '100%',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 50,
-            textAlign: 'center',
-            lineHeight: 1.6,
-            whiteSpace: 'pre-line',
+            flexDirection: 'column',
+            padding: '40px',
             fontFamily: 'system-ui, sans-serif',
+            color: 'white',
           }}
         >
-          {content}
+          {/* Header */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '30px' }}>
+            <div style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>
+              @{username}
+            </div>
+            <div style={{ fontSize: '24px', color: '#E6E8F0' }}>
+              Portfolio: {formatUsd(total_value_usd)}
+            </div>
+          </div>
+
+          {/* Token List */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
+            {tokens.slice(0, 10).map((token, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                {/* Token Image */}
+                {token.logo_url ? (
+                  <img
+                    src={token.logo_url}
+                    width="32"
+                    height="32"
+                    style={{ borderRadius: '50%' }}
+                    alt=""
+                  />
+                ) : (
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    backgroundColor: '#4F46E5',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '12px',
+                  }}>
+                    {(i + 1).toString()}
+                  </div>
+                )}
+                
+                {/* Token Info */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '18px', fontWeight: '600' }}>
+                    {i + 1}. {token.token_symbol}
+                  </span>
+                  <span style={{ fontSize: '16px', color: '#E6E8F0' }}>
+                    {formatUsd(token.value_usd)}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Footer */}
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            marginTop: '20px',
+            fontSize: '14px',
+            color: '#9CA3AF',
+            textAlign: 'center'
+          }}>
+            Search by ETH/SOL wallet address or Farcaster/X username on Wallet Search 🔎
+          </div>
         </div>
       ),
       {

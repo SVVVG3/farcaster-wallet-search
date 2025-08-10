@@ -155,12 +155,40 @@ export default function Home() {
 
       // Get the connected user's FID from Farcaster context
       const context = await sdk.context;
-      if (!context || !context.client || typeof context.client.clientFid !== 'number') {
-        throw new Error('Unable to get your Farcaster profile. Please make sure you\'re using this in the Farcaster app.');
+      console.log('Full SDK context:', context);
+      
+      if (!context) {
+        throw new Error('Unable to get Farcaster context. Please make sure you\'re using this in the Farcaster app.');
       }
 
-      const userFid = context.client.clientFid;
-      console.log('Connected user FID:', userFid);
+      // Try different ways to access the user FID
+      let userFid: number | null = null;
+      
+      // Method 1: context.client.clientFid (most common)
+      if (context.client && typeof context.client.clientFid === 'number') {
+        userFid = context.client.clientFid;
+        console.log('Found FID via context.client.clientFid:', userFid);
+      }
+      // Method 2: context.user.fid (alternative)
+      else if (context.user && typeof context.user.fid === 'number') {
+        userFid = context.user.fid;
+        console.log('Found FID via context.user.fid:', userFid);
+      }
+      // Method 3: Check if context has fid property (with type safety)
+      else if ('fid' in context && typeof (context as any).fid === 'number') {
+        userFid = (context as any).fid;
+        console.log('Found FID via context.fid:', userFid);
+      }
+
+      if (!userFid) {
+        console.error('Could not find FID in context. Available properties:', Object.keys(context));
+        if (context.client) {
+          console.error('Client properties:', Object.keys(context.client));
+        }
+        throw new Error('Unable to get your Farcaster FID. Please make sure you\'re logged into the Farcaster app.');
+      }
+
+      console.log('Using FID for search:', userFid);
 
       // Search for the user's profile using their FID
       const response = await fetch('/api/search', {
@@ -263,11 +291,15 @@ export default function Home() {
                   onMouseEnter={(e) => !isLoading && (e.currentTarget.style.backgroundColor = '#6b5bb3')}
                   onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#7c65c1')}
                 >
-                  <span className="text-lg">👤</span>
+                  <img 
+                    src="/farcaster-arch-icon.png" 
+                    alt="Farcaster" 
+                    className="w-4 h-4"
+                  />
                   <span>{isLoading ? 'Loading...' : 'My Wallets'}</span>
                 </button>
                 <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
-                  View your own Farcaster profile and token holdings
+                  View all wallets and your top token holdings
                 </p>
               </div>
             </div>

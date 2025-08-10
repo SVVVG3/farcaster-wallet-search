@@ -61,7 +61,8 @@ export async function GET(request: NextRequest) {
     // Create token elements using React.createElement pattern
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const createTokenElement = (token: any, index: number) => {
-      const imageUrl = token.r2_image_url || token.logo_url;
+      // Prefer original URLs over R2 for now - R2 having issues
+      const imageUrl = token.logo_url;
       const colors = ['hsl(0, 70%, 50%)', 'hsl(36, 70%, 50%)', 'hsl(72, 70%, 50%)', 'hsl(108, 70%, 50%)', 'hsl(144, 70%, 50%)', 'hsl(180, 70%, 50%)', 'hsl(216, 70%, 50%)', 'hsl(252, 70%, 50%)', 'hsl(288, 70%, 50%)', 'hsl(324, 70%, 50%)'];
       
       return React.createElement('div', 

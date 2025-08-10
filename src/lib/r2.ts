@@ -17,9 +17,17 @@ const PUBLIC_URL = process.env.R2_PUBLIC_URL!;
  * Generate a consistent key for token images based on the original URL
  */
 function generateImageKey(originalUrl: string): string {
-  // Create a hash-like key from the URL for consistent naming
-  const urlHash = Buffer.from(originalUrl).toString('base64').replace(/[^a-zA-Z0-9]/g, '').slice(0, 20);
-  const extension = originalUrl.split('.').pop()?.toLowerCase() || 'png';
+  // Clean the URL by removing query parameters for consistent hashing
+  const cleanUrl = originalUrl.split('?')[0];
+  
+  // Create a full base64 hash from the clean URL
+  const urlHash = Buffer.from(cleanUrl).toString('base64')
+    .replace(/[+=\/]/g, '')  // Remove base64 special chars
+    .replace(/[^a-zA-Z0-9]/g, ''); // Remove any other special chars
+  
+  // Extract extension from clean URL
+  const extension = cleanUrl.split('.').pop()?.toLowerCase() || 'png';
+  
   return `token-images/${urlHash}.${extension}`;
 }
 

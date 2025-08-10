@@ -240,9 +240,18 @@ export default function Home() {
                 <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white truncate">
                   Wallet Search
                 </h1>
-                <p className="text-gray-600 dark:text-gray-400 text-xs md:text-sm">
-                  Find Farcaster profiles linked to wallet addresses
+                <p className="text-gray-600 dark:text-gray-400 text-xs md:text-sm mb-2">
+                  Find Farcaster profiles & all linked wallets!
                 </p>
+                {/* Tip Dev Section in Header */}
+                <div className="flex justify-center">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      Enjoying Wallet Search?
+                    </span>
+                    <TipDev />
+                  </div>
+                </div>
               </div>
             </div>
             
@@ -267,21 +276,10 @@ export default function Home() {
         {!searchResults ? (
           /* Search Interface */
           <div className="max-w-2xl mx-auto">
-            {/* Tip Dev Button */}
-            <div className="flex justify-center mb-6">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600 dark:text-gray-300">
-                  Enjoying Wallet Search?
-                </span>
-                <TipDev />
-              </div>
-            </div>
-
             <div className="text-center mb-6 md:mb-8">
               <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3 md:mb-4">
                 Search Farcaster Profiles
               </h2>
-
             </div>
 
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 md:p-8">

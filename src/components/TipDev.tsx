@@ -43,10 +43,10 @@ export default function TipDev() {
       const amount = parseUnits('1', 6);
       
       await writeContract({
-        address: USDC_CONTRACT_ADDRESS,
+        address: USDC_CONTRACT_ADDRESS as `0x${string}`,
         abi: ERC20_ABI,
         functionName: 'transfer',
-        args: [TIP_ADDRESS, amount],
+        args: [TIP_ADDRESS as `0x${string}`, amount],
       });
 
       setShowSuccess(true);

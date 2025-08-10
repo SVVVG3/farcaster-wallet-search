@@ -91,7 +91,11 @@ export default function AddressInput({ onAddressSubmit, isLoading = false, disab
 
   return (
     <div className="w-full max-w-2xl mx-auto space-y-4">
-
+      <div className="space-y-2">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          Enter Ethereum/Solana addresses, Farcaster usernames, FIDs, or X usernames to find linked profiles
+        </p>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="flex flex-col sm:flex-row gap-2">

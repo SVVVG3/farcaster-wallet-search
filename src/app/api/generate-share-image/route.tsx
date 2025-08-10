@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
       return React.createElement('div', 
         { 
           key: index,
-          style: { display: 'flex', alignItems: 'center', gap: 30, marginBottom: 40 } 
+          style: { display: 'flex', alignItems: 'center', gap: 30, marginBottom: 30 } 
         },
         // Token image or circle - DOUBLED SIZE
         imageUrl 
@@ -128,9 +128,9 @@ export async function GET(request: NextRequest) {
           color: 'white',
         }
       },
-        // Header - ONE LINE WITH POSSESSIVE
+        // Header - REDUCED SPACING BY 50%
         React.createElement('div', {
-          style: { display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 60 }
+          style: { display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 30 }
         },
           React.createElement('div', {
             style: { fontSize: 54, fontWeight: 'bold', color: 'white', textAlign: 'center' }

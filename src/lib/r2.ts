@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand, GetObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
 
 // Initialize R2 client
 const r2Client = new S3Client({
@@ -112,7 +112,7 @@ export async function getTokenImageUrl(originalUrl: string): Promise<string> {
 /**
  * Batch process multiple token image URLs
  */
-export async function processTokenImages(tokens: Array<{ logo_url?: string; [key: string]: any }>): Promise<Array<{ logo_url?: string; r2_image_url?: string; [key: string]: any }>> {
+export async function processTokenImages(tokens: Array<{ logo_url?: string; token_symbol?: string; [key: string]: unknown }>): Promise<Array<{ logo_url?: string; r2_image_url?: string; token_symbol?: string; [key: string]: unknown }>> {
   const processedTokens = await Promise.all(
     tokens.map(async (token) => {
       if (token.logo_url) {

@@ -83,6 +83,7 @@ export async function GET(req: NextRequest) {
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                 {/* Token Image */}
                 {token.r2_image_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={token.r2_image_url}
                     width="32"

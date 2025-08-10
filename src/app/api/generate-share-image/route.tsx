@@ -68,43 +68,43 @@ export async function GET(request: NextRequest) {
       return React.createElement('div', 
         { 
           key: index,
-          style: { display: 'flex', alignItems: 'center', gap: 15, marginBottom: 20 } 
+          style: { display: 'flex', alignItems: 'center', gap: 30, marginBottom: 40 } 
         },
-        // Token image or circle
+        // Token image or circle - DOUBLED SIZE
         imageUrl 
           ? React.createElement('img', {
               src: imageUrl,
-              width: 32,
-              height: 32,
+              width: 64,
+              height: 64,
               style: {
                 borderRadius: '50%',
-                border: '2px solid #4F46E5',
+                border: '4px solid #4F46E5',
               }
             })
           : React.createElement('div', {
               style: {
-                width: 32,
-                height: 32,
+                width: 64,
+                height: 64,
                 borderRadius: '50%',
                 backgroundColor: colors[index % colors.length],
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: 12,
+                fontSize: 24,
                 fontWeight: 'bold',
                 color: 'white',
-                border: '2px solid #4F46E5',
+                border: '4px solid #4F46E5',
               }
             }, (index + 1).toString()),
-        // Token details
+        // Token details - DOUBLED FONT SIZES
         React.createElement('div', 
           { style: { display: 'flex', flexDirection: 'column' } },
           React.createElement('div', 
-            { style: { fontSize: 16, fontWeight: 'bold', color: 'white' } },
+            { style: { fontSize: 32, fontWeight: 'bold', color: 'white' } },
             `${index + 1}. ${token.token_symbol}`
           ),
           React.createElement('div', 
-            { style: { fontSize: 14, color: '#E6E8F0' } },
+            { style: { fontSize: 28, color: '#E6E8F0' } },
             formatUsd(token.value_usd)
           )
         )
@@ -128,21 +128,21 @@ export async function GET(request: NextRequest) {
           color: 'white',
         }
       },
-        // Header
+        // Header - DOUBLED SIZES
         React.createElement('div', {
-          style: { display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 30 }
+          style: { display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 60 }
         },
           React.createElement('div', {
-            style: { fontSize: 32, fontWeight: 'bold', marginBottom: 8 }
+            style: { fontSize: 64, fontWeight: 'bold', marginBottom: 16 }
           }, `@${username}`),
           React.createElement('div', {
-            style: { fontSize: 24, color: '#E6E8F0' }
+            style: { fontSize: 48, color: '#E6E8F0' }
           }, `Portfolio: ${formatUsd(total_value_usd)}`)
         ),
         
-        // 2-Column Layout
+        // 2-Column Layout - DOUBLED GAP
         React.createElement('div', {
-          style: { display: 'flex', gap: 60, flex: 1, justifyContent: 'center' }
+          style: { display: 'flex', gap: 120, flex: 1, justifyContent: 'center' }
         },
           // Left Column
           React.createElement('div', {
@@ -155,13 +155,13 @@ export async function GET(request: NextRequest) {
           }, ...rightTokens)
         ),
         
-        // Footer
+        // Footer - DOUBLED SIZE
         React.createElement('div', {
           style: { 
             display: 'flex', 
             justifyContent: 'center', 
-            marginTop: 20,
-            fontSize: 12,
+            marginTop: 40,
+            fontSize: 24,
             color: '#9CA3AF',
             textAlign: 'center'
           }

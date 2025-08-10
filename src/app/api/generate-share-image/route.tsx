@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
     apiUrl.searchParams.set('fid', String(fid));
     if (bankrAddresses.length > 0) apiUrl.searchParams.set('bankrAddresses', bankrAddresses.join(','));
 
-    let tokens: Array<{ token_address: string; token_name: string; token_symbol: string; value_usd?: number; logo_url?: string; imageDataUri?: string | null }> = [];
+    let tokens: Array<{ token_address: string; token_name: string; token_symbol: string; value_usd?: number; logo_url?: string; r2_image_url?: string | null }> = [];
     let total_value_usd = 0;
 
     try {
@@ -82,9 +82,9 @@ export async function GET(req: NextRequest) {
             {tokens.slice(0, 10).map((token, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                 {/* Token Image */}
-                {token.logo_url ? (
+                {token.r2_image_url ? (
                   <img
-                    src={token.logo_url}
+                    src={token.r2_image_url}
                     width="32"
                     height="32"
                     style={{ borderRadius: '50%' }}

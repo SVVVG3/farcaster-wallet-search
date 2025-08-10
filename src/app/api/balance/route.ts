@@ -1,34 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchUserTokenBalances } from '@/lib/neynar';
-
-// Helper function to fetch image and convert to data URI
-async function fetchImageAsDataUri(imageUrl: string, timeout = 5000): Promise<string | null> {
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-    
-    const response = await fetch(imageUrl, { 
-      signal: controller.signal,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; WalletSearch/1.0)',
-      }
-    });
-    
-    clearTimeout(timeoutId);
-    
-    if (!response.ok) return null;
-    
-    const arrayBuffer = await response.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    const contentType = response.headers.get('content-type') || 'image/png';
-    const base64 = buffer.toString('base64');
-    
-    return `data:${contentType};base64,${base64}`;
-  } catch (error) {
-    console.log(`Failed to fetch image: ${imageUrl}, Error: ${error}`);
-    return null;
-  }
-}
+import { processTokenImages } from '@/lib/r2';
 
 export async function GET(request: NextRequest) {
   try {
@@ -63,34 +35,23 @@ export async function GET(request: NextRequest) {
     
     const balanceResult = await fetchUserTokenBalances(fid, bankrAddresses);
     
-    // Add image data URIs for top 10 tokens
-    const tokensWithImages = await Promise.all(
-      balanceResult.tokens.slice(0, 10).map(async (token) => {
-        if (token.logo_url) {
-          try {
-            const imageDataUri = await fetchImageAsDataUri(token.logo_url);
-            return { ...token, imageDataUri };
-          } catch {
-            return { ...token, imageDataUri: null };
-          }
-        }
-        return { ...token, imageDataUri: null };
-      })
-    );
+    // Process token images with R2 for top 10 tokens
+    const topTokens = balanceResult.tokens.slice(0, 10);
+    const processedTopTokens = await processTokenImages(topTokens);
     
-    // Add imageDataUri: null to remaining tokens for consistency
+    // Add r2_image_url: null to remaining tokens for consistency
     const remainingTokens = balanceResult.tokens.slice(10).map(token => ({
       ...token,
-      imageDataUri: null
+      r2_image_url: null
     }));
 
     // Replace the tokens array with the enhanced version
     const enhancedResult = {
       ...balanceResult,
-      tokens: tokensWithImages.concat(remainingTokens)
+      tokens: processedTopTokens.concat(remainingTokens)
     };
     
-    console.log(`Balance API: Returning ${enhancedResult.tokens.length} tokens for FID ${fid}, ${tokensWithImages.filter(t => t.imageDataUri).length} with images`);
+    console.log(`Balance API: Returning ${enhancedResult.tokens.length} tokens for FID ${fid}, ${processedTopTokens.filter(t => t.r2_image_url).length} with R2 images`);
     
     return NextResponse.json(enhancedResult);
 

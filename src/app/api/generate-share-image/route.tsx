@@ -1,14 +1,17 @@
 import { NextRequest } from 'next/server';
 import { ImageResponse } from 'next/og';
+import React from 'react';
 
 export const runtime = 'edge';
 
-export async function GET(req: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
+    const { searchParams } = new URL(request.url);
     const fidParam = searchParams.get('fid');
     const username = searchParams.get('username') || 'user';
     const bankrAddressesParam = searchParams.get('bankrAddresses');
+    // Accept cache-busting
+    const _v = searchParams.get('v');
 
     if (!fidParam) {
       return new Response('Missing fid', { status: 400 });
@@ -23,8 +26,8 @@ export async function GET(req: NextRequest) {
       ? bankrAddressesParam.split(',').map((s) => s.trim()).filter(Boolean)
       : [];
 
-    // Fetch token data with image data URIs from Node.js balance API
-    const origin = req.nextUrl.origin || 'https://walletsearch.vercel.app';
+    // Fetch token data from balance API
+    const origin = request.nextUrl.origin || 'https://walletsearch.vercel.app';
     const apiUrl = new URL(`${origin}/api/balance`);
     apiUrl.searchParams.set('fid', String(fid));
     if (bankrAddresses.length > 0) apiUrl.searchParams.set('bankrAddresses', bankrAddresses.join(','));
@@ -52,93 +55,115 @@ export async function GET(req: NextRequest) {
       return `$${(v / 1_000_000).toFixed(1)}M`;
     };
 
-    // PRE-BUILD JSX ELEMENTS - Satori limitation workaround
+    // PROVEN PATTERN: Use React.createElement for complex structures
     const topTokens = tokens.slice(0, 10);
     
-    // Create hardcoded token elements to avoid .map() in JSX
-    const tokenElements = [];
-    const colors = ['hsl(0, 70%, 50%)', 'hsl(36, 70%, 50%)', 'hsl(72, 70%, 50%)', 'hsl(108, 70%, 50%)', 'hsl(144, 70%, 50%)', 'hsl(180, 70%, 50%)', 'hsl(216, 70%, 50%)', 'hsl(252, 70%, 50%)', 'hsl(288, 70%, 50%)', 'hsl(324, 70%, 50%)'];
-    
-    for (let i = 0; i < Math.min(topTokens.length, 10); i++) {
-      const token = topTokens[i];
-      tokenElements.push(
-        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <div style={{
-            width: '32px',
-            height: '32px',
-            borderRadius: '50%',
-            backgroundColor: colors[i],
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '12px',
-            fontWeight: 'bold',
-            color: 'white',
-            border: '2px solid #4F46E5',
-          }}>
-            {i + 1}
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
-              {i + 1}. {token.token_symbol}
-            </div>
-            <div style={{ fontSize: '14px', color: '#E6E8F0' }}>
-              {formatUsd(token.value_usd)}
-            </div>
-          </div>
-        </div>
+    // Create token elements using React.createElement pattern
+    const createTokenElement = (token: any, index: number) => {
+      const imageUrl = token.r2_image_url || token.logo_url;
+      const colors = ['hsl(0, 70%, 50%)', 'hsl(36, 70%, 50%)', 'hsl(72, 70%, 50%)', 'hsl(108, 70%, 50%)', 'hsl(144, 70%, 50%)', 'hsl(180, 70%, 50%)', 'hsl(216, 70%, 50%)', 'hsl(252, 70%, 50%)', 'hsl(288, 70%, 50%)', 'hsl(324, 70%, 50%)'];
+      
+      return React.createElement('div', 
+        { 
+          key: index,
+          style: { display: 'flex', alignItems: 'center', gap: 15, marginBottom: 20 } 
+        },
+        // Token image or circle
+        imageUrl 
+          ? React.createElement('img', {
+              src: imageUrl,
+              width: 32,
+              height: 32,
+              style: {
+                borderRadius: '50%',
+                border: '2px solid #4F46E5',
+              }
+            })
+          : React.createElement('div', {
+              style: {
+                width: 32,
+                height: 32,
+                borderRadius: '50%',
+                backgroundColor: colors[index % colors.length],
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 12,
+                fontWeight: 'bold',
+                color: 'white',
+                border: '2px solid #4F46E5',
+              }
+            }, (index + 1).toString()),
+        // Token details
+        React.createElement('div', 
+          { style: { display: 'flex', flexDirection: 'column' } },
+          React.createElement('div', 
+            { style: { fontSize: 16, fontWeight: 'bold', color: 'white' } },
+            `${index + 1}. ${token.token_symbol}`
+          ),
+          React.createElement('div', 
+            { style: { fontSize: 14, color: '#E6E8F0' } },
+            formatUsd(token.value_usd)
+          )
+        )
       );
-    }
+    };
+
+    // Build left and right columns
+    const leftTokens = topTokens.slice(0, 5).map((token, i) => createTokenElement(token, i));
+    const rightTokens = topTokens.slice(5, 10).map((token, i) => createTokenElement(token, i + 5));
 
     return new ImageResponse(
-      (
-        <div
-          style={{
-            background: '#0B1020',
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            padding: '40px',
-            fontFamily: 'system-ui, sans-serif',
-            color: 'white',
-          }}
-        >
-          {/* Header */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '30px' }}>
-            <div style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>
-              @{username}
-            </div>
-            <div style={{ fontSize: '24px', color: '#E6E8F0' }}>
-              Portfolio: {formatUsd(total_value_usd)}
-            </div>
-          </div>
-
-          {/* 2-Column Layout with pre-built elements */}
-          <div style={{ display: 'flex', gap: '60px', flex: 1, justifyContent: 'center' }}>
-            {/* Left Column */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {tokenElements.slice(0, 5)}
-            </div>
-
-            {/* Right Column */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {tokenElements.slice(5, 10)}
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div style={{ 
+      React.createElement('div', {
+        style: {
+          background: '#0B1020',
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          padding: 40,
+          fontFamily: 'system-ui, sans-serif',
+          color: 'white',
+        }
+      },
+        // Header
+        React.createElement('div', {
+          style: { display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 30 }
+        },
+          React.createElement('div', {
+            style: { fontSize: 32, fontWeight: 'bold', marginBottom: 8 }
+          }, `@${username}`),
+          React.createElement('div', {
+            style: { fontSize: 24, color: '#E6E8F0' }
+          }, `Portfolio: ${formatUsd(total_value_usd)}`)
+        ),
+        
+        // 2-Column Layout
+        React.createElement('div', {
+          style: { display: 'flex', gap: 60, flex: 1, justifyContent: 'center' }
+        },
+          // Left Column
+          React.createElement('div', {
+            style: { display: 'flex', flexDirection: 'column' }
+          }, ...leftTokens),
+          
+          // Right Column  
+          React.createElement('div', {
+            style: { display: 'flex', flexDirection: 'column' }
+          }, ...rightTokens)
+        ),
+        
+        // Footer
+        React.createElement('div', {
+          style: { 
             display: 'flex', 
             justifyContent: 'center', 
-            marginTop: '20px',
-            fontSize: '12px',
+            marginTop: 20,
+            fontSize: 12,
             color: '#9CA3AF',
             textAlign: 'center'
-          }}>
-            Search by ETH/SOL wallet address or Farcaster/X username on Wallet Search 🔎
-          </div>
-        </div>
+          }
+        }, 'Search by ETH/SOL wallet address or Farcaster/X username on Wallet Search 🔎')
       ),
       {
         width: 1200,

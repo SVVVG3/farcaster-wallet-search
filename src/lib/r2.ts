@@ -112,7 +112,8 @@ export async function getTokenImageUrl(originalUrl: string): Promise<string> {
 /**
  * Batch process multiple token image URLs
  */
-export async function processTokenImages(tokens: Array<{ logo_url?: string; token_symbol?: string; [key: string]: unknown }>): Promise<Array<{ logo_url?: string; r2_image_url?: string; token_symbol?: string; [key: string]: unknown }>> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function processTokenImages(tokens: Array<any>): Promise<Array<any>> {
   const processedTokens = await Promise.all(
     tokens.map(async (token) => {
       if (token.logo_url) {

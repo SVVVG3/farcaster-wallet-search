@@ -236,6 +236,12 @@ export default function TokenBalances({ fid, username, bankrAddresses = [] }: To
       params.set('v', Date.now().toString());
       const shareUrl = `${base}/share?${params.toString()}`;
       const text = `View @${username}'s top holdings across all Farcaster connected wallets on Wallet Search!`;
+      
+      // Debug logging to verify URL construction
+      console.log('Share URL constructed:', shareUrl);
+      console.log('Share URL is valid URL:', shareUrl.startsWith('http'));
+      console.log('Cast text:', text);
+      
       if (sdk && sdk.actions && sdk.actions.composeCast) {
         await sdk.actions.composeCast({ text, embeds: [shareUrl] });
       } else {

@@ -1,7 +1,6 @@
 import { NextRequest } from 'next/server';
-import { ImageResponse } from 'next/og';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {
   try {
@@ -52,111 +51,140 @@ export async function GET(req: NextRequest) {
       return `$${(v / 1_000_000).toFixed(1)}M`;
     };
 
-    // Test approach: manually create token elements without .map()
-    const topTokens = tokens.slice(0, 3); // Start with just 3 tokens to test
+    // FUCK SATORI! Use Node.js Canvas API to actually draw the images properly
+    const { createCanvas, loadImage } = await import('canvas');
+    
+    const canvas = createCanvas(1200, 800);
+    const ctx = canvas.getContext('2d');
 
-    return new ImageResponse(
-      (
-        <div
-          style={{
-            background: '#0B1020',
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            padding: '40px',
-            fontFamily: 'system-ui, sans-serif',
-            color: 'white',
-          }}
-        >
-          {/* Header */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '30px' }}>
-            <div style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>
-              @{username}
-            </div>
-            <div style={{ fontSize: '24px', color: '#E6E8F0' }}>
-              Portfolio: {formatUsd(total_value_usd)}
-            </div>
-          </div>
+    // Background
+    ctx.fillStyle = '#0B1020';
+    ctx.fillRect(0, 0, 1200, 800);
 
-          {/* Token List - Manual elements (no .map()) */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', flex: 1 }}>
-            {/* Token 1 */}
-            {topTokens[0] && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                {topTokens[0].logo_url && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={topTokens[0].logo_url}
-                    width="32"
-                    height="32"
-                    style={{ borderRadius: '50%' }}
-                    alt=""
-                  />
-                )}
-                <div style={{ fontSize: '18px' }}>
-                  1. {topTokens[0].token_symbol} {formatUsd(topTokens[0].value_usd)}
-                </div>
-              </div>
-            )}
+    // Header
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 32px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(`@${username}`, 600, 80);
 
-            {/* Token 2 */}
-            {topTokens[1] && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                {topTokens[1].logo_url && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={topTokens[1].logo_url}
-                    width="32"
-                    height="32"
-                    style={{ borderRadius: '50%' }}
-                    alt=""
-                  />
-                )}
-                <div style={{ fontSize: '18px' }}>
-                  2. {topTokens[1].token_symbol} {formatUsd(topTokens[1].value_usd)}
-                </div>
-              </div>
-            )}
+    ctx.font = '24px Arial';
+    ctx.fillStyle = '#E6E8F0';
+    ctx.fillText(`Portfolio: ${formatUsd(total_value_usd)}`, 600, 120);
 
-            {/* Token 3 */}
-            {topTokens[2] && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                {topTokens[2].logo_url && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={topTokens[2].logo_url}
-                    width="32"
-                    height="32"
-                    style={{ borderRadius: '50%' }}
-                    alt=""
-                  />
-                )}
-                <div style={{ fontSize: '18px' }}>
-                  3. {topTokens[2].token_symbol} {formatUsd(topTokens[2].value_usd)}
-                </div>
-              </div>
-            )}
-          </div>
+    // Draw tokens with actual images in 2 columns
+    const leftTokens = tokens.slice(0, 5);
+    const rightTokens = tokens.slice(5, 10);
 
-          {/* Footer */}
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            marginTop: '20px',
-            fontSize: '14px',
-            color: '#9CA3AF',
-            textAlign: 'center'
-          }}>
-            Search by ETH/SOL wallet address or Farcaster/X username on Wallet Search 🔎
-          </div>
-        </div>
-      ),
-      {
-        width: 1200,
-        height: 800,
+    // Left column
+    for (let i = 0; i < leftTokens.length; i++) {
+      const token = leftTokens[i];
+      const y = 180 + (i * 80);
+      
+      try {
+        // Load and draw token image
+        if (token.logo_url) {
+          const image = await loadImage(token.logo_url);
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(150, y, 20, 0, Math.PI * 2);
+          ctx.closePath();
+          ctx.clip();
+          ctx.drawImage(image, 130, y - 20, 40, 40);
+          ctx.restore();
+        } else {
+          // Fallback circle
+          ctx.fillStyle = '#4F46E5';
+          ctx.beginPath();
+          ctx.arc(150, y, 20, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = 'white';
+          ctx.font = '12px Arial';
+          ctx.textAlign = 'center';
+          ctx.fillText((i + 1).toString(), 150, y + 4);
+        }
+
+        // Token text
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 18px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText(`${i + 1}. ${token.token_symbol}`, 200, y - 5);
+        
+        ctx.font = '16px Arial';
+        ctx.fillStyle = '#E6E8F0';
+        ctx.fillText(formatUsd(token.value_usd), 200, y + 20);
+      } catch (error) {
+        console.log(`Failed to load image for ${token.token_symbol}:`, error);
+        // Draw fallback
+        ctx.fillStyle = '#4F46E5';
+        ctx.beginPath();
+        ctx.arc(150, y, 20, 0, Math.PI * 2);
+        ctx.fill();
       }
-    );
+    }
+
+    // Right column
+    for (let i = 0; i < rightTokens.length; i++) {
+      const token = rightTokens[i];
+      const y = 180 + (i * 80);
+      
+      try {
+        // Load and draw token image
+        if (token.logo_url) {
+          const image = await loadImage(token.logo_url);
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(650, y, 20, 0, Math.PI * 2);
+          ctx.closePath();
+          ctx.clip();
+          ctx.drawImage(image, 630, y - 20, 40, 40);
+          ctx.restore();
+        } else {
+          // Fallback circle
+          ctx.fillStyle = '#4F46E5';
+          ctx.beginPath();
+          ctx.arc(650, y, 20, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = 'white';
+          ctx.font = '12px Arial';
+          ctx.textAlign = 'center';
+          ctx.fillText((i + 6).toString(), 650, y + 4);
+        }
+
+        // Token text
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 18px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText(`${i + 6}. ${token.token_symbol}`, 700, y - 5);
+        
+        ctx.font = '16px Arial';
+        ctx.fillStyle = '#E6E8F0';
+        ctx.fillText(formatUsd(token.value_usd), 700, y + 20);
+      } catch (error) {
+        console.log(`Failed to load image for ${token.token_symbol}:`, error);
+        // Draw fallback
+        ctx.fillStyle = '#4F46E5';
+        ctx.beginPath();
+        ctx.arc(650, y, 20, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // Footer
+    ctx.fillStyle = '#9CA3AF';
+    ctx.font = '14px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Search by ETH/SOL wallet address or Farcaster/X username on Wallet Search 🔎', 600, 750);
+
+    // Return PNG buffer
+    const buffer = canvas.toBuffer('image/png');
+    
+    return new Response(buffer, {
+      status: 200,
+      headers: {
+        'Content-Type': 'image/png',
+        'Cache-Control': 'public, max-age=3600',
+      },
+    });
   } catch (e) {
     return new Response(`Error: ${e instanceof Error ? e.message : 'Unknown error'}`, {
       status: 500,

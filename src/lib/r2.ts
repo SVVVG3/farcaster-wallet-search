@@ -1,4 +1,5 @@
 import { S3Client, PutObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
+import sharp from 'sharp';
 
 // Initialize R2 client
 const r2Client = new S3Client({
@@ -47,7 +48,7 @@ async function imageExistsInR2(key: string): Promise<boolean> {
 }
 
 /**
- * Upload image to R2 from external URL
+ * Upload image to R2 from external URL, converting WebP to PNG if needed
  */
 async function uploadImageToR2(originalUrl: string, key: string): Promise<boolean> {
   try {
@@ -65,17 +66,56 @@ async function uploadImageToR2(originalUrl: string, key: string): Promise<boolea
 
     const imageBuffer = await response.arrayBuffer();
     const contentType = response.headers.get('content-type') || 'image/png';
+    
+    console.log(`Fetched image: ${originalUrl}, content-type: ${contentType}, size: ${imageBuffer.byteLength}`);
+
+    let finalBuffer: Buffer;
+    let finalContentType = 'image/png';
+    let finalKey = key;
+
+    // Convert WebP and other formats to PNG for Satori compatibility
+    if (contentType === 'image/webp' || contentType === 'image/svg+xml' || !contentType.startsWith('image/')) {
+      try {
+        console.log(`Converting ${contentType} to PNG for Satori compatibility`);
+        
+        // Use Sharp to convert any image format to PNG
+        finalBuffer = await sharp(Buffer.from(imageBuffer))
+          .png({ quality: 90, compressionLevel: 6 })
+          .resize(64, 64, { fit: 'cover' }) // Optimize size for token logos
+          .toBuffer();
+        
+        // Ensure key has .png extension
+        finalKey = key.replace(/\.(webp|svg|jpg|jpeg|gif)$/i, '.png');
+        
+        console.log(`Successfully converted to PNG: ${imageBuffer.byteLength} -> ${finalBuffer.length} bytes`);
+      } catch (conversionError) {
+        console.error(`Failed to convert image ${originalUrl}:`, conversionError);
+        return false;
+      }
+    } else {
+      // For PNG/JPG, use as-is but still optimize size
+      try {
+        finalBuffer = await sharp(Buffer.from(imageBuffer))
+          .resize(64, 64, { fit: 'cover' })
+          .toBuffer();
+        finalContentType = contentType;
+      } catch (optimizeError) {
+        console.log(`Failed to optimize image, using original: ${optimizeError}`);
+        finalBuffer = Buffer.from(imageBuffer);
+        finalContentType = contentType;
+      }
+    }
 
     // Upload to R2
     await r2Client.send(new PutObjectCommand({
       Bucket: BUCKET_NAME,
-      Key: key,
-      Body: new Uint8Array(imageBuffer),
-      ContentType: contentType,
+      Key: finalKey,
+      Body: finalBuffer,
+      ContentType: finalContentType,
       CacheControl: 'public, max-age=31536000', // Cache for 1 year
     }));
 
-    console.log(`Successfully uploaded image to R2: ${key}`);
+    console.log(`Successfully uploaded image to R2: ${finalKey} (${finalContentType}), final size: ${finalBuffer.length}`);
     return true;
   } catch (error) {
     console.error(`Failed to upload image to R2: ${originalUrl}`, error);

@@ -29,14 +29,14 @@ export async function GET(req: NextRequest) {
     apiUrl.searchParams.set('fid', String(fid));
     if (bankrAddresses.length > 0) apiUrl.searchParams.set('bankrAddresses', bankrAddresses.join(','));
 
-    // let tokens: Array<{ token_address: string; token_name: string; token_symbol: string; value_usd?: number; logo_url?: string; imageDataUri?: string | null }> = [];
+    let tokens: Array<{ token_address: string; token_name: string; token_symbol: string; value_usd?: number; logo_url?: string; imageDataUri?: string | null }> = [];
     let total_value_usd = 0;
 
     try {
       const res = await fetch(apiUrl.toString(), { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
-        // tokens = Array.isArray(data.tokens) ? data.tokens.slice(0, 10) : [];
+        tokens = Array.isArray(data.tokens) ? data.tokens.slice(0, 10) : [];
         total_value_usd = typeof data.total_value_usd === 'number' ? data.total_value_usd : 0;
       }
     } catch {
@@ -52,7 +52,18 @@ export async function GET(req: NextRequest) {
       return `$${(v / 1_000_000).toFixed(1)}M`;
     };
 
-    // EXACT copy from docs - absolute simplest approach
+    // Build 2-column layout with token data using pre-line formatting
+    const leftTokens = tokens.slice(0, 5);
+    const rightTokens = tokens.slice(5, 10);
+
+    const leftText = leftTokens
+      .map((token, i) => `${i + 1}. ${token.token_symbol}\n   ${formatUsd(token.value_usd)}`)
+      .join('\n\n');
+
+    const rightText = rightTokens
+      .map((token, i) => `${i + 6}. ${token.token_symbol}\n   ${formatUsd(token.value_usd)}`)
+      .join('\n\n');
+
     return new ImageResponse(
       (
         <div
@@ -61,29 +72,49 @@ export async function GET(req: NextRequest) {
             width: '100%',
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
             backgroundColor: '#0B1020',
             color: 'white',
             padding: '40px',
+            fontFamily: 'system-ui, sans-serif',
           }}
         >
-          <div
-            style={{
-              fontSize: 60,
-              fontWeight: 'bold',
-              textAlign: 'center',
-            }}
-          >
-            @{username}
+          {/* Header */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '30px' }}>
+            <div style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>
+              @{username}
+            </div>
+            <div style={{ fontSize: '24px', color: '#E6E8F0' }}>
+              Portfolio: {formatUsd(total_value_usd)}
+            </div>
           </div>
-          <div
-            style={{
-              fontSize: 30,
-              marginTop: '20px',
-            }}
-          >
-            Portfolio: {formatUsd(total_value_usd)}
+
+          {/* Two Column Layout */}
+          <div style={{ display: 'flex', flex: 1, gap: '60px' }}>
+            <div style={{ 
+              display: 'flex', 
+              flex: 1, 
+              fontSize: '16px',
+              lineHeight: 1.4,
+              whiteSpace: 'pre-line'
+            }}>
+              {leftText}
+            </div>
+            <div style={{ 
+              display: 'flex', 
+              flex: 1, 
+              fontSize: '16px',
+              lineHeight: 1.4,
+              whiteSpace: 'pre-line'
+            }}>
+              {rightText}
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '30px' }}>
+            <div style={{ fontSize: '14px', color: '#A0A0A0', textAlign: 'center' }}>
+              Search by ETH/SOL wallet address or Farcaster/X username on Wallet Search 🔎
+            </div>
           </div>
         </div>
       ),

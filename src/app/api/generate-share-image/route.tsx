@@ -128,16 +128,13 @@ export async function GET(request: NextRequest) {
           color: 'white',
         }
       },
-        // Header - DOUBLED SIZES
+        // Header - ONE LINE WITH POSSESSIVE
         React.createElement('div', {
           style: { display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 60 }
         },
           React.createElement('div', {
-            style: { fontSize: 64, fontWeight: 'bold', marginBottom: 16 }
-          }, `@${username}`),
-          React.createElement('div', {
-            style: { fontSize: 48, color: '#E6E8F0' }
-          }, `Portfolio: ${formatUsd(total_value_usd)}`)
+            style: { fontSize: 54, fontWeight: 'bold', color: 'white', textAlign: 'center' }
+          }, `@${username}'s Portfolio: ${formatUsd(total_value_usd)}`)
         ),
         
         // 2-Column Layout - DOUBLED GAP

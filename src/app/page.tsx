@@ -147,6 +147,48 @@ export default function Home() {
     }
   };
 
+  const handleMyWallets = async () => {
+    try {
+      await triggerHaptic();
+      setIsLoading(true);
+      setError(null);
+
+      // Get the connected user's FID from Farcaster context
+      const context = await sdk.context;
+      if (!context || !context.client || typeof context.client.clientFid !== 'number') {
+        throw new Error('Unable to get your Farcaster profile. Please make sure you\'re using this in the Farcaster app.');
+      }
+
+      const userFid = context.client.clientFid;
+      console.log('Connected user FID:', userFid);
+
+      // Search for the user's profile using their FID
+      const response = await fetch('/api/search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ inputs: [userFid.toString()] }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch your profile');
+      }
+
+      const data = await response.json();
+      setSearchResults(data.results);
+      
+      // Scroll to top after search results are loaded
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+      console.error('My Wallets error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load your wallets');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
@@ -207,6 +249,27 @@ export default function Home() {
                 isLoading={isLoading}
                 disabled={isLoading}
               />
+              
+              {/* My Wallets Button */}
+              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <button
+                  onClick={handleMyWallets}
+                  disabled={isLoading}
+                  className="w-full px-4 py-3 text-white rounded-lg transition-all duration-200 text-sm font-medium
+                           flex items-center justify-center space-x-2 min-h-[48px]
+                           disabled:opacity-50 disabled:cursor-not-allowed
+                           hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98]"
+                  style={{ backgroundColor: '#7c65c1' }}
+                  onMouseEnter={(e) => !isLoading && (e.currentTarget.style.backgroundColor = '#6b5bb3')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#7c65c1')}
+                >
+                  <span className="text-lg">👤</span>
+                  <span>{isLoading ? 'Loading...' : 'My Wallets'}</span>
+                </button>
+                <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
+                  View your own Farcaster profile and token holdings
+                </p>
+              </div>
             </div>
 
             {error && (

@@ -82,9 +82,10 @@ export async function GET(req: NextRequest) {
         const y = 180 + (i * 80);
         
         try {
-          // Load and draw token image
-          if (token.logo_url) {
-            const image = await loadImage(token.logo_url);
+          // Load and draw token image - prefer R2 URL if available
+          const imageUrl = token.r2_image_url || token.logo_url;
+          if (imageUrl) {
+            const image = await loadImage(imageUrl);
             ctx.save();
             ctx.beginPath();
             ctx.arc(150, y, 20, 0, Math.PI * 2);
@@ -139,9 +140,10 @@ export async function GET(req: NextRequest) {
         const y = 180 + (i * 80);
         
         try {
-          // Load and draw token image
-          if (token.logo_url) {
-            const image = await loadImage(token.logo_url);
+          // Load and draw token image - prefer R2 URL if available
+          const imageUrl = token.r2_image_url || token.logo_url;
+          if (imageUrl) {
+            const image = await loadImage(imageUrl);
             ctx.save();
             ctx.beginPath();
             ctx.arc(650, y, 20, 0, Math.PI * 2);

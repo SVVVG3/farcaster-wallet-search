@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
       tokens: processedTopTokens.concat(remainingTokens)
     };
     
-    console.log(`Balance API: Returning ${enhancedResult.tokens.length} tokens for FID ${fid}, ${processedTopTokens.filter(t => t.r2_image_url).length} with R2 images`);
+    console.log(`Balance API: Returning ${enhancedResult.tokens.length} tokens for FID ${fid}, ${processedTopTokens.filter(t => t.r2_image_url && t.r2_image_url !== t.logo_url).length} with R2 images`);
     
     return NextResponse.json(enhancedResult);
 

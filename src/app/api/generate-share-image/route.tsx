@@ -52,18 +52,27 @@ export async function GET(request: NextRequest) {
 
     // Fetch user profile data for profile image
     try {
-      const userApiUrl = new URL(`${origin}/api/search`);
-      userApiUrl.searchParams.set('q', String(fid));
-      userApiUrl.searchParams.set('type', 'fid');
+      const userRes = await fetch(`${origin}/api/search`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inputs: [String(fid)] }),
+        cache: 'no-store'
+      });
       
-      const userRes = await fetch(userApiUrl.toString(), { cache: 'no-store' });
       if (userRes.ok) {
         const userData = await userRes.json();
-        if (userData.users && userData.users.length > 0) {
-          userProfileImage = userData.users[0].pfp_url;
+        if (userData.results?.users && userData.results.users.length > 0) {
+          const rawProfileImage = userData.results.users[0].pfp_url;
+          
+          // Process profile image through R2 for WebP conversion if needed
+          if (rawProfileImage) {
+            const { getTokenImageUrl } = await import('@/lib/r2');
+            userProfileImage = await getTokenImageUrl(rawProfileImage);
+          }
         }
       }
-    } catch {
+    } catch (error) {
+      console.log('Failed to fetch user profile:', error);
       // Fall back to no profile image
     }
 

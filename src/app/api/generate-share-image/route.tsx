@@ -52,39 +52,14 @@ export async function GET(req: NextRequest) {
       return `$${(v / 1_000_000).toFixed(1)}M`;
     };
 
-    // CORRECT APPROACH: Following Next.js ImageResponse docs for external images
-    // Pre-fetch and convert images to data URIs for Satori compatibility
-    const processedTokens = await Promise.all(
-      tokens.slice(0, 10).map(async (token, index) => {
-        const imageUrl = token.r2_image_url || token.logo_url;
-        let imageData = null;
-        
-        if (imageUrl) {
-          try {
-            // Fetch image and convert to data URI (Satori-compatible approach)
-            const response = await fetch(imageUrl, { 
-              headers: { 'User-Agent': 'Mozilla/5.0 (compatible; WalletSearch/1.0)' }
-            });
-            if (response.ok) {
-              const arrayBuffer = await response.arrayBuffer();
-              const base64 = Buffer.from(arrayBuffer).toString('base64');
-              const contentType = response.headers.get('content-type') || 'image/png';
-              imageData = `data:${contentType};base64,${base64}`;
-            }
-          } catch (error) {
-            console.log(`Failed to fetch image for ${token.token_symbol}:`, error);
-          }
-        }
-        
-        return {
-          ...token,
-          imageData,
-          position: index + 1
-        };
-      })
-    );
+    // Use R2 URLs directly - simpler approach
+    const processedTokens = tokens.slice(0, 10).map((token, index) => ({
+      ...token,
+      imageUrl: token.r2_image_url || token.logo_url,
+      position: index + 1
+    }));
 
-    // Split into 2 columns
+    // Split into 2 columns  
     const leftTokens = processedTokens.slice(0, 5);
     const rightTokens = processedTokens.slice(5, 10);
 
@@ -119,9 +94,9 @@ export async function GET(req: NextRequest) {
               {leftTokens.map((token) => (
                 <div key={token.position} style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                   {/* Actual Token Image */}
-                  {token.imageData ? (
+                  {token.imageUrl ? (
                     <img
-                      src={token.imageData}
+                      src={token.imageUrl}
                       width="32"
                       height="32"
                       style={{
@@ -162,9 +137,9 @@ export async function GET(req: NextRequest) {
               {rightTokens.map((token) => (
                 <div key={token.position} style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                   {/* Actual Token Image */}
-                  {token.imageData ? (
+                  {token.imageUrl ? (
                     <img
-                      src={token.imageData}
+                      src={token.imageUrl}
                       width="32"
                       height="32"
                       style={{

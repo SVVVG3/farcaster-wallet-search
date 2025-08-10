@@ -51,7 +51,37 @@ export const metadata: Metadata = {
     images: ["/WalletSearchEmbed.png"],
     creator: "@_svvvg3",
   },
-
+  other: {
+    // Global Mini App embed for the root URL
+    'fc:miniapp': JSON.stringify({
+      version: '1',
+      imageUrl: 'https://walletsearch.vercel.app/WalletSearchEmbed.png',
+      button: {
+        title: '🔍 Search Wallets',
+        action: {
+          type: 'launch_miniapp',
+          name: 'Wallet Search',
+          url: 'https://walletsearch.vercel.app',
+          splashImageUrl: 'https://walletsearch.vercel.app/WalletSearchIcon.png',
+          splashBackgroundColor: '#000000',
+        },
+      },
+    }),
+    'fc:frame': JSON.stringify({
+      version: '1',
+      imageUrl: 'https://walletsearch.vercel.app/WalletSearchEmbed.png',
+      button: {
+        title: '🔍 Search Wallets',
+        action: {
+          type: 'launch_frame',
+          name: 'Wallet Search',
+          url: 'https://walletsearch.vercel.app',
+          splashImageUrl: 'https://walletsearch.vercel.app/WalletSearchIcon.png',
+          splashBackgroundColor: '#000000',
+        },
+      },
+    }),
+  },
 };
 
 export default function RootLayout({

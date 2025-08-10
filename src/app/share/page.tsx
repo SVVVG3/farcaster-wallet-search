@@ -10,7 +10,7 @@ export async function generateMetadata(
   const params = await searchParams;
   const fid = typeof params.fid === 'string' ? params.fid : Array.isArray(params.fid) ? params.fid[0] : undefined;
   const username = typeof params.username === 'string' ? params.username : Array.isArray(params.username) ? params.username[0] : undefined;
-  const bankrAddresses = typeof params.bankrAddresses === 'string' ? params.bankrAddresses : Array.isArray(params.bankrAddresses) ? params.bankrAddresses.join(',') : undefined;
+  // Remove bankrAddresses from URL params - image route will fetch them using FID
 
   const v = Date.now().toString();
 
@@ -18,7 +18,7 @@ export async function generateMetadata(
   const url = new URL(`${origin}/api/generate-share-image`);
   if (fid) url.searchParams.set('fid', fid);
   if (username) url.searchParams.set('username', username);
-  if (bankrAddresses) url.searchParams.set('bankrAddresses', bankrAddresses);
+  // No longer passing bankrAddresses - image route handles this
   url.searchParams.set('v', v);
 
   const imageUrl = url.toString();

@@ -22,12 +22,36 @@ export async function GET(request: NextRequest) {
       return new Response('Invalid fid', { status: 400 });
     }
 
-    const bankrAddresses = bankrAddressesParam
-      ? bankrAddressesParam.split(',').map((s) => s.trim()).filter(Boolean)
-      : [];
+    // If bankrAddresses not provided in URL, fetch them using search API
+    let bankrAddresses: string[] = [];
+    const origin = request.nextUrl.origin || 'https://walletsearch.vercel.app';
+    
+    if (bankrAddressesParam) {
+      bankrAddresses = bankrAddressesParam.split(',').map((s) => s.trim()).filter(Boolean);
+    } else {
+      // Fetch user data to get Bankr addresses
+      try {
+        const searchResponse = await fetch(`${origin}/api/search`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ inputs: [String(fid)] })
+        });
+        if (searchResponse.ok) {
+          const searchData = await searchResponse.json();
+          const user = searchData.results?.users?.[0];
+          if (user?.bankrData?.farcaster?.evmAddress) {
+            bankrAddresses.push(user.bankrData.farcaster.evmAddress);
+          }
+          if (user?.bankrData?.farcaster?.solanaAddress) {
+            bankrAddresses.push(user.bankrData.farcaster.solanaAddress);
+          }
+        }
+      } catch (error) {
+        console.log('Failed to fetch Bankr addresses, continuing without them:', error);
+      }
+    }
 
     // Fetch token data and user profile data
-    const origin = request.nextUrl.origin || 'https://walletsearch.vercel.app';
     
     // Fetch token balances
     const apiUrl = new URL(`${origin}/api/balance`);

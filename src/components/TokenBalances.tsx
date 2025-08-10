@@ -232,14 +232,16 @@ export default function TokenBalances({ fid, username, bankrAddresses = [] }: To
       const base = process.env.NEXT_PUBLIC_BASE_URL || 'https://walletsearch.vercel.app';
       const params = new URLSearchParams({ fid: String(fid) });
       if (username) params.set('username', username);
-      if (bankrAddresses.length > 0) params.set('bankrAddresses', bankrAddresses.join(','));
+      // Remove bankrAddresses from URL - share page will fetch them using FID
       params.set('v', Date.now().toString());
       const shareUrl = `${base}/share?${params.toString()}`;
       const text = `Check out @${username}'s top 10 holdings across all Farcaster connected wallets on Wallet Search!`;
       
       // Debug logging to verify URL construction
       console.log('Share URL constructed:', shareUrl);
+      console.log('Share URL length:', shareUrl.length);
       console.log('Share URL is valid URL:', shareUrl.startsWith('http'));
+      console.log('Share URL under 1024 chars:', shareUrl.length <= 1024);
       console.log('Cast text:', text);
       
       if (sdk && sdk.actions && sdk.actions.composeCast) {

@@ -78,6 +78,18 @@ async function uploadImageToR2(originalUrl: string, key: string): Promise<boolea
       try {
         console.log(`Converting ${contentType} to PNG for Satori compatibility`);
         
+        // For SVG files, add extra validation
+        if (contentType === 'image/svg+xml') {
+          const svgText = Buffer.from(imageBuffer).toString('utf8');
+          // Check for invalid SVG attributes that might cause issues
+          if (svgText.includes('width="small"') || svgText.includes('height="small"') || 
+              svgText.includes('width="medium"') || svgText.includes('height="medium"') ||
+              svgText.includes('width="large"') || svgText.includes('height="large"')) {
+            console.log(`Skipping SVG with invalid attributes: ${originalUrl}`);
+            return false;
+          }
+        }
+        
         // Use Sharp to convert any image format to PNG
         finalBuffer = await sharp(Buffer.from(imageBuffer))
           .png({ quality: 90, compressionLevel: 6 })

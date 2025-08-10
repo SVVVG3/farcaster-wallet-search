@@ -100,17 +100,17 @@ export async function GET(request: NextRequest) {
           key: index,
           style: { display: 'flex', alignItems: 'center', gap: 30, marginBottom: 30 } 
         },
-        // Token image or circle - DOUBLED SIZE
-        imageUrl 
-          ? React.createElement('img', {
-              src: imageUrl,
-              width: 64,
-              height: 64,
-              style: {
-                borderRadius: '50%',
-                border: '4px solid #4F46E5',
-              }
-            })
+                          // Token image or circle - DOUBLED SIZE
+                  imageUrl 
+                    ? React.createElement('img', {
+                        src: imageUrl,
+                        width: 64,
+                        height: 64,
+                        style: {
+                          borderRadius: '50%',
+                          border: '4px solid #4F46E5',
+                        }
+                      })
           : React.createElement('div', {
               style: {
                 width: 64,
@@ -220,8 +220,33 @@ export async function GET(request: NextRequest) {
     imageResponse.headers.set('Cache-Control', 'public, immutable, no-transform, max-age=300');
     return imageResponse;
   } catch (e) {
-    return new Response(`Error: ${e instanceof Error ? e.message : 'Unknown error'}`, {
-      status: 500,
-    });
+    console.error('Image generation error:', e);
+    
+    // Return a simple fallback image on error
+    try {
+      const fallbackResponse = new ImageResponse(
+        React.createElement('div', {
+          style: {
+            background: '#0B1020',
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontFamily: 'system-ui, sans-serif',
+            color: 'white',
+            fontSize: 32,
+          }
+        }, 'Wallet Search'),
+        { width: 1200, height: 800 }
+      );
+      
+      fallbackResponse.headers.set('Cache-Control', 'public, immutable, no-transform, max-age=60');
+      return fallbackResponse;
+    } catch (fallbackError) {
+      return new Response(`Error: ${e instanceof Error ? e.message : 'Unknown error'}`, {
+        status: 500,
+      });
+    }
   }
 }

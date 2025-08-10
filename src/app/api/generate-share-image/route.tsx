@@ -243,7 +243,7 @@ export async function GET(request: NextRequest) {
       
       fallbackResponse.headers.set('Cache-Control', 'public, immutable, no-transform, max-age=60');
       return fallbackResponse;
-    } catch (fallbackError) {
+    } catch {
       return new Response(`Error: ${e instanceof Error ? e.message : 'Unknown error'}`, {
         status: 500,
       });

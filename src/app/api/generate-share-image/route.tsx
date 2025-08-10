@@ -52,33 +52,104 @@ export async function GET(req: NextRequest) {
       return `$${(v / 1_000_000).toFixed(1)}M`;
     };
 
-    // Back to working text-only approach - .map() crashes Satori
-    const tokenText = tokens.slice(0, 10)
-      .map((token, i) => `${i + 1}. ${token.token_symbol} ${formatUsd(token.value_usd)}`)
-      .join('\n');
-
-    const content = `@${username}\nPortfolio: ${formatUsd(total_value_usd)}\n\n${tokenText}\n\nR2 URLs Available: ${tokens.filter(t => t.r2_image_url).length}/10\n\nSearch by ETH/SOL wallet address or\nFarcaster/X username on Wallet Search 🔎`;
+    // Test approach: manually create token elements without .map()
+    const topTokens = tokens.slice(0, 3); // Start with just 3 tokens to test
 
     return new ImageResponse(
       (
         <div
           style={{
-            fontSize: 18,
-            color: 'white',
             background: '#0B1020',
             width: '100%',
             height: '100%',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 50,
-            textAlign: 'center',
-            lineHeight: 1.6,
-            whiteSpace: 'pre-line',
+            flexDirection: 'column',
+            padding: '40px',
             fontFamily: 'system-ui, sans-serif',
+            color: 'white',
           }}
         >
-          {content}
+          {/* Header */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '30px' }}>
+            <div style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>
+              @{username}
+            </div>
+            <div style={{ fontSize: '24px', color: '#E6E8F0' }}>
+              Portfolio: {formatUsd(total_value_usd)}
+            </div>
+          </div>
+
+          {/* Token List - Manual elements (no .map()) */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', flex: 1 }}>
+            {/* Token 1 */}
+            {topTokens[0] && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                {topTokens[0].logo_url && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={topTokens[0].logo_url}
+                    width="32"
+                    height="32"
+                    style={{ borderRadius: '50%' }}
+                    alt=""
+                  />
+                )}
+                <div style={{ fontSize: '18px' }}>
+                  1. {topTokens[0].token_symbol} {formatUsd(topTokens[0].value_usd)}
+                </div>
+              </div>
+            )}
+
+            {/* Token 2 */}
+            {topTokens[1] && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                {topTokens[1].logo_url && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={topTokens[1].logo_url}
+                    width="32"
+                    height="32"
+                    style={{ borderRadius: '50%' }}
+                    alt=""
+                  />
+                )}
+                <div style={{ fontSize: '18px' }}>
+                  2. {topTokens[1].token_symbol} {formatUsd(topTokens[1].value_usd)}
+                </div>
+              </div>
+            )}
+
+            {/* Token 3 */}
+            {topTokens[2] && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                {topTokens[2].logo_url && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={topTokens[2].logo_url}
+                    width="32"
+                    height="32"
+                    style={{ borderRadius: '50%' }}
+                    alt=""
+                  />
+                )}
+                <div style={{ fontSize: '18px' }}>
+                  3. {topTokens[2].token_symbol} {formatUsd(topTokens[2].value_usd)}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            marginTop: '20px',
+            fontSize: '14px',
+            color: '#9CA3AF',
+            textAlign: 'center'
+          }}>
+            Search by ETH/SOL wallet address or Farcaster/X username on Wallet Search 🔎
+          </div>
         </div>
       ),
       {

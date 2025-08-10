@@ -11,6 +11,7 @@ interface ProfileDisplayProps {
   users: FarcasterUser[];
   searchedInputs: string[];
   notFoundInputs: string[];
+  onNewSearch: () => void;
 }
 
 
@@ -668,7 +669,7 @@ function UserProfile({ user, copiedAddress, copyToClipboard }: {
   );
 }
 
-export default function ProfileDisplay({ users, notFoundInputs }: ProfileDisplayProps) {
+export default function ProfileDisplay({ users, notFoundInputs, onNewSearch }: ProfileDisplayProps) {
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
 
   // Check if we're in a mini app environment using SDK context
@@ -718,6 +719,22 @@ export default function ProfileDisplay({ users, notFoundInputs }: ProfileDisplay
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6">
+      {/* New Search Button */}
+      <div className="flex justify-center">
+        <button
+          onClick={onNewSearch}
+          className="px-6 py-3 text-white rounded-lg transition-all duration-200 text-sm font-medium
+                   flex items-center justify-center gap-2 min-h-[48px]
+                   hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98]"
+          style={{ backgroundColor: '#08c0b7' }}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#06a8a0')}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#08c0b7')}
+        >
+          <span>🔍</span>
+          <span>New Search</span>
+        </button>
+      </div>
+
       {/* Found profiles */}
       {users.length > 0 && (
         <div className="space-y-4">

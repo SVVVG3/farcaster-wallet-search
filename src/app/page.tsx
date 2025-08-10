@@ -5,6 +5,7 @@ import { sdk } from '@farcaster/miniapp-sdk';
 import Image from 'next/image';
 import AddressInput from '@/components/AddressInput';
 import ProfileDisplay from '@/components/ProfileDisplay';
+import TipDev from '@/components/TipDev';
 import { SearchResult } from '@/lib/neynar';
 
 export default function Home() {
@@ -384,31 +385,42 @@ export default function Home() {
       {/* Footer */}
       <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="text-center text-sm text-gray-600 dark:text-gray-400">
-            <p>
-              Powered by{' '}
-              <button
-                onClick={() => handleExternalLink('https://neynar.com/')}
-                className="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer border-none bg-transparent p-0 font-inherit"
-              >
-                Neynar
-              </button>
-              {' '}&{' '}
-              <button
-                onClick={() => handleExternalLink('https://bankr.bot/api')}
-                className="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer border-none bg-transparent p-0 font-inherit"
-              >
-                Bankr API
-              </button>
-              {' '}• Vibe Coded w/ love by{' '}
-              <button
-                onClick={handleFarcasterProfile}
-                className="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer border-none bg-transparent p-0 font-inherit"
-              >
-                SVVVG3
-              </button>
-              {' '}for the Farcaster community 💜
-            </p>
+          <div className="flex flex-col items-center gap-4">
+            {/* Tip Dev Button */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                Enjoying Wallet Search?
+              </span>
+              <TipDev />
+            </div>
+            
+            {/* Attribution */}
+            <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+              <p>
+                Powered by{' '}
+                <button
+                  onClick={() => handleExternalLink('https://neynar.com/')}
+                  className="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer border-none bg-transparent p-0 font-inherit"
+                >
+                  Neynar
+                </button>
+                {' '}&{' '}
+                <button
+                  onClick={() => handleExternalLink('https://bankr.bot/api')}
+                  className="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer border-none bg-transparent p-0 font-inherit"
+                >
+                  Bankr API
+                </button>
+                {' '}• Vibe Coded w/ love by{' '}
+                <button
+                  onClick={handleFarcasterProfile}
+                  className="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer border-none bg-transparent p-0 font-inherit"
+                >
+                  SVVVG3
+                </button>
+                {' '}for the Farcaster community 💜
+              </p>
+            </div>
           </div>
         </div>
       </footer>

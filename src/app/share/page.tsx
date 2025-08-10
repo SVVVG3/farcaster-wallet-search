@@ -27,7 +27,7 @@ export async function generateMetadata(
     title: `Wallet Search — ${username ? '@' + username : 'Top Holdings'}`,
     description: 'Top 10 token holdings on Base',
     openGraph: {
-      images: [{ url: imageUrl, width: 1200, height: 630 }],
+      images: [{ url: imageUrl, width: 1200, height: 800 }],
     },
     twitter: {
       card: 'summary_large_image',

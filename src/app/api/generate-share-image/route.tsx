@@ -145,7 +145,7 @@ export async function GET(request: NextRequest) {
     const leftTokens = topTokens.slice(0, 5).map((token, i) => createTokenElement(token, i));
     const rightTokens = topTokens.slice(5, 10).map((token, i) => createTokenElement(token, i + 5));
 
-    return new ImageResponse(
+    const imageResponse = new ImageResponse(
       React.createElement('div', {
         style: {
           background: '#0B1020',
@@ -215,6 +215,10 @@ export async function GET(request: NextRequest) {
         height: 800,
       }
     );
+
+    // Set proper cache headers for dynamic images
+    imageResponse.headers.set('Cache-Control', 'public, immutable, no-transform, max-age=300');
+    return imageResponse;
   } catch (e) {
     return new Response(`Error: ${e instanceof Error ? e.message : 'Unknown error'}`, {
       status: 500,

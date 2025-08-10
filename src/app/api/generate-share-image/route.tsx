@@ -63,6 +63,7 @@ export async function GET(req: NextRequest) {
     const leftTokens = processedTokens.slice(0, 5);
     const rightTokens = processedTokens.slice(5, 10);
 
+    // MINIMAL TEST - isolate the Satori issue
     return new ImageResponse(
       (
         <div
@@ -71,108 +72,19 @@ export async function GET(req: NextRequest) {
             width: '100%',
             height: '100%',
             display: 'flex',
-            flexDirection: 'column',
-            padding: '40px',
-            fontFamily: 'system-ui, sans-serif',
+            alignItems: 'center',
+            justifyContent: 'center',
             color: 'white',
+            fontSize: '24px',
+            fontFamily: 'system-ui, sans-serif',
           }}
         >
-          {/* Header */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '30px' }}>
-            <div style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>
-              @{username}
-            </div>
-            <div style={{ fontSize: '24px', color: '#E6E8F0' }}>
-              Portfolio: {formatUsd(total_value_usd)}
-            </div>
-          </div>
-
-          {/* 2-Column Layout with ACTUAL token images */}
-          <div style={{ display: 'flex', gap: '60px', flex: 1, justifyContent: 'center' }}>
-            {/* Left Column */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {leftTokens.map((token) => (
-                <div key={token.position} style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                  {/* Token Circle - Satori can't handle external images reliably */}
-                  <div style={{
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '50%',
-                    backgroundColor: `hsl(${(token.position - 1) * 36}, 70%, 50%)`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '12px',
-                    fontWeight: 'bold',
-                    color: 'white',
-                    border: '2px solid #4F46E5',
-                  }}>
-                    {token.position}
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
-                      {token.position}. {token.token_symbol}
-                    </div>
-                    <div style={{ fontSize: '14px', color: '#E6E8F0' }}>
-                      {formatUsd(token.value_usd)}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Right Column */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {rightTokens.map((token) => (
-                <div key={token.position} style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                  {/* Token Circle - Satori can't handle external images reliably */}
-                  <div style={{
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '50%',
-                    backgroundColor: `hsl(${(token.position - 1) * 36}, 70%, 50%)`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '12px',
-                    fontWeight: 'bold',
-                    color: 'white',
-                    border: '2px solid #4F46E5',
-                  }}>
-                    {token.position}
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
-                      {token.position}. {token.token_symbol}
-                    </div>
-                    <div style={{ fontSize: '14px', color: '#E6E8F0' }}>
-                      {formatUsd(token.value_usd)}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            marginTop: '20px',
-            fontSize: '12px',
-            color: '#9CA3AF',
-            textAlign: 'center'
-          }}>
-            Search by ETH/SOL wallet address or Farcaster/X username on Wallet Search 🔎
-          </div>
+          @{username} - {tokens.length} tokens - {formatUsd(total_value_usd)}
         </div>
       ),
       {
         width: 1200,
         height: 800,
-        headers: {
-          'Cache-Control': 'public, immutable, no-transform, max-age=300',
-        },
       }
     );
   } catch (e) {

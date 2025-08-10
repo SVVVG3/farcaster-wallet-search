@@ -322,7 +322,7 @@ export default function TokenBalances({ fid, username, bankrAddresses = [] }: To
     <div className="bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 space-y-4 overflow-hidden w-full max-w-full">
       {/* Header */}
       <div className="flex items-center justify-between min-w-0">
-        <h4 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+        <h4 className="text-base font-semibold text-gray-900 dark:text-white truncate">
           Token Holdings
         </h4>
         <div className="flex items-center gap-2 flex-shrink-0 ml-2">

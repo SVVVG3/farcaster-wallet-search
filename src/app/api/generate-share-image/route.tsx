@@ -179,7 +179,7 @@ export async function GET(request: NextRequest) {
             // Username and portfolio text
             React.createElement('div', {
               style: { fontSize: 43, fontWeight: 'bold', color: 'white', textAlign: 'center' } // Reduced by 20% for longer usernames
-            }, `@${username}'s Portfolio: ${formatUsd(total_value_usd)}`)
+            }, `@${username}'s Top 10 Holdings: ${formatUsd(total_value_usd)}`)
           )
         ),
         

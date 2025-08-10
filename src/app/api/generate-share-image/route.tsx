@@ -26,15 +26,19 @@ export async function GET(request: NextRequest) {
       ? bankrAddressesParam.split(',').map((s) => s.trim()).filter(Boolean)
       : [];
 
-    // Fetch token data from balance API
+    // Fetch token data and user profile data
     const origin = request.nextUrl.origin || 'https://walletsearch.vercel.app';
+    
+    // Fetch token balances
     const apiUrl = new URL(`${origin}/api/balance`);
     apiUrl.searchParams.set('fid', String(fid));
     if (bankrAddresses.length > 0) apiUrl.searchParams.set('bankrAddresses', bankrAddresses.join(','));
 
     let tokens: Array<{ token_address: string; token_name: string; token_symbol: string; value_usd?: number; logo_url?: string; r2_image_url?: string | null }> = [];
     let total_value_usd = 0;
+    let userProfileImage = null;
 
+    // Fetch token data
     try {
       const res = await fetch(apiUrl.toString(), { cache: 'no-store' });
       if (res.ok) {
@@ -44,6 +48,23 @@ export async function GET(request: NextRequest) {
       }
     } catch {
       // Fall back to empty data on fetch error
+    }
+
+    // Fetch user profile data for profile image
+    try {
+      const userApiUrl = new URL(`${origin}/api/search`);
+      userApiUrl.searchParams.set('q', String(fid));
+      userApiUrl.searchParams.set('type', 'fid');
+      
+      const userRes = await fetch(userApiUrl.toString(), { cache: 'no-store' });
+      if (userRes.ok) {
+        const userData = await userRes.json();
+        if (userData.users && userData.users.length > 0) {
+          userProfileImage = userData.users[0].pfp_url;
+        }
+      }
+    } catch {
+      // Fall back to no profile image
     }
 
     // Format USD values
@@ -128,13 +149,29 @@ export async function GET(request: NextRequest) {
           color: 'white',
         }
       },
-        // Header - REDUCED SPACING BY 50%
+        // Header with profile image and text
         React.createElement('div', {
           style: { display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 30 }
         },
+          // Profile image and text container
           React.createElement('div', {
-            style: { fontSize: 54, fontWeight: 'bold', color: 'white', textAlign: 'center' }
-          }, `@${username}'s Portfolio: ${formatUsd(total_value_usd)}`)
+            style: { display: 'flex', alignItems: 'center', gap: 20 }
+          },
+            // Profile image (if available)
+            userProfileImage ? React.createElement('img', {
+              src: userProfileImage,
+              width: 80,
+              height: 80,
+              style: {
+                borderRadius: '50%',
+                border: '4px solid #4F46E5',
+              }
+            }) : null,
+            // Username and portfolio text
+            React.createElement('div', {
+              style: { fontSize: 54, fontWeight: 'bold', color: 'white', textAlign: 'center' }
+            }, `@${username}'s Portfolio: ${formatUsd(total_value_usd)}`)
+          )
         ),
         
         // 2-Column Layout - DOUBLED GAP

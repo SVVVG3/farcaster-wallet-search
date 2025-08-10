@@ -175,7 +175,9 @@ export default function Home() {
         console.log('Found FID via context.user.fid:', userFid);
       }
       // Method 3: Check if context has fid property (with type safety)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       else if ('fid' in context && typeof (context as any).fid === 'number') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         userFid = (context as any).fid;
         console.log('Found FID via context.fid:', userFid);
       }
@@ -291,6 +293,7 @@ export default function Home() {
                   onMouseEnter={(e) => !isLoading && (e.currentTarget.style.backgroundColor = '#6b5bb3')}
                   onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#7c65c1')}
                 >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img 
                     src="/farcaster-arch-icon.png" 
                     alt="Farcaster" 

@@ -331,6 +331,7 @@ export default function TokenBalances({ fid, username, bankrAddresses = [] }: To
             className="px-3 py-1.5 text-xs font-semibold rounded-md transition-colors text-white flex items-center gap-1.5"
             style={{ backgroundColor: '#7c65c1' }}
           >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
               src="/farcaster-arch-icon.png" 
               alt="Farcaster" 

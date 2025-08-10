@@ -64,28 +64,35 @@ export default function TipDev() {
       <button
         onClick={handleTip}
         disabled={isLoading}
-        className="px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 
-                   flex items-center gap-1.5 min-h-[32px]
-                   bg-gradient-to-r from-green-500 to-emerald-600 text-white
-                   hover:from-green-600 hover:to-emerald-700
+        className="px-2 py-1 text-xs font-medium rounded transition-all duration-200 
+                   flex items-center gap-1 min-h-[24px]
+                   bg-gradient-to-r from-cyan-500 to-teal-600 text-white
+                   hover:from-cyan-600 hover:to-teal-700
                    disabled:opacity-50 disabled:cursor-not-allowed
                    transform hover:scale-105 active:scale-95"
+        style={{
+          background: isLoading 
+            ? 'linear-gradient(to right, #06b6d4, #0891b2)' 
+            : 'linear-gradient(to right, #08c0b7, #0891b2)'
+        }}
+        onMouseEnter={(e) => !isLoading && (e.currentTarget.style.background = 'linear-gradient(to right, #06a8a0, #0e7490)')}
+        onMouseLeave={(e) => !isLoading && (e.currentTarget.style.background = 'linear-gradient(to right, #08c0b7, #0891b2)')}
       >
         {isLoading ? (
           <>
-            <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            <div className="w-2.5 h-2.5 border border-white border-t-transparent rounded-full animate-spin" />
             <span>Sending...</span>
           </>
         ) : (
           <>
-            <span className="text-sm">💚</span>
+            <span className="text-xs">💚</span>
             <span>Tip 1 USDC</span>
           </>
         )}
       </button>
       
       {showSuccess && (
-        <div className="text-xs text-green-600 dark:text-green-400 font-medium animate-fade-in">
+        <div className="text-xs font-medium animate-fade-in" style={{ color: '#08c0b7' }}>
           Thank you! 🙏
         </div>
       )}

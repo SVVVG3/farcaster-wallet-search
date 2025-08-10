@@ -15,5 +15,5 @@ export const wagmiConfig = createConfig({
 // USDC contract address on Base
 export const USDC_CONTRACT_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
 
-// Your tip address - update this with your actual Base address
-export const TIP_ADDRESS = '0x648316bFD6176077cDE2C62feeE912Dc3eC8fB6a'; // TODO: Replace with your actual Base address
+// Your tip address from environment variable (more secure)
+export const TIP_ADDRESS = process.env.NEXT_PUBLIC_TIP_ADDRESS || '0x0000000000000000000000000000000000000000';

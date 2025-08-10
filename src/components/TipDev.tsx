@@ -25,6 +25,11 @@ export default function TipDev() {
   const { isConnected } = useAccount();
   const { writeContract } = useWriteContract();
 
+  // Don't render if tip address is not configured
+  if (!TIP_ADDRESS || TIP_ADDRESS === '0x0000000000000000000000000000000000000000') {
+    return null;
+  }
+
   const handleTip = async () => {
     if (!isConnected) {
       alert('Please connect your wallet through Farcaster first.');

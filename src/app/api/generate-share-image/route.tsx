@@ -86,13 +86,12 @@ export async function GET(req: NextRequest) {
           const imageUrl = token.r2_image_url || token.logo_url;
           if (imageUrl) {
             // Add timeout and better error handling for image loading
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const image = await Promise.race([
               loadImage(imageUrl),
-              new Promise((_, reject) => 
+              new Promise<never>((_, reject) => 
                 setTimeout(() => reject(new Error('Image load timeout')), 5000)
               )
-            ]) as any;
+            ]);
             ctx.save();
             ctx.beginPath();
             ctx.arc(150, y, 20, 0, Math.PI * 2);
@@ -151,13 +150,12 @@ export async function GET(req: NextRequest) {
           const imageUrl = token.r2_image_url || token.logo_url;
           if (imageUrl) {
             // Add timeout and better error handling for image loading
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const image = await Promise.race([
               loadImage(imageUrl),
-              new Promise((_, reject) => 
+              new Promise<never>((_, reject) => 
                 setTimeout(() => reject(new Error('Image load timeout')), 5000)
               )
-            ]) as any;
+            ]);
             ctx.save();
             ctx.beginPath();
             ctx.arc(650, y, 20, 0, Math.PI * 2);

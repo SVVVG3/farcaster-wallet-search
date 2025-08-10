@@ -81,9 +81,9 @@ export async function GET(req: NextRequest) {
         const token = leftTokens[i];
         const y = 180 + (i * 80);
         
+        // Load and draw token image - prefer R2 URL if available
+        const imageUrl = token.r2_image_url || token.logo_url;
         try {
-          // Load and draw token image - prefer R2 URL if available
-          const imageUrl = token.r2_image_url || token.logo_url;
           if (imageUrl) {
             // Add timeout and better error handling for image loading
             const image = await Promise.race([
@@ -145,9 +145,9 @@ export async function GET(req: NextRequest) {
         const token = rightTokens[i];
         const y = 180 + (i * 80);
         
+        // Load and draw token image - prefer R2 URL if available
+        const imageUrl = token.r2_image_url || token.logo_url;
         try {
-          // Load and draw token image - prefer R2 URL if available
-          const imageUrl = token.r2_image_url || token.logo_url;
           if (imageUrl) {
             // Add timeout and better error handling for image loading
             const image = await Promise.race([

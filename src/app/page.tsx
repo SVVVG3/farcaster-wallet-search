@@ -164,15 +164,15 @@ export default function Home() {
       // Try different ways to access the user FID
       let userFid: number | null = null;
       
-      // Method 1: context.client.clientFid (most common)
-      if (context.client && typeof context.client.clientFid === 'number') {
-        userFid = context.client.clientFid;
-        console.log('Found FID via context.client.clientFid:', userFid);
-      }
-      // Method 2: context.user.fid (alternative)
-      else if (context.user && typeof context.user.fid === 'number') {
+      // Method 1: context.user.fid (CORRECT - this is the actual user's FID)
+      if (context.user && typeof context.user.fid === 'number') {
         userFid = context.user.fid;
         console.log('Found FID via context.user.fid:', userFid);
+      }
+      // Method 2: context.client.clientFid (fallback - this might be the client app's FID)
+      else if (context.client && typeof context.client.clientFid === 'number') {
+        userFid = context.client.clientFid;
+        console.log('Found FID via context.client.clientFid:', userFid);
       }
       // Method 3: Check if context has fid property (with type safety)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

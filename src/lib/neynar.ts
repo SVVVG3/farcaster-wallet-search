@@ -641,10 +641,11 @@ export async function fetchUserTokenBalances(fid: number, bankrAddresses: string
           '0xe9d43de0898df63ba125384240699f7e4bae61d9', // DRINK - Jelly Drink
           '0xad20b837d28eff66af55ef0962c6bdb7c7888cb8', // HBK - Hoe Benk
           '0xe3c84123d49cbfdfdfc94b9254525832eaca11f7', // Fake AERO with "visit" in symbol
+          '0xc7507de6824cdd759da0d08c0ddcc1a50bd0f26d', // FLIP - !!🏆👉flip gg👈
         ],
         // Token names and symbols
-        names: ['phylactery', 'jelly drink', 'hoe benk', 'cappa juice'],
-        symbols: ['phy', 'drink', 'hbk', 'juice'],
+        names: ['phylactery', 'jelly drink', 'hoe benk', 'cappa juice', '!!🏆👉flip gg👈'],
+        symbols: ['phy', 'drink', 'hbk', 'juice', 'flip'],
         // Suspicious keywords in names/symbols
         suspiciousKeywords: [
           'visit', 'swap', 'claim', 'airdrop', 'free', 'bonus',

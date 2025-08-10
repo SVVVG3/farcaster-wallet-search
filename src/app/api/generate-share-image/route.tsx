@@ -52,10 +52,43 @@ export async function GET(req: NextRequest) {
       return `$${(v / 1_000_000).toFixed(1)}M`;
     };
 
-    // Build 2-column layout step by step
+    // PRE-BUILD JSX ELEMENTS - Satori limitation workaround
     const topTokens = tokens.slice(0, 10);
-    const leftTokens = topTokens.slice(0, 5);
-    const rightTokens = topTokens.slice(5, 10);
+    
+    // Create hardcoded token elements to avoid .map() in JSX
+    const tokenElements = [];
+    const colors = ['hsl(0, 70%, 50%)', 'hsl(36, 70%, 50%)', 'hsl(72, 70%, 50%)', 'hsl(108, 70%, 50%)', 'hsl(144, 70%, 50%)', 'hsl(180, 70%, 50%)', 'hsl(216, 70%, 50%)', 'hsl(252, 70%, 50%)', 'hsl(288, 70%, 50%)', 'hsl(324, 70%, 50%)'];
+    
+    for (let i = 0; i < Math.min(topTokens.length, 10); i++) {
+      const token = topTokens[i];
+      tokenElements.push(
+        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <div style={{
+            width: '32px',
+            height: '32px',
+            borderRadius: '50%',
+            backgroundColor: colors[i],
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '12px',
+            fontWeight: 'bold',
+            color: 'white',
+            border: '2px solid #4F46E5',
+          }}>
+            {i + 1}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
+              {i + 1}. {token.token_symbol}
+            </div>
+            <div style={{ fontSize: '14px', color: '#E6E8F0' }}>
+              {formatUsd(token.value_usd)}
+            </div>
+          </div>
+        </div>
+      );
+    }
 
     return new ImageResponse(
       (
@@ -81,68 +114,16 @@ export async function GET(req: NextRequest) {
             </div>
           </div>
 
-          {/* 2-Column Layout */}
+          {/* 2-Column Layout with pre-built elements */}
           <div style={{ display: 'flex', gap: '60px', flex: 1, justifyContent: 'center' }}>
             {/* Left Column */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {leftTokens.map((token, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                  <div style={{
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '50%',
-                    backgroundColor: `hsl(${i * 36}, 70%, 50%)`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '12px',
-                    fontWeight: 'bold',
-                    color: 'white',
-                    border: '2px solid #4F46E5',
-                  }}>
-                    {i + 1}
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
-                      {i + 1}. {token.token_symbol}
-                    </div>
-                    <div style={{ fontSize: '14px', color: '#E6E8F0' }}>
-                      {formatUsd(token.value_usd)}
-                    </div>
-                  </div>
-                </div>
-              ))}
+              {tokenElements.slice(0, 5)}
             </div>
 
             {/* Right Column */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {rightTokens.map((token, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                  <div style={{
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '50%',
-                    backgroundColor: `hsl(${(i + 5) * 36}, 70%, 50%)`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '12px',
-                    fontWeight: 'bold',
-                    color: 'white',
-                    border: '2px solid #4F46E5',
-                  }}>
-                    {i + 6}
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
-                      {i + 6}. {token.token_symbol}
-                    </div>
-                    <div style={{ fontSize: '14px', color: '#E6E8F0' }}>
-                      {formatUsd(token.value_usd)}
-                    </div>
-                  </div>
-                </div>
-              ))}
+              {tokenElements.slice(5, 10)}
             </div>
           </div>
 

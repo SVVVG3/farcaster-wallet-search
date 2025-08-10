@@ -10,8 +10,8 @@ export async function GET(request: NextRequest) {
     const fidParam = searchParams.get('fid');
     const username = searchParams.get('username') || 'user';
     const bankrAddressesParam = searchParams.get('bankrAddresses');
-    // Accept cache-busting
-    const _v = searchParams.get('v');
+    // Accept cache-busting (unused but needed for cache busting)
+    searchParams.get('v');
 
     if (!fidParam) {
       return new Response('Missing fid', { status: 400 });
@@ -59,6 +59,7 @@ export async function GET(request: NextRequest) {
     const topTokens = tokens.slice(0, 10);
     
     // Create token elements using React.createElement pattern
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const createTokenElement = (token: any, index: number) => {
       const imageUrl = token.r2_image_url || token.logo_url;
       const colors = ['hsl(0, 70%, 50%)', 'hsl(36, 70%, 50%)', 'hsl(72, 70%, 50%)', 'hsl(108, 70%, 50%)', 'hsl(144, 70%, 50%)', 'hsl(180, 70%, 50%)', 'hsl(216, 70%, 50%)', 'hsl(252, 70%, 50%)', 'hsl(288, 70%, 50%)', 'hsl(324, 70%, 50%)'];

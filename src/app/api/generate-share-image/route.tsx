@@ -52,70 +52,33 @@ export async function GET(req: NextRequest) {
       return `$${(v / 1_000_000).toFixed(1)}M`;
     };
 
-    // Build 2-column layout with token data using pre-line formatting
-    const leftTokens = tokens.slice(0, 5);
-    const rightTokens = tokens.slice(5, 10);
+    // Create single-column token list - simplest approach that works
+    const tokenText = tokens.slice(0, 10)
+      .map((token, i) => `${i + 1}. ${token.token_symbol} ${formatUsd(token.value_usd)}`)
+      .join('\n');
 
-    const leftText = leftTokens
-      .map((token, i) => `${i + 1}. ${token.token_symbol}\n   ${formatUsd(token.value_usd)}`)
-      .join('\n\n');
-
-    const rightText = rightTokens
-      .map((token, i) => `${i + 6}. ${token.token_symbol}\n   ${formatUsd(token.value_usd)}`)
-      .join('\n\n');
+    const content = `@${username}\nPortfolio: ${formatUsd(total_value_usd)}\n\n${tokenText}\n\nSearch by ETH/SOL wallet address or\nFarcaster/X username on Wallet Search 🔎`;
 
     return new ImageResponse(
       (
         <div
           style={{
-            height: '100%',
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            backgroundColor: '#0B1020',
+            fontSize: 18,
             color: 'white',
-            padding: '40px',
+            background: '#0B1020',
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 50,
+            textAlign: 'center',
+            lineHeight: 1.6,
+            whiteSpace: 'pre-line',
             fontFamily: 'system-ui, sans-serif',
           }}
         >
-          {/* Header */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '30px' }}>
-            <div style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>
-              @{username}
-            </div>
-            <div style={{ fontSize: '24px', color: '#E6E8F0' }}>
-              Portfolio: {formatUsd(total_value_usd)}
-            </div>
-          </div>
-
-          {/* Two Column Layout */}
-          <div style={{ display: 'flex', flex: 1, gap: '60px' }}>
-            <div style={{ 
-              display: 'flex', 
-              flex: 1, 
-              fontSize: '16px',
-              lineHeight: 1.4,
-              whiteSpace: 'pre-line'
-            }}>
-              {leftText}
-            </div>
-            <div style={{ 
-              display: 'flex', 
-              flex: 1, 
-              fontSize: '16px',
-              lineHeight: 1.4,
-              whiteSpace: 'pre-line'
-            }}>
-              {rightText}
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '30px' }}>
-            <div style={{ fontSize: '14px', color: '#A0A0A0', textAlign: 'center' }}>
-              Search by ETH/SOL wallet address or Farcaster/X username on Wallet Search 🔎
-            </div>
-          </div>
+          {content}
         </div>
       ),
       {

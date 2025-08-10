@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useAccount, useSendTransaction, useWriteContract } from 'wagmi';
+import { useAccount, useWriteContract } from 'wagmi';
 import { parseUnits } from 'viem';
 import { USDC_CONTRACT_ADDRESS, TIP_ADDRESS } from '@/lib/wagmi';
 

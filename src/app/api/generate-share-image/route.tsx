@@ -52,16 +52,7 @@ export async function GET(req: NextRequest) {
       return `$${(v / 1_000_000).toFixed(1)}M`;
     };
 
-    // Use R2 URLs directly - simpler approach
-    const processedTokens = tokens.slice(0, 10).map((token, index) => ({
-      ...token,
-      imageUrl: token.r2_image_url || token.logo_url,
-      position: index + 1
-    }));
-
-    // Split into 2 columns  
-    const leftTokens = processedTokens.slice(0, 5);
-    const rightTokens = processedTokens.slice(5, 10);
+    // Minimal test - remove unused variables for now
 
     // MINIMAL TEST - isolate the Satori issue
     return new ImageResponse(

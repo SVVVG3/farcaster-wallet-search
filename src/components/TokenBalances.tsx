@@ -328,9 +328,14 @@ export default function TokenBalances({ fid, username, bankrAddresses = [] }: To
         <div className="flex items-center gap-2 flex-shrink-0 ml-2">
           <button
             onClick={handleShare}
-            className="px-3 py-1.5 text-xs font-semibold rounded-md transition-colors text-white"
-            style={{ backgroundColor: '#1F6FEB' }}
+            className="px-3 py-1.5 text-xs font-semibold rounded-md transition-colors text-white flex items-center gap-1.5"
+            style={{ backgroundColor: '#7c65c1' }}
           >
+            <img 
+              src="/farcaster-arch-icon.png" 
+              alt="Farcaster" 
+              className="w-3.5 h-3.5"
+            />
             Share
           </button>
           <div className="text-right">

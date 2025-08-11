@@ -28,7 +28,6 @@ export default function TipDev() {
   useEffect(() => {
     if (isSuccess) {
       setShowGif(true);
-      setTimeout(() => setShowGif(false), 3000);
     }
   }, [isSuccess]);
 
@@ -90,12 +89,12 @@ export default function TipDev() {
 
       {/* GIF Popup Modal */}
       {showGif && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm mx-4 text-center shadow-2xl">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl relative">
             <div className="mb-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img 
-                src="/ChimpThankYou.gif" 
+                src="/ChimpThankYou.GIF" 
                 alt="Thank You!" 
                 className="w-48 h-48 mx-auto rounded-lg"
                 style={{ objectFit: 'cover' }}

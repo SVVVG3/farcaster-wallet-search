@@ -24,11 +24,6 @@ export default function TipDev() {
   const { isConnected } = useAccount();
   const { writeContract, isPending, isSuccess } = useWriteContract();
 
-  // Don't render if tip address is not configured
-  if (!TIP_ADDRESS || TIP_ADDRESS === '0x0000000000000000000000000000000000000000') {
-    return null;
-  }
-
   // Show GIF when transaction is successful
   useEffect(() => {
     if (isSuccess) {
@@ -36,6 +31,11 @@ export default function TipDev() {
       setTimeout(() => setShowGif(false), 3000);
     }
   }, [isSuccess]);
+
+  // Don't render if tip address is not configured
+  if (!TIP_ADDRESS || TIP_ADDRESS === '0x0000000000000000000000000000000000000000') {
+    return null;
+  }
 
   const handleTip = () => {
     if (!isConnected) {

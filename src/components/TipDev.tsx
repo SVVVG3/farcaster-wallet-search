@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAccount, useWriteContract } from 'wagmi';
 import { parseUnits } from 'viem';
 import { USDC_CONTRACT_ADDRESS, TIP_ADDRESS } from '@/lib/wagmi';
@@ -25,14 +25,21 @@ interface TipDevProps {
 
 export default function TipDev({ onTransactionSuccess }: TipDevProps) {
   const { isConnected } = useAccount();
-  const { writeContract, isPending, isSuccess } = useWriteContract();
+  const { writeContract, isPending, isSuccess, data } = useWriteContract();
 
-  // Show GIF when transaction is successful
+  // Track which transaction we've already shown success for
+  const [lastSuccessfulTx, setLastSuccessfulTx] = useState<string | null>(null);
+
+  // Show GIF when transaction is successful (but only once per transaction)
   useEffect(() => {
-    if (isSuccess && onTransactionSuccess) {
-      onTransactionSuccess();
+    if (isSuccess && data && onTransactionSuccess) {
+      const txHash = data;
+      if (txHash !== lastSuccessfulTx) {
+        setLastSuccessfulTx(txHash);
+        onTransactionSuccess();
+      }
     }
-  }, [isSuccess, onTransactionSuccess]);
+  }, [isSuccess, data, onTransactionSuccess, lastSuccessfulTx]);
 
   // Don't render if tip address is not configured
   if (!TIP_ADDRESS || TIP_ADDRESS === '0x0000000000000000000000000000000000000000') {

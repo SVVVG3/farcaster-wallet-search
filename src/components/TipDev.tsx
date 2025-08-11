@@ -89,8 +89,15 @@ export default function TipDev() {
 
       {/* GIF Popup Modal */}
       {showGif && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl relative">
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-50 overflow-auto"
+          onClick={() => setShowGif(false)}
+        >
+          <div className="min-h-full flex items-center justify-center p-4">
+            <div 
+              className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl relative mx-auto my-8"
+              onClick={(e) => e.stopPropagation()}
+            >
             <div className="mb-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img 
@@ -116,6 +123,7 @@ export default function TipDev() {
             >
               Close
             </button>
+            </div>
           </div>
         </div>
       )}

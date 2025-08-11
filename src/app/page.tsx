@@ -222,7 +222,14 @@ export default function Home() {
   };
 
   const handleTipSuccess = () => {
-    setShowTipGif(true);
+    // Add small delay to prevent state conflicts
+    setTimeout(() => {
+      setShowTipGif(true);
+    }, 100);
+  };
+
+  const handleCloseTipGif = () => {
+    setShowTipGif(false);
   };
 
   return (
@@ -419,7 +426,7 @@ export default function Home() {
       {showTipGif && (
         <div 
           className="fixed inset-0 bg-black bg-opacity-50 z-50 overflow-auto"
-          onClick={() => setShowTipGif(false)}
+          onClick={handleCloseTipGif}
         >
           <div className="min-h-full flex items-center justify-center p-4">
             <div 
@@ -442,7 +449,7 @@ export default function Home() {
                 Your tip helps keep Wallet Search running!
               </p>
               <button
-                onClick={() => setShowTipGif(false)}
+                onClick={handleCloseTipGif}
                 className="mt-4 px-4 py-2 text-xs font-medium rounded transition-all duration-200 
                            text-white"
                 style={{ backgroundColor: '#08c0b7' }}

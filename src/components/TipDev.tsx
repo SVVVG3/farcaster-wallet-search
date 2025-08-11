@@ -19,17 +19,20 @@ const ERC20_ABI = [
   },
 ] as const;
 
-export default function TipDev() {
-  const [showGif, setShowGif] = useState(false);
+interface TipDevProps {
+  onTransactionSuccess?: () => void;
+}
+
+export default function TipDev({ onTransactionSuccess }: TipDevProps) {
   const { isConnected } = useAccount();
   const { writeContract, isPending, isSuccess } = useWriteContract();
 
   // Show GIF when transaction is successful
   useEffect(() => {
-    if (isSuccess) {
-      setShowGif(true);
+    if (isSuccess && onTransactionSuccess) {
+      onTransactionSuccess();
     }
-  }, [isSuccess]);
+  }, [isSuccess, onTransactionSuccess]);
 
   // Don't render if tip address is not configured
   if (!TIP_ADDRESS || TIP_ADDRESS === '0x0000000000000000000000000000000000000000') {
@@ -54,79 +57,36 @@ export default function TipDev() {
   };
 
   return (
-    <>
-      <div className="flex items-center gap-2">
-        <button
-          onClick={handleTip}
-          disabled={isPending}
-          className="px-2 py-1 text-xs font-medium rounded transition-all duration-200 
-                     flex items-center gap-1 min-h-[24px]
-                     bg-gradient-to-r from-cyan-500 to-teal-600 text-white
-                     hover:from-cyan-600 hover:to-teal-700
-                     disabled:opacity-50 disabled:cursor-not-allowed
-                     transform hover:scale-105 active:scale-95"
-          style={{
-            background: isPending 
-              ? 'linear-gradient(to right, #06b6d4, #0891b2)' 
-              : 'linear-gradient(to right, #08c0b7, #0891b2)'
-          }}
-          onMouseEnter={(e) => !isPending && (e.currentTarget.style.background = 'linear-gradient(to right, #06a8a0, #0e7490)')}
-          onMouseLeave={(e) => !isPending && (e.currentTarget.style.background = 'linear-gradient(to right, #08c0b7, #0891b2)')}
-        >
-          {isPending ? (
-            <>
-              <div className="w-2.5 h-2.5 border border-white border-t-transparent rounded-full animate-spin" />
-              <span>Sending...</span>
-            </>
-          ) : (
-            <>
-              <span className="text-xs">💚</span>
-              <span>Tip 1 USDC</span>
-            </>
-          )}
-        </button>
-      </div>
-
-      {/* GIF Popup Modal */}
-      {showGif && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-50 overflow-auto"
-          onClick={() => setShowGif(false)}
-        >
-          <div className="min-h-full flex items-center justify-center p-4">
-            <div 
-              className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl relative mx-auto my-8"
-              onClick={(e) => e.stopPropagation()}
-            >
-            <div className="mb-4">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img 
-                src="/ChimpThankYou.GIF" 
-                alt="Thank You!" 
-                className="w-48 h-48 mx-auto rounded-lg"
-                style={{ objectFit: 'cover' }}
-              />
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-              Thank You! 🙏
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400 text-sm">
-              Your tip helps keep Wallet Search running!
-            </p>
-            <button
-              onClick={() => setShowGif(false)}
-              className="mt-4 px-4 py-2 text-xs font-medium rounded transition-all duration-200 
-                         text-white"
-              style={{ backgroundColor: '#08c0b7' }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#06a8a0')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#08c0b7')}
-            >
-              Close
-            </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
+    <div className="flex items-center gap-2">
+      <button
+        onClick={handleTip}
+        disabled={isPending}
+        className="px-2 py-1 text-xs font-medium rounded transition-all duration-200 
+                   flex items-center gap-1 min-h-[24px]
+                   bg-gradient-to-r from-cyan-500 to-teal-600 text-white
+                   hover:from-cyan-600 hover:to-teal-700
+                   disabled:opacity-50 disabled:cursor-not-allowed
+                   transform hover:scale-105 active:scale-95"
+        style={{
+          background: isPending 
+            ? 'linear-gradient(to right, #06b6d4, #0891b2)' 
+            : 'linear-gradient(to right, #08c0b7, #0891b2)'
+        }}
+        onMouseEnter={(e) => !isPending && (e.currentTarget.style.background = 'linear-gradient(to right, #06a8a0, #0e7490)')}
+        onMouseLeave={(e) => !isPending && (e.currentTarget.style.background = 'linear-gradient(to right, #08c0b7, #0891b2)')}
+      >
+        {isPending ? (
+          <>
+            <div className="w-2.5 h-2.5 border border-white border-t-transparent rounded-full animate-spin" />
+            <span>Sending...</span>
+          </>
+        ) : (
+          <>
+            <span className="text-xs">💚</span>
+            <span>Tip 1 USDC</span>
+          </>
+        )}
+      </button>
+    </div>
   );
 }

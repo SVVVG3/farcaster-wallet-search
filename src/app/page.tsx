@@ -12,6 +12,7 @@ export default function Home() {
   const [searchResults, setSearchResults] = useState<SearchResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showTipGif, setShowTipGif] = useState(false);
 
   // Initialize Farcaster Mini App SDK
   useEffect(() => {
@@ -220,6 +221,10 @@ export default function Home() {
     }
   };
 
+  const handleTipSuccess = () => {
+    setShowTipGif(true);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
@@ -249,7 +254,7 @@ export default function Home() {
                     <span className="text-xs text-gray-500 dark:text-gray-400">
                       Enjoying Wallet Search?
                     </span>
-                    <TipDev />
+                    <TipDev onTransactionSuccess={handleTipSuccess} />
                   </div>
                 </div>
               </div>
@@ -409,6 +414,47 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Tip Success GIF Modal */}
+      {showTipGif && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-50 overflow-auto"
+          onClick={() => setShowTipGif(false)}
+        >
+          <div className="min-h-full flex items-center justify-center p-4">
+            <div 
+              className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl relative mx-auto my-8"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="mb-4">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
+                  src="/ChimpThankYou.GIF" 
+                  alt="Thank You!" 
+                  className="w-48 h-48 mx-auto rounded-lg"
+                  style={{ objectFit: 'cover' }}
+                />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                Thank You! 🙏
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                Your tip helps keep Wallet Search running!
+              </p>
+              <button
+                onClick={() => setShowTipGif(false)}
+                className="mt-4 px-4 py-2 text-xs font-medium rounded transition-all duration-200 
+                           text-white"
+                style={{ backgroundColor: '#08c0b7' }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#06a8a0')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#08c0b7')}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

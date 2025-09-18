@@ -35,12 +35,12 @@ export async function GET(request: NextRequest) {
     
     const balanceResult = await fetchUserTokenBalances(fid, bankrAddresses);
     
-    // Process token images with R2 for top 20 tokens
-    const topTokens = balanceResult.tokens.slice(0, 20);
+    // Process token images with R2 for top 10 tokens
+    const topTokens = balanceResult.tokens.slice(0, 10);
     const processedTopTokens = await processTokenImages(topTokens);
     
     // Add r2_image_url: null to remaining tokens for consistency
-    const remainingTokens = balanceResult.tokens.slice(20).map(token => ({
+    const remainingTokens = balanceResult.tokens.slice(10).map(token => ({
       ...token,
       r2_image_url: null
     }));

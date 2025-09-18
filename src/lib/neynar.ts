@@ -542,7 +542,11 @@ export async function fetchUserTokenBalances(fid: number, bankrAddresses: string
         verified_address?: { address?: string } 
       };
       const tokenBalances = addressBalanceData.token_balances || [];
-      console.log(`Address ${addressBalanceData.verified_address?.address}: ${tokenBalances.length} tokens`);
+      const address = addressBalanceData.verified_address?.address;
+      console.log(`Address ${address}: ${tokenBalances.length} tokens`);
+      
+      // Check specifically for mintedmerch in this address
+      let foundMintedMerchInAddress = false;
       
       for (const tokenBalance of tokenBalances) {
         const tokenBalanceData = tokenBalance as { 
@@ -551,6 +555,18 @@ export async function fetchUserTokenBalances(fid: number, bankrAddresses: string
         };
         const token = tokenBalanceData.token;
         const balance = tokenBalanceData.balance;
+        
+        // Check if this is mintedmerch token
+        const isMintedMerch = token?.contract_address?.toLowerCase() === '0x774eaefe73df7959496ac92a77279a8d7d690b07';
+        if (isMintedMerch) {
+          foundMintedMerchInAddress = true;
+          console.log(`🎯 FOUND MINTEDMERCH in address ${address}:`);
+          console.log(`   - Token Name: ${token?.name}`);
+          console.log(`   - Token Symbol: ${token?.symbol}`);
+          console.log(`   - Contract: ${token?.contract_address}`);
+          console.log(`   - Balance (in_token): ${balance?.in_token}`);
+          console.log(`   - USD Value (in_usdc): ${balance?.in_usdc}`);
+        }
 
         // Map to our TokenBalance interface (temporarily without logo)
         const mappedToken: TokenBalance = {
@@ -563,6 +579,10 @@ export async function fetchUserTokenBalances(fid: number, bankrAddresses: string
         };
         
         allTokens.push(mappedToken);
+      }
+      
+      if (!foundMintedMerchInAddress && (address?.endsWith('5310') || address?.endsWith('fc20') || address?.endsWith('3888'))) {
+        console.log(`❌ MINTEDMERCH NOT FOUND in expected address ${address}`);
       }
     }
 
@@ -587,6 +607,7 @@ export async function fetchUserTokenBalances(fid: number, bankrAddresses: string
     for (const token of allTokens) {
       // Use contract address as key (lowercase for consistency)
       const key = token.token_address.toLowerCase();
+      const isMintedMerch = key === '0x774eaefe73df7959496ac92a77279a8d7d690b07';
       
       if (tokenGroups.has(key)) {
         // Aggregate with existing token
@@ -600,9 +621,17 @@ export async function fetchUserTokenBalances(fid: number, bankrAddresses: string
         existing.balance = combinedBalance.toString();
         existing.value_usd = combinedValue;
         
-        console.log(`📊 Aggregated ${existing.token_symbol}: ${existingBalance} + ${newTokenBalance} = ${combinedBalance} (${existing.token_name})`);
+        if (isMintedMerch) {
+          console.log(`🎯 AGGREGATING MINTEDMERCH: ${existingBalance} + ${newTokenBalance} = ${combinedBalance} tokens`);
+          console.log(`💰 AGGREGATING MINTEDMERCH USD: $${existing.value_usd || 0} + $${token.value_usd || 0} = $${combinedValue}`);
+        } else {
+          console.log(`📊 Aggregated ${existing.token_symbol}: ${existingBalance} + ${newTokenBalance} = ${combinedBalance} (${existing.token_name})`);
+        }
       } else {
         // First occurrence of this token
+        if (isMintedMerch) {
+          console.log(`🎯 ADDING MINTEDMERCH TO MAP: Balance=${token.balance}, USD=${token.value_usd}`);
+        }
         tokenGroups.set(key, { ...token });
       }
     }
@@ -610,6 +639,16 @@ export async function fetchUserTokenBalances(fid: number, bankrAddresses: string
     // Convert aggregated tokens back to array
     const aggregatedTokens = Array.from(tokenGroups.values());
     console.log(`After aggregation: ${aggregatedTokens.length} unique tokens for FID ${fid} (reduced from ${allTokens.length} individual entries)`);
+    
+    // Check if mintedmerch made it through aggregation
+    const mintedMerchAfterAggregation = aggregatedTokens.find(t => 
+      t.token_address.toLowerCase() === '0x774eaefe73df7959496ac92a77279a8d7d690b07'
+    );
+    if (mintedMerchAfterAggregation) {
+      console.log(`✅ MINTEDMERCH SURVIVED AGGREGATION: Balance=${mintedMerchAfterAggregation.balance}, USD=${mintedMerchAfterAggregation.value_usd}`);
+    } else {
+      console.log(`❌ MINTEDMERCH LOST DURING AGGREGATION`);
+    }
 
     // Populate token logos (async operation)
     console.log(`🖼️ Fetching logos for ${aggregatedTokens.length} tokens...`);
@@ -762,7 +801,7 @@ export async function fetchUserTokenBalances(fid: number, bankrAddresses: string
     
     const sortedTokens = filteredTokens
       .sort((a: TokenBalance, b: TokenBalance) => (b.value_usd || 0) - (a.value_usd || 0))
-      .slice(0, 20); // Top 20 to include more tokens like $mintedmerch
+      .slice(0, 10); // Top 10 only
 
     // Calculate total USD value
     const totalValueUsd = sortedTokens.reduce((sum: number, token: TokenBalance) => sum + (token.value_usd || 0), 0);

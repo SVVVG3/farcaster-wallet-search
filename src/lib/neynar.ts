@@ -719,16 +719,50 @@ export async function fetchUserTokenBalances(fid: number, bankrAddresses: string
       return false;
     };
 
-    // Filter out scam tokens and sort by USD value (descending) and take top 10
-    const filteredTokens = aggregatedTokens
-      .filter((token: TokenBalance) => token.value_usd && token.value_usd > 0) // Only tokens with USD value
+    // Log all tokens before filtering to debug mintedmerch issue
+    console.log('🔍 All tokens before filtering:');
+    aggregatedTokens.forEach((token, index) => {
+      if (token.token_symbol?.toLowerCase().includes('minted') || 
+          token.token_name?.toLowerCase().includes('minted') ||
+          token.token_address?.toLowerCase() === '0x774eaefe73df7959496ac92a77279a8d7d690b07') {
+        console.log(`🎯 FOUND MINTEDMERCH TOKEN: ${token.token_name} (${token.token_symbol}) - Address: ${token.token_address}, Balance: ${token.balance}, USD Value: ${token.value_usd}`);
+      }
+    });
+
+    // Filter out scam tokens and sort by USD value (descending) and take top 20
+    const tokensWithValue = aggregatedTokens
+      .filter((token: TokenBalance) => {
+        const hasValue = token.value_usd && token.value_usd > 0;
+        const isMintedMerch = token.token_address?.toLowerCase() === '0x774eaefe73df7959496ac92a77279a8d7d690b07';
+        
+        // Always include mintedmerch token even without USD pricing
+        if (isMintedMerch) {
+          console.log(`🎯 KEEPING MINTEDMERCH TOKEN: ${token.token_name} (${token.token_symbol}) - Balance: ${token.balance}, USD Value: ${token.value_usd}`);
+          // Calculate USD value manually if missing
+          if (!token.value_usd && token.balance) {
+            const balance = parseFloat(token.balance);
+            const pricePerToken = 0.000004235; // From DexScreener
+            token.value_usd = balance * pricePerToken;
+            console.log(`💰 Calculated USD value for mintedmerch: $${token.value_usd.toFixed(2)}`);
+          }
+          return true;
+        }
+        
+        if (!hasValue && (token.token_symbol?.toLowerCase().includes('minted') || 
+                         token.token_name?.toLowerCase().includes('minted'))) {
+          console.log(`❌ OTHER MINTED TOKEN FILTERED OUT - No USD value: ${token.token_name} (${token.token_symbol}) - USD Value: ${token.value_usd}`);
+        }
+        return hasValue;
+      });
+    
+    const filteredTokens = tokensWithValue
       .filter((token: TokenBalance) => !isLikelyScamToken(token)); // Remove scam tokens
     
     console.log(`After scam filtering: ${filteredTokens.length} legitimate tokens remaining for FID ${fid}`);
     
     const sortedTokens = filteredTokens
       .sort((a: TokenBalance, b: TokenBalance) => (b.value_usd || 0) - (a.value_usd || 0))
-      .slice(0, 10); // Top 10 only
+      .slice(0, 20); // Top 20 to include more tokens like $mintedmerch
 
     // Calculate total USD value
     const totalValueUsd = sortedTokens.reduce((sum: number, token: TokenBalance) => sum + (token.value_usd || 0), 0);

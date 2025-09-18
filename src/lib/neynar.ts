@@ -721,7 +721,7 @@ export async function fetchUserTokenBalances(fid: number, bankrAddresses: string
 
     // Log all tokens before filtering to debug mintedmerch issue
     console.log('🔍 All tokens before filtering:');
-    aggregatedTokens.forEach((token, index) => {
+    aggregatedTokens.forEach((token) => {
       if (token.token_symbol?.toLowerCase().includes('minted') || 
           token.token_name?.toLowerCase().includes('minted') ||
           token.token_address?.toLowerCase() === '0x774eaefe73df7959496ac92a77279a8d7d690b07') {

@@ -112,14 +112,14 @@ export async function GET(request: NextRequest) {
       return React.createElement('div', 
         { 
           key: index,
-          style: { display: 'flex', alignItems: 'center', gap: 30, marginBottom: 30 } 
+          style: { display: 'flex', alignItems: 'center', gap: 35, marginBottom: 35 } 
         },
-                          // Token image or circle - DOUBLED SIZE
+                          // Token image or circle - INCREASED SIZE
                   imageUrl 
                     ? React.createElement('img', {
                         src: imageUrl,
-                        width: 64,
-                        height: 64,
+                        width: 72,
+                        height: 72,
                         style: {
                           borderRadius: '50%',
                           border: '4px solid #4F46E5',
@@ -127,24 +127,24 @@ export async function GET(request: NextRequest) {
                       })
           : React.createElement('div', {
               style: {
-                width: 64,
-                height: 64,
+                width: 72,
+                height: 72,
                 borderRadius: '50%',
                 backgroundColor: colors[index % colors.length],
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: 24,
+                fontSize: 28,
                 fontWeight: 'bold',
                 color: 'white',
                 border: '4px solid #4F46E5',
               }
             }, (index + 1).toString()),
-        // Token details - DOUBLED FONT SIZES
+        // Token details - INCREASED FONT SIZES
         React.createElement('div', 
           { style: { display: 'flex', flexDirection: 'column' } },
           React.createElement('div', 
-            { style: { fontSize: 32, fontWeight: 'bold', color: 'white' } },
+            { style: { fontSize: 36, fontWeight: 'bold', color: 'white' } },
             `${index + 1}. ${token.token_symbol}`
           )
         )
@@ -170,7 +170,7 @@ export async function GET(request: NextRequest) {
       },
         // Header with profile image and text
         React.createElement('div', {
-          style: { display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 30 }
+          style: { display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 20 }
         },
           // Profile image and text container
           React.createElement('div', {
@@ -193,9 +193,9 @@ export async function GET(request: NextRequest) {
           )
         ),
         
-        // 2-Column Layout - DOUBLED GAP
+        // 2-Column Layout - BETTER CENTERED
         React.createElement('div', {
-          style: { display: 'flex', gap: 120, flex: 1, justifyContent: 'center' }
+          style: { display: 'flex', gap: 120, flex: 1, justifyContent: 'center', alignItems: 'center' }
         },
           // Left Column
           React.createElement('div', {
@@ -208,12 +208,12 @@ export async function GET(request: NextRequest) {
           }, ...rightTokens)
         ),
         
-        // Footer - DOUBLED SIZE
+        // Footer - BETTER POSITIONED
         React.createElement('div', {
           style: { 
             display: 'flex', 
             justifyContent: 'center', 
-            marginTop: 40,
+            marginTop: 20,
             fontSize: 24,
             color: '#9CA3AF',
             textAlign: 'center'

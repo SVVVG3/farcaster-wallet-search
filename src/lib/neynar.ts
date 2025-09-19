@@ -436,9 +436,15 @@ async function fetchTokenBalancesForAddresses(addresses: string[]): Promise<Toke
       const baseRpcUrl = 'https://mainnet.base.org';
       
       // ERC-20 balanceOf function call data
-      // balanceOf(address) = 0x70a08231 + padded address
-      const paddedAddress = address.slice(2).padStart(64, '0');
+      // balanceOf(address) = 0x70a08231 + padded address (remove 0x and pad to 64 chars)
+      const cleanAddress = address.toLowerCase().replace('0x', '');
+      const paddedAddress = cleanAddress.padStart(64, '0');
       const callData = '0x70a08231' + paddedAddress;
+      
+      console.log(`🔍 Checking mintedmerch for ${address}:`);
+      console.log(`   - Clean address: ${cleanAddress}`);
+      console.log(`   - Padded address: ${paddedAddress}`);
+      console.log(`   - Call data: ${callData}`);
       
       const response = await fetch(baseRpcUrl, {
         method: 'POST',
@@ -470,15 +476,24 @@ async function fetchTokenBalancesForAddresses(addresses: string[]): Promise<Toke
 
       const balanceHex = data.result;
       
+      console.log(`   - Raw balance response: ${balanceHex}`);
+      
       if (!balanceHex || balanceHex === '0x0' || balanceHex === '0x') {
         console.log(`❌ No mintedmerch balance found for ${address}`);
         continue;
       }
       
-      // Convert hex balance to decimal
+      // Convert hex balance to decimal using BigInt for precision
       const balanceDecimal = BigInt(balanceHex);
       const decimals = 18; // mintedmerch has 18 decimals
-      const balanceFormatted = Number(balanceDecimal) / Math.pow(10, decimals);
+      
+      // Use BigInt arithmetic to avoid precision loss
+      const divisor = BigInt(10) ** BigInt(decimals);
+      const wholePart = balanceDecimal / divisor;
+      const fractionalPart = balanceDecimal % divisor;
+      
+      // Convert to number with proper precision
+      const balanceFormatted = Number(wholePart) + Number(fractionalPart) / Number(divisor);
       
       console.log(`🎯 FOUND MINTEDMERCH in address ${address}!`);
       console.log(`   - Balance: ${balanceFormatted.toLocaleString()} tokens`);

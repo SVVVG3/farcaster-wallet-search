@@ -414,32 +414,121 @@ export interface TokenBalanceResult {
   error?: string;
 }
 
-// Function to fetch token balances for specific addresses using Base network APIs
+// Function to fetch token balances for specific addresses using Base RPC calls
 async function fetchTokenBalancesForAddresses(addresses: string[]): Promise<TokenBalance[]> {
   const allTokens: TokenBalance[] = [];
   
   for (const address of addresses) {
-    console.log(`Fetching token balances for Bankr address: ${address}`);
+    console.log(`🔗 Fetching ALL ERC-20 tokens for address: ${address}`);
     
     try {
-      // For now, we'll use a simple approach - in a production app you might want to use
-      // services like Moralis, Alchemy, or other token balance APIs
-      // This is a placeholder that returns empty results for Bankr addresses
-      console.log(`⚠️ Token balance fetching for individual addresses (${address}) not yet implemented`);
-      console.log(`📝 This would require integration with services like Moralis or Alchemy`);
+      // Use Alchemy's Base API to get all ERC-20 token balances
+      const alchemyApiKey = process.env.ALCHEMY_API_KEY || 'demo'; // Use demo key as fallback
+      const baseUrl = `https://base-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
       
-      // TODO: Implement token balance fetching for individual addresses
-      // Example services that could be used:
-      // - Moralis API
-      // - Alchemy API  
-      // - Base network RPC calls
-      // - DexScreener API (limited)
+      const response = await fetch(baseUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'alchemy_getTokenBalances',
+          params: [address, 'erc20']
+        })
+      });
+      
+      if (!response.ok) {
+        console.error(`❌ Alchemy API error for ${address}: ${response.status}`);
+        continue;
+      }
+      
+      const data = await response.json();
+      
+      if (data.error) {
+        console.error(`❌ Alchemy API error for ${address}:`, data.error);
+        continue;
+      }
+      
+      const tokenBalances = data.result?.tokenBalances || [];
+      console.log(`✅ Found ${tokenBalances.length} ERC-20 tokens for ${address}`);
+      
+      // Process each token balance
+      for (const tokenBalance of tokenBalances) {
+        const contractAddress = tokenBalance.contractAddress;
+        const balance = tokenBalance.tokenBalance;
+        
+        // Skip tokens with zero balance
+        if (!balance || balance === '0x0') {
+          continue;
+        }
+        
+        try {
+          // Get token metadata (name, symbol, decimals)
+          const metadataResponse = await fetch(baseUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              id: 1,
+              jsonrpc: '2.0',
+              method: 'alchemy_getTokenMetadata',
+              params: [contractAddress]
+            })
+          });
+          
+          if (!metadataResponse.ok) {
+            console.log(`⚠️ Could not get metadata for token ${contractAddress}`);
+            continue;
+          }
+          
+          const metadataData = await metadataResponse.json();
+          const metadata = metadataData.result;
+          
+          if (!metadata || !metadata.symbol) {
+            console.log(`⚠️ Invalid metadata for token ${contractAddress}`);
+            continue;
+          }
+          
+          // Convert balance from hex to decimal
+          const balanceDecimal = parseInt(balance, 16);
+          const decimals = metadata.decimals || 18;
+          const balanceFormatted = balanceDecimal / Math.pow(10, decimals);
+          
+          // Check if this is mintedmerch token
+          const isMintedMerch = contractAddress.toLowerCase() === '0x774eaefe73df7959496ac92a77279a8d7d690b07';
+          if (isMintedMerch) {
+            console.log(`🎯 FOUND MINTEDMERCH in address ${address}!`);
+            console.log(`   - Balance: ${balanceFormatted} tokens`);
+            console.log(`   - Raw balance: ${balance}`);
+            console.log(`   - Decimals: ${decimals}`);
+          }
+          
+          // Create token balance object
+          const tokenBalanceObj: TokenBalance = {
+            token_address: contractAddress,
+            token_name: metadata.name || metadata.symbol || 'Unknown',
+            token_symbol: metadata.symbol || 'UNKNOWN',
+            balance: balanceFormatted.toString(),
+            value_usd: 0, // Will be calculated later if needed
+            logo_url: undefined
+          };
+          
+          allTokens.push(tokenBalanceObj);
+          
+        } catch (metadataError) {
+          console.error(`❌ Error getting metadata for token ${contractAddress}:`, metadataError);
+        }
+      }
       
     } catch (error) {
-      console.error(`Error fetching token balances for address ${address}:`, error);
+      console.error(`❌ Error fetching token balances for address ${address}:`, error);
     }
   }
   
+  console.log(`🔗 Total tokens found across ${addresses.length} addresses: ${allTokens.length}`);
   return allTokens;
 }
 
@@ -588,17 +677,30 @@ export async function fetchUserTokenBalances(fid: number, bankrAddresses: string
 
     console.log(`Found ${allTokens.length} total tokens across all addresses for FID ${fid}`);
 
+    // Also fetch ALL tokens using Base RPC for verified addresses (to catch tokens Neynar missed)
+    const verifiedAddresses = addressBalances.map(ab => {
+      const addressBalanceData = ab as { verified_address?: { address?: string } };
+      return addressBalanceData.verified_address?.address;
+    }).filter(Boolean) as string[];
+    
+    console.log(`🔗 Fetching ALL ERC-20 tokens via Base RPC for ${verifiedAddresses.length} verified addresses`);
+    const rpcTokensFromVerified = await fetchTokenBalancesForAddresses(verifiedAddresses);
+    console.log(`🔗 Found ${rpcTokensFromVerified.length} additional tokens via Base RPC from verified addresses`);
+    
+    // Add RPC tokens from verified addresses
+    allTokens.push(...rpcTokensFromVerified);
+
     // Fetch token balances for Bankr wallet addresses (if any)
     if (bankrAddresses.length > 0) {
-      console.log(`Fetching token balances for ${bankrAddresses.length} Bankr wallet addresses`);
+      console.log(`🔗 Fetching token balances for ${bankrAddresses.length} Bankr wallet addresses`);
       const bankrTokens = await fetchTokenBalancesForAddresses(bankrAddresses);
-      console.log(`Found ${bankrTokens.length} tokens from Bankr wallets`);
+      console.log(`🔗 Found ${bankrTokens.length} tokens from Bankr wallets`);
       
       // Add Bankr tokens to the combined list
       allTokens.push(...bankrTokens);
-      console.log(`Combined total: ${allTokens.length} tokens (${allTokens.length - bankrTokens.length} from Neynar + ${bankrTokens.length} from Bankr)`);
+      console.log(`🔗 Combined total: ${allTokens.length} tokens (${allTokens.length - bankrTokens.length - rpcTokensFromVerified.length} from Neynar + ${rpcTokensFromVerified.length} from verified RPC + ${bankrTokens.length} from Bankr RPC)`);
     } else {
-      console.log(`No Bankr wallet addresses provided for FID ${fid}`);
+      console.log(`🔗 Combined total: ${allTokens.length} tokens (${allTokens.length - rpcTokensFromVerified.length} from Neynar + ${rpcTokensFromVerified.length} from verified RPC)`);
     }
 
     // Aggregate tokens by contract address (combine same tokens from different wallets)
@@ -778,13 +880,20 @@ export async function fetchUserTokenBalances(fid: number, bankrAddresses: string
         if (isMintedMerch) {
           console.log(`🎯 KEEPING MINTEDMERCH TOKEN: ${token.token_name} (${token.token_symbol}) - Balance: ${token.balance}, USD Value: ${token.value_usd}`);
           // Calculate USD value manually if missing
-          if (!token.value_usd && token.balance) {
+          if ((!token.value_usd || token.value_usd === 0) && token.balance) {
             const balance = parseFloat(token.balance);
             const pricePerToken = 0.000004235; // From DexScreener
             token.value_usd = balance * pricePerToken;
             console.log(`💰 Calculated USD value for mintedmerch: $${token.value_usd.toFixed(2)}`);
           }
           return true;
+        }
+        
+        // For tokens from RPC that don't have USD values, try to calculate them
+        if ((!token.value_usd || token.value_usd === 0) && token.balance) {
+          // For now, we'll include tokens without USD values but with balance > 0
+          // Later we can add DexScreener/CoinGecko pricing lookup
+          return parseFloat(token.balance) > 0;
         }
         
         if (!hasValue && (token.token_symbol?.toLowerCase().includes('minted') || 

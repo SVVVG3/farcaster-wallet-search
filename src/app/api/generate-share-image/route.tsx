@@ -58,8 +58,7 @@ export async function GET(request: NextRequest) {
     apiUrl.searchParams.set('fid', String(fid));
     if (bankrAddresses.length > 0) apiUrl.searchParams.set('bankrAddresses', bankrAddresses.join(','));
 
-    let tokens: Array<{ token_address: string; token_name: string; token_symbol: string; value_usd?: number; logo_url?: string; r2_image_url?: string | null }> = [];
-    let total_value_usd = 0;
+    let tokens: Array<{ token_address: string; token_name: string; token_symbol: string; balance?: string; value_usd?: number; logo_url?: string; r2_image_url?: string | null }> = [];
     let userProfileImage = null;
 
     // Fetch token data
@@ -68,7 +67,6 @@ export async function GET(request: NextRequest) {
       if (res.ok) {
         const data = await res.json();
         tokens = Array.isArray(data.tokens) ? data.tokens.slice(0, 10) : [];
-        total_value_usd = typeof data.total_value_usd === 'number' ? data.total_value_usd : 0;
       }
     } catch {
       // Fall back to empty data on fetch error
@@ -99,15 +97,6 @@ export async function GET(request: NextRequest) {
       console.log('Failed to fetch user profile:', error);
       // Fall back to no profile image
     }
-
-    // Format USD values
-    const formatUsd = (value?: number): string => {
-      const v = value || 0;
-      if (v < 0.01) return '<$0.01';
-      if (v < 1000) return `$${v.toFixed(2)}`;
-      if (v < 1_000_000) return `$${(v / 1000).toFixed(1)}K`;
-      return `$${(v / 1_000_000).toFixed(1)}M`;
-    };
 
     // Format token amounts
     const formatTokenAmount = (balance?: string): string => {

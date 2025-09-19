@@ -422,11 +422,25 @@ async function fetchTokenBalancesForAddresses(addresses: string[]): Promise<Toke
     console.log(`🔗 Fetching ALL ERC-20 tokens for address: ${address}`);
     
     try {
-      // Use Alchemy's Base API to get all ERC-20 token balances
-      const alchemyApiKey = process.env.ALCHEMY_API_KEY || 'demo'; // Use demo key as fallback
-      const baseUrl = `https://base-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
+      // Skip Solana addresses for now
+      if (address.length > 42) {
+        console.log(`⏭️ Skipping Solana address: ${address}`);
+        continue;
+      }
       
-      const response = await fetch(baseUrl, {
+      // Specifically check for mintedmerch token using public Base RPC
+      // This avoids Alchemy rate limits and targets the exact token we need
+      const mintedMerchAddress = '0x774eaefe73df7959496ac92a77279a8d7d690b07';
+      
+      // Use public Base RPC endpoint
+      const baseRpcUrl = 'https://mainnet.base.org';
+      
+      // ERC-20 balanceOf function call data
+      // balanceOf(address) = 0x70a08231 + padded address
+      const paddedAddress = address.slice(2).padStart(64, '0');
+      const callData = '0x70a08231' + paddedAddress;
+      
+      const response = await fetch(baseRpcUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -434,94 +448,60 @@ async function fetchTokenBalancesForAddresses(addresses: string[]): Promise<Toke
         body: JSON.stringify({
           id: 1,
           jsonrpc: '2.0',
-          method: 'alchemy_getTokenBalances',
-          params: [address, 'erc20']
+          method: 'eth_call',
+          params: [{
+            to: mintedMerchAddress,
+            data: callData
+          }, 'latest']
         })
       });
       
       if (!response.ok) {
-        console.error(`❌ Alchemy API error for ${address}: ${response.status}`);
+        console.error(`❌ Base RPC error for ${address}: ${response.status}`);
         continue;
       }
       
       const data = await response.json();
       
       if (data.error) {
-        console.error(`❌ Alchemy API error for ${address}:`, data.error);
+        console.error(`❌ Base RPC error for ${address}:`, data.error);
+        continue;
+      }
+
+      const balanceHex = data.result;
+      
+      if (!balanceHex || balanceHex === '0x0' || balanceHex === '0x') {
+        console.log(`❌ No mintedmerch balance found for ${address}`);
         continue;
       }
       
-      const tokenBalances = data.result?.tokenBalances || [];
-      console.log(`✅ Found ${tokenBalances.length} ERC-20 tokens for ${address}`);
+      // Convert hex balance to decimal
+      const balanceDecimal = BigInt(balanceHex);
+      const decimals = 18; // mintedmerch has 18 decimals
+      const balanceFormatted = Number(balanceDecimal) / Math.pow(10, decimals);
       
-      // Process each token balance
-      for (const tokenBalance of tokenBalances) {
-        const contractAddress = tokenBalance.contractAddress;
-        const balance = tokenBalance.tokenBalance;
-        
-        // Skip tokens with zero balance
-        if (!balance || balance === '0x0') {
-          continue;
-        }
-        
-        try {
-          // Get token metadata (name, symbol, decimals)
-          const metadataResponse = await fetch(baseUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              id: 1,
-              jsonrpc: '2.0',
-              method: 'alchemy_getTokenMetadata',
-              params: [contractAddress]
-            })
-          });
-          
-          if (!metadataResponse.ok) {
-            console.log(`⚠️ Could not get metadata for token ${contractAddress}`);
-            continue;
-          }
-          
-          const metadataData = await metadataResponse.json();
-          const metadata = metadataData.result;
-          
-          if (!metadata || !metadata.symbol) {
-            console.log(`⚠️ Invalid metadata for token ${contractAddress}`);
-            continue;
-          }
-          
-          // Convert balance from hex to decimal
-          const balanceDecimal = parseInt(balance, 16);
-          const decimals = metadata.decimals || 18;
-          const balanceFormatted = balanceDecimal / Math.pow(10, decimals);
-          
-          // Check if this is mintedmerch token
-          const isMintedMerch = contractAddress.toLowerCase() === '0x774eaefe73df7959496ac92a77279a8d7d690b07';
-          if (isMintedMerch) {
-            console.log(`🎯 FOUND MINTEDMERCH in address ${address}!`);
-            console.log(`   - Balance: ${balanceFormatted} tokens`);
-            console.log(`   - Raw balance: ${balance}`);
-            console.log(`   - Decimals: ${decimals}`);
-          }
-          
-          // Create token balance object
-          const tokenBalanceObj: TokenBalance = {
-            token_address: contractAddress,
-            token_name: metadata.name || metadata.symbol || 'Unknown',
-            token_symbol: metadata.symbol || 'UNKNOWN',
-            balance: balanceFormatted.toString(),
-            value_usd: 0, // Will be calculated later if needed
-            logo_url: undefined
-          };
-          
-          allTokens.push(tokenBalanceObj);
-          
-        } catch (metadataError) {
-          console.error(`❌ Error getting metadata for token ${contractAddress}:`, metadataError);
-        }
-      }
+      console.log(`🎯 FOUND MINTEDMERCH in address ${address}!`);
+      console.log(`   - Balance: ${balanceFormatted.toLocaleString()} tokens`);
+      console.log(`   - Raw balance: ${balanceHex}`);
+      console.log(`   - Decimals: ${decimals}`);
+      
+      // Calculate USD value
+      const pricePerToken = 0.000004235; // From DexScreener
+      const usdValue = balanceFormatted * pricePerToken;
+      
+      // Create token balance object
+      const tokenBalanceObj: TokenBalance = {
+        token_address: mintedMerchAddress,
+        token_name: 'Minted Merch',
+        token_symbol: 'mintedmerch',
+        balance: balanceFormatted.toString(),
+        value_usd: usdValue,
+        logo_url: undefined
+      };
+      
+      console.log(`✅ MINTEDMERCH TOKEN FOUND: Balance: ${balanceFormatted.toLocaleString()}, USD: $${usdValue.toFixed(2)}`);
+      
+      allTokens.push(tokenBalanceObj);
       
     } catch (error) {
       console.error(`❌ Error fetching token balances for address ${address}:`, error);

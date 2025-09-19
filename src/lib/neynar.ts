@@ -436,13 +436,11 @@ async function fetchTokenBalancesForAddresses(addresses: string[]): Promise<Toke
       const baseRpcUrl = 'https://mainnet.base.org';
       
       // ERC-20 balanceOf function call data
-      // balanceOf(address) = 0x70a08231 + padded address (remove 0x and pad to 64 chars)
-      const cleanAddress = address.toLowerCase().replace('0x', '');
-      const paddedAddress = cleanAddress.padStart(64, '0');
+      // balanceOf(address) = 0x70a08231 + padded address
+      const paddedAddress = address.slice(2).padStart(64, '0');
       const callData = '0x70a08231' + paddedAddress;
       
       console.log(`🔍 Checking mintedmerch for ${address}:`);
-      console.log(`   - Clean address: ${cleanAddress}`);
       console.log(`   - Padded address: ${paddedAddress}`);
       console.log(`   - Call data: ${callData}`);
       

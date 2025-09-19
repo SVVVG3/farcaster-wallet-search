@@ -235,7 +235,7 @@ export default function TokenBalances({ fid, username, bankrAddresses = [] }: To
       // Remove bankrAddresses from URL - share page will fetch them using FID
       params.set('v', Date.now().toString());
       const shareUrl = `${base}/share?${params.toString()}`;
-      const text = `Check out @${username}'s top 10 holdings across all Farcaster connected wallets on Wallet Search!`;
+      const text = `Check out @${username}'s top 10 holdings across all Farcaster connected (and Bankr) wallets on Wallet Search!`;
       
       // Debug logging to verify URL construction
       console.log('Share URL constructed:', shareUrl);

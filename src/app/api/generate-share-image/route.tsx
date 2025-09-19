@@ -98,34 +98,6 @@ export async function GET(request: NextRequest) {
       // Fall back to no profile image
     }
 
-    // Format token amounts
-    const formatTokenAmount = (balance?: string): string => {
-      if (!balance) return '0';
-      try {
-        const balanceNum = parseFloat(balance);
-        if (balanceNum === 0) return '0';
-        
-        // For very small amounts, show more precision
-        if (balanceNum < 0.001) {
-          if (balanceNum < 0.00001) {
-            return balanceNum.toExponential(2); // e.g., 2.97e-5
-          }
-          return balanceNum.toFixed(6); // e.g., 0.000530
-        }
-        
-        // For small amounts, show reasonable decimals
-        if (balanceNum < 1) return balanceNum.toFixed(4); // e.g., 0.0999
-        
-        // For moderate amounts
-        if (balanceNum < 1000) return balanceNum.toFixed(2); // e.g., 722.29
-        
-        // For large amounts, use K/M notation
-        if (balanceNum < 1000000) return (balanceNum / 1000).toFixed(1) + 'K'; // e.g., 7.5K
-        return (balanceNum / 1000000).toFixed(1) + 'M'; // e.g., 385.4M
-      } catch {
-        return balance;
-      }
-    };
 
     // PROVEN PATTERN: Use React.createElement for complex structures
     const topTokens = tokens.slice(0, 10);
@@ -174,10 +146,6 @@ export async function GET(request: NextRequest) {
           React.createElement('div', 
             { style: { fontSize: 32, fontWeight: 'bold', color: 'white' } },
             `${index + 1}. ${token.token_symbol}`
-          ),
-          React.createElement('div', 
-            { style: { fontSize: 28, color: '#E6E8F0' } },
-            formatTokenAmount(token.balance)
           )
         )
       );

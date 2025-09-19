@@ -444,31 +444,59 @@ async function fetchTokenBalancesForAddresses(addresses: string[]): Promise<Toke
       console.log(`   - Padded address: ${paddedAddress}`);
       console.log(`   - Call data: ${callData}`);
       
-      const response = await fetch(baseRpcUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'eth_call',
-          params: [{
-            to: mintedMerchAddress,
-            data: callData
-          }, 'latest']
-        })
-      });
+      // Try multiple RPC endpoints with retry logic
+      const rpcEndpoints = [
+        'https://mainnet.base.org',
+        'https://base.llamarpc.com',
+        'https://base-mainnet.public.blastapi.io'
+      ];
       
-      if (!response.ok) {
-        console.error(`❌ Base RPC error for ${address}: ${response.status}`);
-        continue;
+      let response = null;
+      let data = null;
+      
+      for (const rpcUrl of rpcEndpoints) {
+        try {
+          console.log(`   - Trying RPC: ${rpcUrl}`);
+          
+          response = await fetch(rpcUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              id: 1,
+              jsonrpc: '2.0',
+              method: 'eth_call',
+              params: [{
+                to: mintedMerchAddress,
+                data: callData
+              }, 'latest']
+            })
+          });
+          
+          if (!response.ok) {
+            console.log(`   - RPC ${rpcUrl} failed with status: ${response.status}`);
+            continue; // Try next endpoint
+          }
+          
+          data = await response.json();
+          
+          if (data.error) {
+            console.log(`   - RPC ${rpcUrl} returned error:`, data.error);
+            continue; // Try next endpoint
+          }
+          
+          console.log(`   - ✅ RPC ${rpcUrl} succeeded`);
+          break; // Success, exit loop
+          
+        } catch (error) {
+          console.log(`   - RPC ${rpcUrl} threw error:`, error);
+          continue; // Try next endpoint
+        }
       }
       
-      const data = await response.json();
-      
-      if (data.error) {
-        console.error(`❌ Base RPC error for ${address}:`, data.error);
+      if (!data || data.error) {
+        console.error(`❌ All RPC endpoints failed for ${address}`);
         continue;
       }
 

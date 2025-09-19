@@ -432,8 +432,7 @@ async function fetchTokenBalancesForAddresses(addresses: string[]): Promise<Toke
       // This avoids Alchemy rate limits and targets the exact token we need
       const mintedMerchAddress = '0x774eaefe73df7959496ac92a77279a8d7d690b07';
       
-      // Use public Base RPC endpoint
-      const baseRpcUrl = 'https://mainnet.base.org';
+      // Multiple RPC endpoints for fallback
       
       // ERC-20 balanceOf function call data
       // balanceOf(address) = 0x70a08231 + padded address
